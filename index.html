@@ -271,8 +271,8 @@ const LIVE_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vQUiVKWlB8ttAXMp
 let ELEC="live", PARTIES=PARTIES_LIVE, P_ORDER=Object.keys(PARTIES), GOV=GOV_EX, OPP=OPP_EX;
 // what each region is like and how it votes
 const REGION_NOTES={
-  "Myrati":"Welsh-speaking border country around Port Aaron, next to Independent Myrati. Politics is fiercely local: independents do well, and the rest splits between the Democrats and the centre.",
-  "Chasmia":"A prosperous French-speaking region of market towns, the dales and the cities of Chasberg and Lisieux. The most right-leaning region on paper, but the right splits three ways and the liberal cities let the Democrats and Manifest in.",
+  "Myrati":"Myratian-speaking border country around Port Aaron, next to Independent Myrati. Politics is fiercely local: independents do well, and the rest splits between the Democrats and the centre.",
+  "Chasmia":"A prosperous Gallic-speaking region of market towns, the dales and the cities of Chasberg and Lisieux. The most right-leaning region on paper, but the right splits three ways and the liberal cities let the Democrats and Manifest in.",
   "Carnapol":"Built around the cosmopolitan city of Dubois. Manifest’s best region, with technocratic inner-city seats, New Progressive suburbs and a conservative rural fringe.",
   "Moeras":"A small, Dutch-heritage lowland region of three seats. Leans left, but every seat is a three-way contest between the Democrats, Manifest and Renaissance.",
   "Kalahooska":"A big region with a strong identity of its own. Régionale wins almost everything outside Caille and Greenhaven, where the national parties fight over the city seats.",
@@ -283,7 +283,7 @@ const REGION_NOTES={
   "Reno":"The capital region of Syon and Capital Park, full of public servants and professionals. The Democrats’ governorship base, otherwise the most evenly split region in the country.",
   "Montiablo":"The Montiablo Bay metropolis and its hinterland. People’s Party heartland in the affluent suburbs, Avenir in the hinterland, and the Democrats fighting for the professional inner suburbs.",
   "Oplana":"A left-leaning but fragmented region centred on Langston. The city and the coast vote left; the wealthier suburbs of Cabo and Kirkwood lean right.",
-  "Costa Blanca":"A Spanish-heritage working-class coast around Buenida and Domicilio Blanca. Rejuvenation’s heartland; the Democrats hold the better-off seats.",
+  "Costa Blanca":"An Alcamerian-heritage working-class coast around Buenida and Domicilio Blanca. Rejuvenation’s heartland; the Democrats hold the better-off seats.",
   "Pittston":"A county-based region around Losana and Río Claro. A liberal swing region and the New Progressives’ best ground.",
   "Cambria":"Mountain and mining country around Battle Mountain, Alto and Sionaq Springs. The old industrial seats vote Rejuvenation; the rest scatter across the parties.",
   "Mezata":"The commercial hub of Mercado and its hinterland. Leans hard left, but the left vote splits, so Renaissance wins the professional suburbs on low shares.",
@@ -291,7 +291,7 @@ const REGION_NOTES={
 };
 // what each constituency is like (the results sentence is added from RESULTS when shown)
 const SEAT_NOTES={
-  "myrati-cas-arwydd-west":"The western half of Port Aaron's old town and its harbourfront, where Welsh is still the first language in most households.",
+  "myrati-cas-arwydd-west":"The western half of Port Aaron's old town and its harbourfront, where Myratian is still the first language in most households.",
   "myrati-cas-arwydd":"Central Port Aaron, taking in the castle quarter, the main shopping streets and the newer migrant neighbourhoods behind the station.",
   "myrati-abermeiron":"The market town of Abermeiron and the farms and quarry villages that run north from Port Aaron toward Port Heaton.",
   "myrati-aberllew":"The western fringe of Port Aaron and the coastal town of Aberllew, a mix of council estates and fishing villages.",
@@ -402,14 +402,14 @@ const SEAT_NOTES={
   "reno-syon-central":"Central Syon, the capital's core, covering parliament, the ministries and the apartment blocks around them.",
   "reno-marietta":"Marietta, a prosperous eastern district of Syon with many lawyers, lobbyists and consultants.",
   "reno-capital-park":"Capital Park and the suburbs west toward Redmont, a large commuter seat with many public-sector households.",
-  "reno-orlean":"Orléan, Syon's French-speaking eastern suburbs, a mix of long-established working families and newer arrivals.",
+  "reno-orlean":"Orléan, Syon's Gallic-speaking eastern suburbs, a mix of long-established working families and newer arrivals.",
   "reno-syon-south":"Syon's southern districts, the capital's main working-class area, with large public-housing estates.",
   "reno-holmdel":"Holmdel, a conservative suburb between Redmont and Capital Park, built around the old army base.",
   "reno-redmont":"The town of Redmont, an affluent satellite of the capital.",
   "reno-renokipling":"Reno and Kipling, small towns and farmland in the south of the region.",
   "montiablo-hollingworth":"Hollingworth, on the north-western edge of Montiablo, where the city gives way to farms and older family suburbs.",
   "montiablo-montiablo-north":"Montiablo's northern suburbs, home to many hospital, university and council workers.",
-  "montiablo-alameda":"Alameda, a suburb of churches and family homes with a large Spanish-speaking Catholic population.",
+  "montiablo-alameda":"Alameda, a suburb of churches and family homes with a large Alcamerian-speaking Catholic population.",
   "montiablo-norcastle":"Norcastle, an inner-north district that has filled with young professionals over the last decade.",
   "montiablo-san-fernando":"San Fernando, a western suburb of owner-occupiers and small businesses.",
   "montiablo-pinewood":"Pinewood, an inner-west district of public housing and bus depots.",
