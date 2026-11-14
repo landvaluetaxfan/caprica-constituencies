@@ -82,7 +82,9 @@ regions.forEach(r => {
 
 // ---------- named player NPCs (sheet = definitive) + extra names given in chat
 const LEADERS = new Set(["Adriana Flash", "Mandy Trottier", "Safiya Bethune-Fayyad", "Robert Bluespan", "David Breen Cutter", "Jon Fraser",
-  "Klinton Arkas", "Alexandria Yuan Kew Lee", "Jaco van Ryneveld", "Eve Callen"]);
+  "Klinton Arkas", "Jaco van Ryneveld"]);
+// not leaders, but kept in the seats the old Rejuvenation and Régionale leaders held (their party's safest), so a rerun gives the same result
+const SAFE_SEAT = new Set([...LEADERS, "Rosa María Valdivia", "Margaret Ashby"]);
 const W = (party, region, names, extra = {}) => names.map(name => ({ name, region, party, ...extra }));
 const NAMED = [
   // --- from the player-NPC sheet
@@ -112,8 +114,8 @@ const NAMED = [
   ...W("DEM", "Reno", ["Gavin Collyer", "Nathan Eovaldi"]), ...W("DEM", "Ventura", ["Erika Hasumi-Inaba", "Jacob Latz"]),
   ...W("RE", "Reno", ["Roberto Libero"]), ...W("PP", "Montiablo", ["Jon Fraser"]),
   // party leaders not on the sheet, placed where their party (or family) is strongest
-  ...W("NPP", "Carnapol", ["Klinton Arkas"]), ...W("REJ", "Costa Blanca", ["Alexandria Yuan Kew Lee"]), ...W("AC", "Pleucadeuc", ["Jaco van Ryneveld"]),
-  ...W("REG", "Kalahooska", ["Eve Callen"]), ...W("RE", "Chasmia", ["David Breen Cutter"]),
+  ...W("NPP", "Carnapol", ["Klinton Arkas"]), ...W("REJ", "Costa Blanca", ["Rosa María Valdivia"]), ...W("AC", "Pleucadeuc", ["Jaco van Ryneveld"]),
+  ...W("REG", "Kalahooska", ["Margaret Ashby"]), ...W("RE", "Chasmia", ["David Breen Cutter"]),
   // --- stood and lost
   ...W("IND", "Ambarino", ["Yeeun Bluespan II"], { win: false }), ...W("DEM", "Ambarino", ["Cam Cauley"], { win: false }),
   ...W("RE", "Moeras", ["Bak Ki-Ha"], { win: false }), ...W("RE", "Myrati", ["JB Stoner"], { win: false }),
@@ -166,10 +168,10 @@ const marginOf = id => { const c = ranked(id), t = c.reduce((a, x) => a + x.vote
 // ---------- place named people
 const namedSeat = {}; // seat id -> [{name, party, win}]
 const placed = [];
-const winnersFirst = [...NAMED.filter(n => n.win !== false)].sort((a, b) => LEADERS.has(b.name) - LEADERS.has(a.name));
+const winnersFirst = [...NAMED.filter(n => n.win !== false)].sort((a, b) => SAFE_SEAT.has(b.name) - SAFE_SEAT.has(a.name));
 winnersFirst.forEach(n => {
   let seats = S.filter(s => s.region === n.region && ranked(s.id)[0].party === n.party && !ranked(s.id)[0].name);
-  if (LEADERS.has(n.name)) seats.sort((a, b) => marginOf(b.id) - marginOf(a.id)); // leaders sit in their party's safest seat
+  if (SAFE_SEAT.has(n.name)) seats.sort((a, b) => marginOf(b.id) - marginOf(a.id)); // leaders sit in their party's safest seat
   const s = seats[0]; if (!s) throw `no ${n.party} seat left in ${n.region} for ${n.name}`;
   ranked(s.id)[0].name = n.name; (namedSeat[s.id] = namedSeat[s.id] || []).push(n);
   if (LEADERS.has(n.name)) out[s.id].leader = n.name;
