@@ -113,7 +113,7 @@ const NAMED = [
   ...W("RE", "Reno", ["Roberto Libero"]), ...W("PP", "Montiablo", ["Jon Fraser"]),
   // party leaders not on the sheet, placed where their party (or family) is strongest
   ...W("NPP", "Carnapol", ["Klinton Arkas"]), ...W("REJ", "Costa Blanca", ["Alexandria Yuan Kew Lee"]), ...W("AC", "Pleucadeuc", ["Jaco van Ryneveld"]),
-  ...W("REG", "Kalahooska", ["Eve Callen"]), ...W("RE", "Montiablo", ["David Breen Cutter"]),
+  ...W("REG", "Kalahooska", ["Eve Callen"]), ...W("RE", "Chasmia", ["David Breen Cutter"]),
   // --- stood and lost
   ...W("IND", "Ambarino", ["Yeeun Bluespan II"], { win: false }), ...W("DEM", "Ambarino", ["Cam Cauley"], { win: false }),
   ...W("RE", "Moeras", ["Bak Ki-Ha"], { win: false }), ...W("RE", "Myrati", ["JB Stoner"], { win: false }),
