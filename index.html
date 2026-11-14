@@ -211,10 +211,10 @@ const PARTIES_EX = {
 // the government formed after this election (left of the seat bar) and the opposition
 const GOV_EX=["DEM","DM","SDA","REJ","REG"], OPP_EX=["RE","NPP","PP","AC","IND"];
 // ---- 2080 (live). Codes are the count sheet's. Convergence = Renaissance + New Progressives + Caprican Democratic Movement;
-// AA = Augustin Alliance (SDA + Rejuvenation), AR = Régionale, JF = Jasmine Movement–Scarfelts independent alliance,
+// AA = Autumn Accords (SDA + Rejuvenation), AR = Régionale, JF = Jasmine Movement–Scarfelts independent alliance,
 // A = Alliance (Avenir + People’s Party).
 const PARTIES_2080 = {
-  AA: {name:"Augustin Alliance (Social Democrats and Rejuvenation)",short:"Augustin Alliance",color:"#E3173E"},
+  AA: {name:"Autumn Accords (Social Democrats and Rejuvenation)",short:"Autumn Accords",color:"#E3173E"},
   DEM:{name:"Democratic Party of Caprica",short:"Democrats",color:"#7B2CBF"},
   DM: {name:"Democracy Manifest",short:"Manifest",color:"#14C2DA"},
   AR: {name:"Régionale",short:"Régionale",color:"#F2C230"},
@@ -642,7 +642,7 @@ function legend(){
     L.innerHTML=`<span class="badge" style="margin-left:0;background:#fde2e2;color:#9b1c1c">${LIVE_SRC==="live"?`Live · updated ${t}`:"Saved snapshot"}</span> `+
       P_ORDER.filter(p=>Object.values(OUT).some(o=>o.c.some(c=>c.party===p))).map(p=>`<span><span class="sw" style="background:${pcol(p)}"></span>${pshort(p)}</span>`).join("")+
       `<span style="color:#777"><span class="sw" style="background:linear-gradient(90deg,${shade("#7B2CBF",0.6)} 50%,#7B2CBF 50%)"></span>Leading · called</span><span style="color:#777"><span class="sw" style="background:#dedede"></span>No votes yet</span>`;
-    N.innerHTML=`<b>About the 2080 count.</b> Each region’s share of the vote and how much of it has been counted come from the live count sheet, refreshed every five minutes. Seat-by-seat results are simulated from that: every seat starts from its result in the 2076 election and swings with its region, and seats report at different speeds. How many seats each party leads in follows the sheet’s seat table for each region, so the seat totals match the sheet as the count moves. A seat is called only when most of its vote is in and the lead is safe. Convergence is the electoral alliance of Renaissance, the New Progressives and the Caprican Democratic Movement. The Augustin Alliance brings together the Social Democrats and Rejuvenation, the Alliance brings together Avenir and the People’s Party, and Jasmine–Scarfelts is an alliance of independents.`;
+    N.innerHTML=`<b>About the 2080 count.</b> Each region’s share of the vote and how much of it has been counted come from the live count sheet, refreshed every five minutes. Seat-by-seat results are simulated from that: every seat starts from its result in the 2076 election and swings with its region, and seats report at different speeds. How many seats each party leads in follows the sheet’s seat table for each region, so the seat totals match the sheet as the count moves. A seat is called only when most of its vote is in and the lead is safe. Convergence is the electoral alliance of Renaissance, the New Progressives and the Caprican Democratic Movement. The Autumn Accords bring together the Social Democrats and Rejuvenation, the Alliance brings together Avenir and the People’s Party, and Jasmine–Scarfelts is an alliance of independents.`;
     return;
   }
   if(mode==="region") L.innerHTML=Object.entries(DATA.regions).map(([r,v])=>`<span><span class="sw" style="background:${REG_COL[r]}"></span>${r} <span style="color:#888">${v.seats}</span></span>`).join("");
@@ -790,7 +790,7 @@ function voteNote(s){
   return t;
 }
 // ---- live (2080) hover box and note
-const PN2080={AA:"the Augustin Alliance",DEM:"the Democrats",DM:"Manifest",AR:"Régionale",JF:"Jasmine–Scarfelts",CON:"Convergence",A:"the Alliance",IND:"an independent"};
+const PN2080={AA:"the Autumn Accords",DEM:"the Democrats",DM:"Manifest",AR:"Régionale",JF:"Jasmine–Scarfelts",CON:"Convergence",A:"the Alliance",IND:"an independent"};
 const pnL=p=>PN2080[p]||p;
 function liveNote(s,o){
   const pct=Math.round(o.pct*100);
