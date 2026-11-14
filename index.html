@@ -105,6 +105,7 @@
   .pvl b{font-weight:700;color:#121212}
   .livehd{font-size:11.5px;color:#666;margin:6px 0 2px;display:flex;justify-content:space-between;gap:8px}
   .seatbar i.lt{opacity:.45}
+  .legend .sw.hatchsw{background:repeating-linear-gradient(45deg,#7B2CBF 0 2.5px,#cdb2e6 2.5px 4.5px)}
   #tip .rnote{font-size:12px;line-height:1.45;color:#444;margin-top:7px;padding-top:6px;border-top:1px solid #eee;width:0;min-width:100%}
   .race{padding:7px 4px 7px;border-bottom:1px solid #eee;cursor:pointer;border-radius:2px}
   .race:hover,.race.hot{background:#f6f6f6}
@@ -590,7 +591,25 @@ function inView(s){const o=OUT[s.id]; if(!o) return false;
   if(rFilter==="flips"&&!o.flip) return false;
   if(rParty&&o.win!==rParty) return false; return true}
 const LIVE_MODE=()=>ELEC==="2080";
-function fill(s){
+// flipped seats are hatched: white diagonal stripes over the seat's colour (sized for the main map or an inset)
+const HATCH_DEFS=(()=>{const sv=document.createElementNS("http://www.w3.org/2000/svg","svg");sv.setAttribute("width","0");sv.setAttribute("height","0");sv.setAttribute("aria-hidden","true");
+  sv.style.position="absolute";const d=document.createElementNS("http://www.w3.org/2000/svg","defs");sv.appendChild(d);document.body.prepend(sv);return d})();
+const hatchMade={};
+function hatch(color,small){
+  const id="h"+(small?"s":"m")+color.replace(/[^0-9a-z]/gi,"");
+  if(!hatchMade[id]){hatchMade[id]=1; const N="http://www.w3.org/2000/svg", size=small?1.1:3.2;
+    const p=document.createElementNS(N,"pattern"); p.setAttribute("id",id); p.setAttribute("patternUnits","userSpaceOnUse");
+    p.setAttribute("width",size); p.setAttribute("height",size); p.setAttribute("patternTransform","rotate(45)");
+    const r=document.createElementNS(N,"rect"); r.setAttribute("width",size); r.setAttribute("height",size); r.setAttribute("fill",color); p.appendChild(r);
+    const l=document.createElementNS(N,"rect"); l.setAttribute("width",size*0.38); l.setAttribute("height",size); l.setAttribute("fill","#fff"); l.setAttribute("fill-opacity","0.6"); p.appendChild(l);
+    HATCH_DEFS.appendChild(p)}
+  return `url(#${id})`;
+}
+function fill(s,small){
+  const c=baseFill(s), o=mode==="results"?OUT[s.id]:null;
+  return o&&o.flip&&o.win&&inView(s)?hatch(c,small):c;
+}
+function baseFill(s){
   if(mode==="region"){const v=(s.num%3)*0.10;return shade(REG_COL[s.region],v)}
   if(mode==="dev"){const d=Math.max(-0.12,Math.min(0.12,s.dev))/0.12;return d>=0?shade("#b2182b",1-d*0.85):shade("#2166ac",1+d*0.85)}
   const o=OUT[s.id]; if(!o) return "#e6e6e6";
@@ -630,7 +649,7 @@ DATA.insets.forEach((ins,k)=>{
   drawMap(sv,ins.ids,ins.regs,false);
 });
 
-function recolor(){S.forEach(s=>(pathsById[s.id]||[]).forEach(p=>p.setAttribute("fill",fill(s))));legend()}
+function recolor(){S.forEach(s=>(pathsById[s.id]||[]).forEach(p=>p.setAttribute("fill",fill(s,p.ownerSVGElement.id!=="main"))));legend()}
 const DEK_DEFAULT=document.getElementById("dek").textContent;
 function legend(){
   const L=document.getElementById("legend"), N=document.getElementById("note"), D=document.getElementById("dek");
@@ -641,14 +660,14 @@ function legend(){
     const t=LIVE_TIME?LIVE_TIME.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"}):null;
     L.innerHTML=`<span class="badge" style="margin-left:0;background:#fde2e2;color:#9b1c1c">${LIVE_SRC==="live"?`Live · updated ${t}`:"Saved snapshot"}</span> `+
       P_ORDER.filter(p=>Object.values(OUT).some(o=>o.c.some(c=>c.party===p))).map(p=>`<span><span class="sw" style="background:${pcol(p)}"></span>${pshort(p)}</span>`).join("")+
-      `<span style="color:#777"><span class="sw" style="background:linear-gradient(90deg,${shade("#7B2CBF",0.6)} 50%,#7B2CBF 50%)"></span>Leading · called</span><span style="color:#777"><span class="sw" style="background:#dedede"></span>No votes yet</span>`;
+      `<span style="color:#777"><span class="sw" style="background:linear-gradient(90deg,${shade("#7B2CBF",0.6)} 50%,#7B2CBF 50%)"></span>Leading · called</span><span style="color:#777"><span class="sw hatchsw"></span>Would be a gain</span><span style="color:#777"><span class="sw" style="background:#dedede"></span>No votes yet</span>`;
     N.innerHTML=`<b>About the 2080 count.</b> Each region’s share of the vote and how much of it has been counted come from the live count sheet, refreshed every five minutes. Seat-by-seat results are simulated from that: every seat starts from its result in the 2076 election and swings with its region, and seats report at different speeds. How many seats each party leads in follows the sheet’s seat table for each region, so the seat totals match the sheet as the count moves. A seat is called only when most of its vote is in and the lead is safe. Convergence is the electoral alliance of Renaissance, the New Progressives and the Caprican Democratic Movement. The Autumn Accords bring together the Social Democrats and Rejuvenation, the Alliance brings together Avenir and the People’s Party, and Jasmine–Scarfelts is an alliance of independents.`;
     return;
   }
   if(mode==="region") L.innerHTML=Object.entries(DATA.regions).map(([r,v])=>`<span><span class="sw" style="background:${REG_COL[r]}"></span>${r} <span style="color:#888">${v.seats}</span></span>`).join("");
   else if(mode==="dev") L.innerHTML=`<span><span class="sw" style="background:#2166ac"></span>Below region quota (−12%)</span><span><span class="sw" style="background:#f2f2f2;border:1px solid #ccc"></span>At quota</span><span><span class="sw" style="background:#b2182b"></span>Above quota (+12%)</span>`;
   else L.innerHTML=(SIMULATED?`<span class="badge" style="margin-left:0">Simulated results</span> `:"")+P_ORDER.filter(p=>SEATS[p]).map(p=>`<span><span class="sw" style="background:${pcol(p)}"></span>${pshort(p)}</span>`).join("")+
-    `<span style="color:#777"><span class="sw" style="background:linear-gradient(90deg,${shade("#7B2CBF",0.45)} 33%,${shade("#7B2CBF",0.22)} 33% 66%,#7B2CBF 66%)"></span>Margin &lt;5 · 5–15 · &gt;15 pts</span>`;
+    `<span style="color:#777"><span class="sw" style="background:linear-gradient(90deg,${shade("#7B2CBF",0.45)} 33%,${shade("#7B2CBF",0.22)} 33% 66%,#7B2CBF 66%)"></span>Margin &lt;5 · 5–15 · &gt;15 pts</span><span style="color:#777"><span class="sw hatchsw"></span>Flipped seat</span>`;
   N.innerHTML=`<b>About this draft.</b> Most borders were drawn by computer from city populations and then adjusted for compactness. Pittston’s seats are built from its real counties, using the old seat counts as a census. The other regions follow county-style lines that have not yet been matched to real county boundaries. Population figures are estimates built from the city table plus a rural baseline, and each seat is compared with its own region’s quota, because the 203 seats were allocated by region. The names are drafts. ${mode==="results"&&SIMULATED?"<b>The Results view shows simulated constituency results and candidates, generated to match the party seat totals. Gains are measured against the previous election (also simulated), with the Alternative Labour Party and Democratic Greens counted as the Democrats and the Kalahooska National Party as Régionale. The Social Democrats and Rejuvenation, the New Progressives and Renaissance, and Avenir and the People’s Party do not stand against each other.</b>":""}`;
 }
 function setMode(m){mode=m;document.body.classList.toggle("res",m==="results");recolor();if(m==="results")renderRaces();layout()}
