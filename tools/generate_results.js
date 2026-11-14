@@ -21,7 +21,7 @@ const N = () => (R() + R() + R() - 1.5) / 1.5;
 
 // ---------- seat targets per region (from the sheet)  cols: REJ SDA ALP DGC DM KNP NPP RE PP AC IND
 const RAW = {
-  Ambarino:[1,1,2,2,2,0,2,1,0,0,0], Ambrosia:[0,0,1,0,1,0,0,1,1,0,0], Cambria:[1,2,1,0,1,0,1,1,0,0,0],
+  Ambarino:[1,1,2,2,2,0,2,1,0,0,0], Ambrosia:[0,0,1,0,1,0,0,1,1,0,0], Cambria:[2,1,1,0,1,0,1,1,0,0,0],
   Carnapol:[0,1,0,1,3,0,2,0,0,1,0], Chasmia:[0,1,1,1,1,0,1,2,1,1,0], "Costa Blanca":[5,3,2,2,1,0,1,1,1,0,0],
   Kalahooska:[1,0,1,1,2,14,2,0,0,1,0], Kazana:[5,7,3,2,2,0,1,1,1,1,0], Mezata:[2,2,1,1,1,0,1,4,2,1,0],
   Moeras:[0,0,0,1,1,0,0,1,0,0,0], Montiablo:[1,1,1,2,1,0,2,3,7,4,0], Myrati:[1,0,1,1,1,0,1,0,0,0,2],
