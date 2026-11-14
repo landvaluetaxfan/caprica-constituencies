@@ -131,6 +131,14 @@ const NAMED = [
   { name: "Roberto Libero", region: "Reno", party: "RE" },
   { name: "Myat Noe Win", region: "Reno", party: "RE", win: false },
   { name: "Robert Bluespan", region: "Ventura", party: "RE" },
+  // Democracy Manifest MPs standing for re-election (inc: incumbent, so the seat is a hold)
+  ...[["Ambarino","Maria Carter"],["Ambarino","Oliver Williams"],["Ambrosia","Elizabeth Harris"],["Cambria","Amelia McLean"],
+      ["Carnapol","Cordelia Lynn Edinburgh"],["Carnapol","Robyn Pantic-Slater"],["Carnapol","Avery Sladen"],["Chasmia","Donna Christensen"],
+      ["Costa Blanca","Tomomi Kawaguchi"],["Kalahooska","Klara Ludvigsson"],["Kalahooska","Sandy Barber"],["Kazana","Cheryl Williamson"],
+      ["Kazana","Jacqui Karlson"],["Mezata","Ignacio Díaz"],["Moeras","James Wilson"],["Montiablo","Geraldine Trent"],
+      ["Myrati","Sophie Jean-Larsson"],["Oplana","Meredith Astor"],["Pittston","Shirley Ballas"],["Pleucadeuc","Ophélie Merrine"],
+      ["Reno","Christina McElroy"],["Ventura","Sydney Kostas Pastry II"],["Ventura","Nicholas Jakobssen"]]
+    .map(([region, name]) => ({ name, region, party: "DM", inc: true })),
 ];
 const sorted = c => [...c].sort((a, b) => b.votes - a.votes);
 const namedIn = {}; // seat id -> count of named people placed there
@@ -157,6 +165,7 @@ const placed = [];
   const r = out[s.id];
   if (r.inc && r.inc === cand.name) r.inc = n.name;
   cand.name = n.name; cand.named = true;
+  if (n.inc) { r.inc = n.name; if (n.win !== false) r.prev = n.party; }
   namedIn[s.id] = (namedIn[s.id] || 0) + 1; used2.add(s.id + "|" + n.party);
   placed.push(`${n.name} (${n.party}) ${n.region} / ${s.name}: ${sorted(r.cands)[0] === cand ? "won" : "lost"}`);
 });
