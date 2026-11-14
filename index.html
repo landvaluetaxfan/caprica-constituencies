@@ -567,6 +567,7 @@ S.forEach(s=>{const r=RESULTS[s.id]; if(!r) return; const tot=r.cands.reduce((a,
 for(const r in REGBASE){const R=REGBASE[r]; for(const p in R) if(p!=="w") R[p]/=R.w}
 let LIVE=null, LIVE_TIME=null, LIVE_SRC="";
 const CALL_FROM=0.45; // share of a region's vote counted before any of its seats can be called
+const EARLY_FROM=0.10, EARLY_PROJ=0.25, EARLY_NOW=0.15; // early calls: region at least 10% in, projected lead 25+ pts, current lead 15+ pts
 // Voting runs until tomorrow morning: until the polls close, no more than half the races are called (the safest first).
 const POLLS_CLOSE=new Date("2026-11-15T07:00:00-06:00"); // 7:00 a.m. Central, Sunday 15 November
 const pollsOpen=()=>Date.now()<POLLS_CLOSE.getTime();
@@ -621,10 +622,14 @@ function buildLive(){
     // The lead needed shrinks as the seat's count fills in: 25 pts at half counted, 15 at three-quarters, 9 at 90%.
     // a call already shown stays called while the same party leads, even if the sheet's counted share dips back under the threshold
     const shown=reporting&&callTimes[id]&&callTimes[id].w===win;
-    const called=reporting&&(final||o.f>=0.999||shown||(RL.pct>=CALL_FROM&&o.f>=0.5&&margin*100>5+40*(1-o.f)));
-    res[id]={r:{cands:c,inc:o.inc,turnout:null},c,tot,win,prev:o.prev,flip:!!win&&win!==o.prev,margin,pct:o.f,called,reporting,expected:o.expected}}
+    const pj=[...o.cands].sort((a,b)=>b.s0-a.s0), proj={win:pj[0].party,margin:pj[0].s0-(pj[1]?pj[1].s0:0)}; // where the seat ends up once fully counted
+    // early calls, like a safe state called at poll close: once the region is counting, a seat whose own lean (its 2072 result
+    // swung by the region) puts the leader 25+ points clear, and whose votes so far agree, is called straight away
+    const early=reporting&&RL.pct>=EARLY_FROM&&proj.win===win&&proj.margin>=EARLY_PROJ&&margin>=EARLY_NOW;
+    const called=reporting&&(final||o.f>=0.999||shown||early||(RL.pct>=CALL_FROM&&o.f>=0.5&&margin*100>5+40*(1-o.f)));
+    res[id]={r:{cands:c,inc:o.inc,turnout:null},c,tot,win,prev:o.prev,flip:!!win&&win!==o.prev,margin,pct:o.f,called,reporting,expected:o.expected,proj}}
   capCalls(Object.keys(res).map(id=>{const o=res[id], k=typeof callTimes==="object"&&callTimes[id]&&callTimes[id].w===o.win?1:0;
-    return {o,keep:k,safety:LIVE.reg[byId[id].region].final||o.pct>=0.999?1e9:o.margin*100-(5+40*(1-o.pct))}}),S.length);
+    return {o,keep:k,safety:LIVE.reg[byId[id].region].final||o.pct>=0.999?1e9:Math.max(o.margin*100-(5+40*(1-o.pct)),o.proj.margin*100-20)}}),S.length);
   return res;
 }
 function loadElection(key){
@@ -751,7 +756,7 @@ function legend(){
     L.innerHTML=`<span class="badge" style="margin-left:0;background:#fde2e2;color:#9b1c1c">${SIM?`Simulated count · ${Math.round(SIM*100)}% preview`:LIVE_SRC==="live"?`Live · updated ${t}`:"Saved snapshot"}</span> `+
       P_ORDER.filter(p=>Object.values(OUT).some(o=>o.c.some(c=>c.party===p))).map(p=>`<span><span class="sw" style="background:${pcol(p)}"></span>${pshort(p)}</span>`).join("")+
       `<span style="color:#777"><span class="sw" style="background:linear-gradient(90deg,${shade("#7B2CBF",0.6)} 50%,#7B2CBF 50%)"></span>Leading · called</span><span style="color:#777"><span class="sw hatchsw"></span>Would be a gain</span><span style="color:#777"><span class="sw" style="background:#dedede"></span>No votes yet</span>`;
-    N.innerHTML=`<b>About the 2076 count.</b> Each region’s share of the vote and how much of it has been counted come from the live count sheet, refreshed every five minutes. Seat-by-seat results are simulated from that: every seat starts from its result in the 2072 election and swings with its region, and seats report at different speeds. How many seats each party leads in follows the sheet’s seat table for each region, so the seat totals match the sheet as the count moves. A seat is called only when most of its vote is in and the lead is safe. Voting continues until tomorrow morning, so until the polls close no more than half the seats (101 of 203) are called, the safest first. Convergence is the electoral alliance of Renaissance, the New Progressives and the Caprican Democratic Movement. The Autumn Accords bring together the Social Democrats and Rejuvenation, the Alliance brings together Avenir and the People’s Party, and Jasmine–Scarfelts is an alliance of independents.`;
+    N.innerHTML=`<b>About the 2076 count.</b> Each region’s share of the vote and how much of it has been counted come from the live count sheet, refreshed every five minutes. Seat-by-seat results are simulated from that: every seat starts from its result in the 2072 election and swings with its region, and seats report at different speeds. How many seats each party leads in follows the sheet’s seat table for each region, so the seat totals match the sheet as the count moves. Safe seats are called early: once its region is counting, a seat projected to be won by 25 points or more, with the votes so far agreeing, is called straight away. Other seats are called once their region is about 45% counted and the lead is safe. Voting continues until tomorrow morning, so until the polls close no more than half the seats (101 of 203) are called, the safest first. Convergence is the electoral alliance of Renaissance, the New Progressives and the Caprican Democratic Movement. The Autumn Accords bring together the Social Democrats and Rejuvenation, the Alliance brings together Avenir and the People’s Party, and Jasmine–Scarfelts is an alliance of independents.`;
     return;
   }
   if(mode==="region") L.innerHTML=Object.entries(DATA.regions).map(([r,v])=>`<span><span class="sw" style="background:${REG_COL[r]}"></span>${r} <span style="color:#888">${v.seats}</span></span>`).join("");
@@ -872,11 +877,11 @@ function revealRace(s){
 
 // ---- race calls: a feed of called seats, a shareable call graphic for each, and a pop-up when a new call comes in
 // When each seat was first seen called is kept per viewer, so the feed can run newest first.
-const CALL_KEY="caprica2080calls";
+const CALL_KEY="caprica2076calls"; // new key: older saves could hold calls taken from the built-in snapshot
 let callTimes={}; if(!SIM) try{callTimes=JSON.parse(localStorage.getItem(CALL_KEY)||"{}")||{}}catch(e){callTimes={}}
 let callsSeen=null;
 function trackCalls(){ // records call times; returns seats called since the last check
-  if(ELEC!=="live") return [];
+  if(ELEC!=="live"||LIVE_SRC!=="live") return [];
   const now=Date.now(), fresh=[], seen=new Set();
   for(const id in OUT){const o=OUT[id];
     if(o.called){seen.add(id); const k=callTimes[id]; if(!k||k.w!==o.win) callTimes[id]={t:now,w:o.win}; if(callsSeen&&!callsSeen.has(id)) fresh.push(id)}
@@ -1210,7 +1215,7 @@ q.addEventListener("keydown",e=>{if(e.key!=="Enter"||!qText)return;
   if(mode==="results"){if(!inView(s)){rFilter="all";rParty=null;document.querySelectorAll("#rfilter button").forEach(x=>x.classList.toggle("on",x.dataset.f==="all"));recolor();renderRaces()} revealRace(s)}
   const p=(pathsById[s.id]||[])[0]; if(!p) return; const b=p.getBoundingClientRect();
   cur=null; showTip(s,{clientX:b.left+b.width/2,clientY:b.top+b.height/2});});
-loadElection(location.hash==="#2072"||location.hash==="#example"?"ex":"live"); trackCalls(); buildSenate();
+loadElection(location.hash==="#2072"||location.hash==="#example"?"ex":"live"); buildSenate(); // calls are only recorded from the live sheet (in fetchLive), never from the built-in snapshot
 document.querySelectorAll("#elec button").forEach(b=>b.onclick=()=>{loadElection(b.dataset.e);recolor();renderRaces();hideTip()});
 fetchLive(); setInterval(fetchLive,5*60*1000);
 setMode(location.hash==="#senate"?"senate":["#results","#2076","#2072","#example"].includes(location.hash)?"results":"region");
