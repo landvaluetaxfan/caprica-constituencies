@@ -82,9 +82,8 @@ regions.forEach(r => {
 
 // ---------- named player NPCs (sheet = definitive) + extra names given in chat
 const LEADERS = new Set(["Adriana Flash", "Mandy Trottier", "Safiya Bethune-Fayyad", "Robert Bluespan", "David Breen Cutter", "Jon Fraser",
-  "Klinton Arkas", "Zhaohua Li", "Jaco van Ryneveld"]);
-// not a leader, but kept in the seat the old Régionale leader held (the party's safest), so a rerun gives the same result
-const SAFE_SEAT = new Set([...LEADERS, "Margaret Ashby"]);
+  "Klinton Arkas", "Zhaohua Li", "Jaco van Ryneveld", "Camila Vega"]);
+const SAFE_SEAT = LEADERS; // leaders sit in their party's safest seat in the region
 const W = (party, region, names, extra = {}) => names.map(name => ({ name, region, party, ...extra }));
 const NAMED = [
   // --- from the player-NPC sheet
