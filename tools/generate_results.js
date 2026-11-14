@@ -82,9 +82,9 @@ regions.forEach(r => {
 
 // ---------- named player NPCs (sheet = definitive) + extra names given in chat
 const LEADERS = new Set(["Adriana Flash", "Mandy Trottier", "Safiya Bethune-Fayyad", "Robert Bluespan", "David Breen Cutter", "Jon Fraser",
-  "Klinton Arkas", "Jaco van Ryneveld"]);
-// not leaders, but kept in the seats the old Rejuvenation and Régionale leaders held (their party's safest), so a rerun gives the same result
-const SAFE_SEAT = new Set([...LEADERS, "Rosa María Valdivia", "Margaret Ashby"]);
+  "Klinton Arkas", "Zhaohua Li", "Jaco van Ryneveld"]);
+// not a leader, but kept in the seat the old Régionale leader held (the party's safest), so a rerun gives the same result
+const SAFE_SEAT = new Set([...LEADERS, "Margaret Ashby"]);
 const W = (party, region, names, extra = {}) => names.map(name => ({ name, region, party, ...extra }));
 const NAMED = [
   // --- from the player-NPC sheet
@@ -114,7 +114,7 @@ const NAMED = [
   ...W("DEM", "Reno", ["Gavin Collyer", "Nathan Eovaldi"]), ...W("DEM", "Ventura", ["Erika Hasumi-Inaba", "Jacob Latz"]),
   ...W("RE", "Reno", ["Roberto Libero"]), ...W("PP", "Montiablo", ["Jon Fraser"]),
   // party leaders not on the sheet, placed where their party (or family) is strongest
-  ...W("NPP", "Carnapol", ["Klinton Arkas"]), ...W("REJ", "Costa Blanca", ["Rosa María Valdivia"]), ...W("AC", "Pleucadeuc", ["Jaco van Ryneveld"]),
+  ...W("NPP", "Carnapol", ["Klinton Arkas"]), ...W("REJ", "Costa Blanca", ["Zhaohua Li"]), ...W("AC", "Pleucadeuc", ["Jaco van Ryneveld"]),
   ...W("REG", "Kalahooska", ["Margaret Ashby"]), ...W("RE", "Chasmia", ["David Breen Cutter"]),
   // --- stood and lost
   ...W("IND", "Ambarino", ["Yeeun Bluespan II"], { win: false }), ...W("DEM", "Ambarino", ["Cam Cauley"], { win: false }),
