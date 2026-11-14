@@ -1,0 +1,204 @@
+region,seat_no,name,id,est_population,deviation_from_region_quota,area_svg_units2,main_places
+Myrati,1,Cas Arwydd West,myrati-cas-arwydd-west,277000,+3.2%,81,Port Aaron
+Myrati,2,Cas Arwydd,myrati-cas-arwydd,279000,+4.0%,77,Port Aaron
+Myrati,3,Abermeiron,myrati-abermeiron,263000,-2.0%,809,Abermeiron; Port Aaron; Port Heaton
+Myrati,4,Aberllew,myrati-aberllew,270000,+0.6%,301,Port Aaron; Abermeiron; Aberllew
+Myrati,5,Bae Glas,myrati-bae-glas,255000,-5.0%,386,Blue Bay; Aberllew
+Myrati,6,Cas Hardd,myrati-cas-hardd,263000,-2.0%,523,Blue Bay; Port Heaton
+Myrati,7,Morfach,myrati-morfach,271000,+1.0%,571,Morfach; Llanhew
+Chasmia,1,Chasberg,chasmia-chasberg,350000,-1.5%,335,Chasberg
+Chasmia,2,Verasul and Hollin Fells,chasmia-verasul-and-hollin-fells,366000,+3.0%,7849,Verasul; Morrick; Lisieux
+Chasmia,3,Chasberg South and Morrick,chasmia-chasberg-south-and-morrick,352000,-0.9%,1541,Chasberg; Morrick
+Chasmia,4,Saint-Aubin—Les Prés,chasmia-saint-aubinles-pres,361000,+1.6%,4622,Lisieux
+Chasmia,5,Morrick and Verasul,chasmia-morrick-and-verasul,342000,-3.7%,3105,Morrick; Verasul; Chasberg
+Chasmia,6,Lisieux Centre,chasmia-lisieux-centre,376000,+5.8%,432,Lisieux
+Chasmia,7,Lisieux East,chasmia-lisieux-east,352000,-0.9%,215,Lisieux
+Chasmia,8,Littlewoods and the Southern Dales,chasmia-littlewoods-and-the-southern-dales,343000,-3.4%,16288,Littlewoods; Verasul
+Chasmia,9,Hautmont,chasmia-hautmont,355000,-0.1%,2692,Lisieux
+Carnapol,1,Montfleury,carnapol-montfleury,373000,-2.5%,883,Dubois
+Carnapol,2,Dubois-Ouest,carnapol-dubois-ouest,387000,+1.1%,501,Dubois
+Carnapol,3,Vieux-Dubois,carnapol-vieux-dubois,405000,+5.8%,120,Dubois
+Carnapol,4,Pointe-aux-Saules,carnapol-pointe-aux-saules,369000,-3.6%,431,Dubois
+Carnapol,5,Saint-Rémi,carnapol-saint-remi,378000,-1.2%,142,Dubois
+Carnapol,6,Dubois-Sud,carnapol-dubois-sud,386000,+0.9%,484,Dubois
+Carnapol,7,Le Plateau,carnapol-le-plateau,387000,+1.1%,104,Dubois
+Carnapol,8,Rivière-aux-Cèdres,carnapol-riviere-aux-cedres,376000,-1.7%,358,Dubois
+Moeras,1,Georgetown and St. Lucia,moeras-georgetown-and-st-lucia,237000,+0.6%,1894,Georgetown; St. Lucia
+Moeras,2,Javeyla,moeras-javeyla,228000,-3.3%,334,Javeyla; St. Lucia
+Moeras,3,Dalaran and Port Penelope,moeras-dalaran-and-port-penelope,242000,+2.7%,270,Dalaran; Port Penelope; Georgetown
+Kalahooska,1,Machan,kalahooska-machan,367000,-2.0%,4978,Machan; Caille
+Kalahooska,2,Wyndham,kalahooska-wyndham,374000,-0.1%,3910,Carraway; Greenhaven
+Kalahooska,3,Marshall,kalahooska-marshall,385000,+2.8%,617,Marshall
+Kalahooska,4,Stockdale,kalahooska-stockdale,367000,-2.0%,4781,Stockdale; Marshall
+Kalahooska,5,Caille North,kalahooska-caille-north,392000,+4.7%,758,Caille
+Kalahooska,6,Mid Kalahooska,kalahooska-mid-kalahooska,375000,+0.2%,8104,Machan; Carraway
+Kalahooska,7,Carraway,kalahooska-carraway,393000,+5.0%,730,Carraway
+Kalahooska,8,Saltmarsh,kalahooska-saltmarsh,393000,+5.0%,97,Caille
+Kalahooska,9,Caille Central,kalahooska-caille-central,362000,-3.3%,81,Caille
+Kalahooska,10,Brickfield,kalahooska-brickfield,351000,-6.2%,142,Caille
+Kalahooska,11,Caille East,kalahooska-caille-east,355000,-5.2%,179,Caille
+Kalahooska,12,Hollins Park,kalahooska-hollins-park,371000,-0.9%,280,Caille
+Kalahooska,13,Fernhill,kalahooska-fernhill,397000,+6.0%,271,Greenhaven
+Kalahooska,14,Greenhaven Central,kalahooska-greenhaven-central,355000,-5.2%,106,Greenhaven
+Kalahooska,15,Kingsmere,kalahooska-kingsmere,367000,-2.0%,223,Greenhaven
+Kalahooska,16,Greenhaven East,kalahooska-greenhaven-east,364000,-2.8%,242,Greenhaven
+Kalahooska,17,Tolland,kalahooska-tolland,379000,+1.2%,7257,Greenhaven; Marshall
+Kalahooska,18,Lowmoor,kalahooska-lowmoor,373000,-0.4%,1664,Caille
+Kalahooska,19,Greenhaven South,kalahooska-greenhaven-south,381000,+1.8%,575,Greenhaven; Resina
+Kalahooska,20,Wexley,kalahooska-wexley,375000,+0.2%,18102,Caille
+Kalahooska,21,Resina,kalahooska-resina,377000,+0.7%,4910,Resina
+Kalahooska,22,Fort Prospect,kalahooska-fort-prospect,383000,+2.3%,1332,Fort Prospect
+Ambarino,1,Bedford Falls,ambarino-bedford-falls,395000,-0.4%,574,Ambarino City; University Square
+Ambarino,2,University Square,ambarino-university-square,397000,+0.1%,1026,University Square; Ambarino City
+Ambarino,3,Ambarino West,ambarino-ambarino-west,410000,+3.4%,78,Ambarino City
+Ambarino,4,Belmont,ambarino-belmont,380000,-4.2%,138,Ambarino City
+Ambarino,5,Ambarino Centre,ambarino-ambarino-centre,385000,-2.9%,98,Ambarino City
+Ambarino,6,Forêt-Rouge,ambarino-foret-rouge,396000,-0.1%,993,Ambarino City
+Ambarino,7,Hartley and Bois-Joli,ambarino-hartley-and-bois-joli,406000,+2.4%,681,Ambarino City
+Ambarino,8,Saint-Clément,ambarino-saint-clement,396000,-0.1%,110,Ambarino City
+Ambarino,9,Ambarino South,ambarino-ambarino-south,415000,+4.7%,95,Ambarino City
+Ambarino,10,Montclair,ambarino-montclair,386000,-2.6%,277,Ambarino City
+Ambarino,11,Vallée-Verte,ambarino-vallee-verte,395000,-0.4%,703,Ambarino City
+Pleucadeuc,1,Plouzennec,pleucadeuc-plouzennec,367000,-1.3%,1269,Notanville
+Pleucadeuc,2,Montagne—Hautes-Terres,pleucadeuc-montagnehautes-terres,371000,-0.2%,8573,Montagne
+Pleucadeuc,3,Notanville-Sud,pleucadeuc-notanville-sud,360000,-3.1%,252,Notanville
+Pleucadeuc,4,Janvier,pleucadeuc-janvier,363000,-2.3%,2233,Janvier; Notanville
+Pleucadeuc,5,Lanveur,pleucadeuc-lanveur,361000,-2.9%,168,Valcartier; Decoteau
+Pleucadeuc,6,Valcartier-Nord,pleucadeuc-valcartier-nord,372000,+0.1%,1979,Valcartier; Janvier; Notanville
+Pleucadeuc,7,Valcartier-Centre,pleucadeuc-valcartier-centre,376000,+1.2%,242,Valcartier
+Pleucadeuc,8,Kerangall,pleucadeuc-kerangall,377000,+1.4%,2405,Valcartier; Glazcarneau
+Pleucadeuc,9,Glazcarneau,pleucadeuc-glazcarneau,375000,+0.9%,1321,Glazcarneau
+Pleucadeuc,10,Decoteau,pleucadeuc-decoteau,366000,-1.5%,176,Decoteau; Valcartier
+Pleucadeuc,11,Kerbriant,pleucadeuc-kerbriant,379000,+2.0%,79,Valcartier; Decoteau
+Pleucadeuc,12,Locmaria,pleucadeuc-locmaria,370000,-0.5%,74,Valcartier
+Pleucadeuc,13,Vieux-Valcartier,pleucadeuc-vieux-valcartier,373000,+0.4%,110,Valcartier
+Pleucadeuc,14,Valcartier-Sud,pleucadeuc-valcartier-sud,376000,+1.2%,236,Valcartier
+Pleucadeuc,15,Lévrard,pleucadeuc-levrard,370000,-0.5%,4729,Lévrard; Fievreau; Valcartier
+Pleucadeuc,16,Fievreau-Nord,pleucadeuc-fievreau-nord,381000,+2.5%,412,Fievreau
+Pleucadeuc,17,Penhoat,pleucadeuc-penhoat,373000,+0.4%,1467,Fievreau
+Pleucadeuc,18,Fievreau-Est,pleucadeuc-fievreau-est,377000,+1.4%,410,Fievreau
+Pleucadeuc,19,Point Arthur,pleucadeuc-point-arthur,375000,+0.9%,1311,Point Arthur; Lévrard
+Kazana,1,Meauxsloit,kazana-meauxsloit,381000,+7.4%,359,Meauxsloit
+Kazana,2,Pedra Branca,kazana-pedra-branca,364000,+2.6%,424,Raudea
+Kazana,3,Raudea North,kazana-raudea-north,371000,+4.6%,2177,Raudea; Meauxsloit
+Kazana,4,Raudea Central,kazana-raudea-central,354000,-0.2%,156,Raudea
+Kazana,5,Cais da Raudea,kazana-cais-da-raudea,333000,-6.1%,120,Raudea
+Kazana,6,Ilha Longa and Raudea East,kazana-ilha-longa-and-raudea-east,359000,+1.2%,1064,Raudea
+Kazana,7,Marae Peninsula,kazana-marae-peninsula,334000,-5.8%,3795,Marae Bay
+Kazana,8,Boa Vista,kazana-boa-vista,338000,-4.7%,481,Marae Bay
+Kazana,9,Luminar West,kazana-luminar-west,380000,+7.1%,180,Luminar
+Kazana,10,Farol,kazana-farol,363000,+2.4%,120,Luminar
+Kazana,11,Santa Luzia,kazana-santa-luzia,333000,-6.1%,666,Mariton; Marae Bay
+Kazana,12,Marae Bay West,kazana-marae-bay-west,329000,-7.2%,234,Marae Bay
+Kazana,13,Marae Bay Central,kazana-marae-bay-central,340000,-4.1%,66,Marae Bay
+Kazana,14,Vila Nova,kazana-vila-nova,343000,-3.3%,73,Marae Bay
+Kazana,15,Ribeira,kazana-ribeira,317000,-10.6%,53,Marae Bay
+Kazana,16,Marae Bay East,kazana-marae-bay-east,319000,-10.1%,50,Marae Bay
+Kazana,17,Porto Velho,kazana-porto-velho,352000,-0.7%,195,Mariton
+Kazana,18,Mariton Central,kazana-mariton-central,342000,-3.6%,110,Mariton
+Kazana,19,Mariton South,kazana-mariton-south,358000,+0.9%,96,Mariton
+Kazana,20,Serra Verde,kazana-serra-verde,384000,+8.3%,9896,Luminar; Dalton
+Kazana,21,João Verde,kazana-joao-verde,385000,+8.6%,6198,João Verde; Luminar
+Kazana,22,Dalton,kazana-dalton,392000,+10.5%,2634,Dalton
+Kazana,23,Saint Athena and Cape Vue,kazana-saint-athena-and-cape-vue,386000,+8.8%,13409,Saint Athena; Cape Vue
+Ambrosia,1,Auburne,ambrosia-auburne,261000,-0.9%,151,Auburne
+Ambrosia,2,Ambrosian Downs,ambrosia-ambrosian-downs,261000,-0.9%,22308,Auburne
+Ambrosia,3,Strawberry and Meridian,ambrosia-strawberry-and-meridian,262000,-0.5%,21042,Strawberry; Meridian
+Ambrosia,4,Garrison,ambrosia-garrison,269000,+2.2%,1201,Garrison
+Reno,1,Coleston,reno-coleston,361000,+1.6%,1412,Syon
+Reno,2,Kingsbridge,reno-kingsbridge,349000,-1.7%,84,Syon
+Reno,3,Syon Central,reno-syon-central,354000,-0.3%,66,Syon
+Reno,4,Marietta,reno-marietta,368000,+3.6%,110,Syon
+Reno,5,Capital Park,reno-capital-park,357000,+0.5%,3908,Capital Park; Redmont
+Reno,6,Orléan,reno-orlean,341000,-4.0%,712,Syon
+Reno,7,Syon South,reno-syon-south,370000,+4.2%,96,Syon
+Reno,8,Holmdel,reno-holmdel,352000,-0.9%,310,Redmont; Capital Park
+Reno,9,Redmont,reno-redmont,353000,-0.6%,252,Redmont
+Reno,10,Reno—Kipling,reno-renokipling,347000,-2.3%,2589,Reno; Redmont
+Montiablo,1,Hollingworth,montiablo-hollingworth,427000,+3.1%,149,Montiablo
+Montiablo,2,Montiablo North,montiablo-montiablo-north,414000,-0.1%,103,Montiablo
+Montiablo,3,Alameda,montiablo-alameda,433000,+4.5%,58,Montiablo
+Montiablo,4,Norcastle,montiablo-norcastle,403000,-2.7%,106,Montiablo
+Montiablo,5,San Fernando,montiablo-san-fernando,396000,-4.4%,84,Montiablo
+Montiablo,6,Pinewood,montiablo-pinewood,427000,+3.1%,82,Montiablo
+Montiablo,7,Los Olivos,montiablo-los-olivos,396000,-4.4%,76,Montiablo
+Montiablo,8,Westbourne,montiablo-westbourne,424000,+2.3%,52,Montiablo
+Montiablo,9,Cathedral,montiablo-cathedral,405000,-2.2%,49,Montiablo
+Montiablo,10,Bellwood,montiablo-bellwood,394000,-4.9%,54,Montiablo
+Montiablo,11,Las Palmas,montiablo-las-palmas,412000,-0.5%,75,Montiablo
+Montiablo,12,Montiablo Central,montiablo-montiablo-central,429000,+3.6%,43,Montiablo
+Montiablo,13,Ciudad Vieja,montiablo-ciudad-vieja,413000,-0.3%,44,Montiablo
+Montiablo,14,Grand Parade,montiablo-grand-parade,443000,+6.9%,50,Montiablo
+Montiablo,15,Market Quarter,montiablo-market-quarter,432000,+4.3%,45,Montiablo
+Montiablo,16,Riverside,montiablo-riverside,414000,-0.1%,86,Montiablo
+Montiablo,17,Saint Jude,montiablo-saint-jude,415000,+0.2%,70,Montiablo
+Montiablo,18,Harbourside,montiablo-harbourside,414000,-0.1%,61,Montiablo
+Montiablo,19,Bayview,montiablo-bayview,422000,+1.9%,192,Montiablo
+Montiablo,20,Southwood,montiablo-southwood,386000,-6.8%,203,Montiablo
+Montiablo,21,La Ensenada,montiablo-la-ensenada,407000,-1.8%,200,Montiablo
+Montiablo,22,Port Munsey,montiablo-port-munsey,408000,-1.5%,290,Montiablo
+Oplana,1,Ashgrove,oplana-ashgrove,366000,-0.4%,671,Langston
+Oplana,2,Langston Central,oplana-langston-central,361000,-1.8%,98,Langston
+Oplana,3,Munsey,oplana-munsey,358000,-2.6%,308,Langston
+Oplana,4,Langston East,oplana-langston-east,387000,+5.3%,193,Langston
+Oplana,5,Cabo,oplana-cabo,359000,-2.3%,895,Cabo; Langston
+Oplana,6,Kirkwood,oplana-kirkwood,360000,-2.0%,530,Langston
+Oplana,7,Grayndler,oplana-grayndler,366000,-0.4%,1993,Santa Valentina; Langston
+Oplana,8,Santa Valentina West,oplana-santa-valentina-west,381000,+3.7%,153,Santa Valentina
+Oplana,9,Punta Valentina,oplana-punta-valentina,369000,+0.4%,449,Santa Valentina
+Costa Blanca,1,Miramar,costa-blanca-miramar,321000,+0.2%,288,Domicilio Blanca
+Costa Blanca,2,El Centro,costa-blanca-el-centro,337000,+5.2%,60,Domicilio Blanca
+Costa Blanca,3,La Marina,costa-blanca-la-marina,327000,+2.1%,61,Domicilio Blanca
+Costa Blanca,4,Domicilio Blanca Central,costa-blanca-domicilio-blanca-central,296000,-7.6%,62,Domicilio Blanca
+Costa Blanca,5,Buenida West,costa-blanca-buenida-west,324000,+1.1%,1048,Buenida
+Costa Blanca,6,Villa Hermosa,costa-blanca-villa-hermosa,325000,+1.4%,150,Buenida
+Costa Blanca,7,San Andrés,costa-blanca-san-andres,345000,+7.7%,133,Buenida
+Costa Blanca,8,Buenida Central,costa-blanca-buenida-central,290000,-9.5%,74,Buenida
+Costa Blanca,9,Las Flores,costa-blanca-las-flores,308000,-3.9%,171,Buenida
+Costa Blanca,10,San Isidro,costa-blanca-san-isidro,319000,-0.4%,212,Domicilio Blanca
+Costa Blanca,11,Domicilio Blanca South,costa-blanca-domicilio-blanca-south,316000,-1.4%,254,Domicilio Blanca
+Costa Blanca,12,Sierra Blanca,costa-blanca-sierra-blanca,322000,+0.5%,4799,Buenida; Domicilio Blanca
+Costa Blanca,13,Santa Maria,costa-blanca-santa-maria,333000,+3.9%,279,Santa Maria
+Costa Blanca,14,Los Campos,costa-blanca-los-campos,325000,+1.4%,1237,Los Campos; Santa Maria
+Costa Blanca,15,Valle del Sol,costa-blanca-valle-del-sol,322000,+0.5%,4941,Los Campos; Santa Maria
+Costa Blanca,16,Santa Rosita,costa-blanca-santa-rosita,316000,-1.4%,1720,Santa Rosita
+Pittston,1,Hinton and Larocque,pittston-hinton-and-larocque,314000,+0.0%,1953,Hinton; Larocque
+Pittston,2,"Waterford, Carver and Estrella",pittston-waterford-carver-and-estrella,314000,+0.0%,4104,Waterford; Carver; Estrella
+Pittston,3,"Escarlata, San Aurelio and Spearhead",pittston-escarlata-san-aurelio-and-spearhead,314000,+0.0%,4920,Escarlata; San Aurelio; Spearhead
+Pittston,4,"Esquerico, Reyes and Conklin",pittston-esquerico-reyes-and-conklin,314000,+0.0%,2151,Esquerico; Reyes; Conklin
+Pittston,5,Losana North,pittston-losana-north,314000,+0.0%,87,Losana
+Pittston,6,Losana South,pittston-losana-south,314000,+0.0%,82,Losana; Río Claro
+Pittston,7,Río Claro,pittston-rio-claro,314000,+0.0%,30,Río Claro
+Cambria,1,Oluksee,cambria-oluksee,332000,-0.5%,17047,Oluksee
+Cambria,2,La Croix,cambria-la-croix,333000,-0.2%,8418,Gryphon; La Croix
+Cambria,3,Gryphon,cambria-gryphon,326000,-2.3%,848,Gryphon
+Cambria,4,Sionaq Springs,cambria-sionaq-springs,324000,-2.9%,12147,Sionaq Springs; Alto; Ampollá
+Cambria,5,Battle Mountain and Fayre,cambria-battle-mountain-and-fayre,330000,-1.1%,11179,Battle Mountain; Fayre; Ampollá
+Cambria,6,Alto West,cambria-alto-west,352000,+5.5%,660,Alto
+Cambria,7,Alto East,cambria-alto-east,339000,+1.6%,339,Alto
+Mezata,1,Mercado North,mezata-mercado-north,301000,-2.4%,346,Mercado
+Mezata,2,San Pedro,mezata-san-pedro,315000,+2.2%,158,Mercado
+Mezata,3,San Cristóbal,mezata-san-cristobal,323000,+4.8%,137,Mercado
+Mezata,4,La Merced,mezata-la-merced,341000,+10.6%,66,Mercado
+Mezata,5,Mercado Central,mezata-mercado-central,322000,+4.5%,58,Mercado
+Mezata,6,Los Arcos,mezata-los-arcos,305000,-1.1%,46,Mercado
+Mezata,7,Mercado South,mezata-mercado-south,343000,+11.3%,148,Mercado
+Mezata,8,El Puerto,mezata-el-puerto,304000,-1.4%,57,Mercado
+Mezata,9,Las Acacias,mezata-las-acacias,306000,-0.7%,940,Mercado
+Mezata,10,New Roschau,mezata-new-roschau,299000,-3.0%,9688,New Roschau; Mercado
+Mezata,11,Rancho Rojos,mezata-rancho-rojos,293000,-5.0%,538,Rancho Rojos
+Mezata,12,Valle Rojo,mezata-valle-rojo,294000,-4.6%,6708,Rancho Rojos
+Mezata,13,Arroyo Seco,mezata-arroyo-seco,293000,-5.0%,931,Rancho Rojos
+Mezata,14,Casteledo,mezata-casteledo,291000,-5.6%,6989,Casteledo
+Mezata,15,Fort Alés,mezata-fort-ales,294000,-4.6%,6110,Fort Alés; Casteledo
+Ventura,1,Sierra Ventura,ventura-sierra-ventura,364000,+1.9%,4514,San Vicente
+Ventura,2,Las Colinas,ventura-las-colinas,342000,-4.3%,218,San Vicente
+Ventura,3,San Vicente West,ventura-san-vicente-west,349000,-2.3%,858,San Vicente
+Ventura,4,San Vicente Central,ventura-san-vicente-central,354000,-0.9%,110,San Vicente
+Ventura,5,El Prado,ventura-el-prado,335000,-6.2%,88,San Vicente
+Ventura,6,La Catedral,ventura-la-catedral,378000,+5.8%,100,San Vicente
+Ventura,7,El Faro,ventura-el-faro,359000,+0.5%,132,San Vicente
+Ventura,8,San Vicente South,ventura-san-vicente-south,344000,-3.7%,366,San Vicente
+Ventura,9,Puerto Ventura,ventura-puerto-ventura,362000,+1.3%,381,San Vicente
+Ventura,10,Coralisle West,ventura-coralisle-west,373000,+4.4%,139,Coralisle
+Ventura,11,Coralisle East,ventura-coralisle-east,370000,+3.6%,209,Coralisle
