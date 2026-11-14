@@ -678,7 +678,8 @@ function inView(s){const o=OUT[s.id]; if(!o) return false;
 const LIVE_MODE=()=>ELEC==="live";
 // flipped seats are hatched: white diagonal stripes over the seat's colour (sized for the main map or an inset)
 const HATCH_DEFS=(()=>{const sv=document.createElementNS("http://www.w3.org/2000/svg","svg");sv.setAttribute("width","0");sv.setAttribute("height","0");sv.setAttribute("aria-hidden","true");
-  sv.style.position="absolute";const d=document.createElementNS("http://www.w3.org/2000/svg","defs");sv.appendChild(d);document.body.prepend(sv);return d})();
+  sv.style.cssText="position:absolute;left:0;top:0;width:0;height:0;overflow:hidden;pointer-events:none"; // WebKit (Safari, every iPhone browser) otherwise lets this empty svg swallow clicks on the controls
+  const d=document.createElementNS("http://www.w3.org/2000/svg","defs");sv.appendChild(d);document.body.prepend(sv);return d})();
 const hatchMade={};
 function hatch(color,small){
   const id="h"+(small?"s":"m")+color.replace(/[^0-9a-z]/gi,"");
