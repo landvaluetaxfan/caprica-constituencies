@@ -230,6 +230,10 @@ S.forEach(s => {
   r.cands = c;
 });
 
+// named MPs added after the fact are swapped in for the generated name, so no other seat changes: [seat, generated name, MP]
+const SWAPS = [["pittston-esquerico-reyes-and-conklin", "Teresa Domínguez", "Paul Otrione"]];
+SWAPS.forEach(([id, from, to]) => { const r = out[id]; r.cands.forEach(c => { if (c.name === from) c.name = to; }); if (r.inc === from) r.inc = to; });
+
 // ---------- report + write
 const tally = (f) => { const t = {}; S.forEach(s => { const p = f(s); t[p] = (t[p] || 0) + 1; }); return t; };
 const now = tally(s => out[s.id].cands[0].party), before = tally(s => out[s.id].prev);

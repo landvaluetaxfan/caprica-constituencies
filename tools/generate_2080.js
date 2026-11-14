@@ -18,8 +18,10 @@ const P2080 = ["AA", "DEM", "DM", "AR", "JF", "CON", "A", "IND"];
 
 let seed = 20800101;
 const R = () => { seed ^= seed << 13; seed ^= seed >>> 17; seed ^= seed << 5; return ((seed >>> 0) % 1000000) / 1000000; };
-const exampleNames = new Set(); Object.values(RESULTS).forEach(r => r.cands.forEach(c => exampleNames.add(c.name)));
-const incumbents = Object.values(RESULTS).map(r => [...r.cands].sort((a, b) => b.votes - a.votes)[0].name);
+// generated names that were later swapped for named MPs (SWAPS in generate_results.js) stay reserved, so no other names move
+const SWAPPED_OUT = ["Teresa Domínguez"];
+const exampleNames = new Set(SWAPPED_OUT); Object.values(RESULTS).forEach(r => r.cands.forEach(c => exampleNames.add(c.name)));
+const incumbents = [...Object.values(RESULTS).map(r => [...r.cands].sort((a, b) => b.votes - a.votes)[0].name), ...SWAPPED_OUT];
 const namer = makeNamer(R, incumbents);
 const parse = d => d.replace(/Z/g, "").split(/[ML]/).filter(Boolean).map(p => p.trim().split(/\s+/).map(Number));
 const area = r => { let a = 0; for (let i = 0; i < r.length; i++) { const p = r[i], q = r[(i + 1) % r.length]; a += p[0] * q[1] - q[0] * p[1]; } return Math.abs(a / 2); };
