@@ -568,6 +568,8 @@ S.forEach(s=>{const r=RESULTS[s.id]; if(!r) return; const tot=r.cands.reduce((a,
 for(const r in REGBASE){const R=REGBASE[r]; for(const p in R) if(p!=="w") R[p]/=R.w}
 let LIVE=null, LIVE_TIME=null, LIVE_SRC="";
 const CALL_FROM=0.45; // share of a region's vote counted before any of its seats can be called
+// seats the organiser has called for a named candidate: kept for that party when the seat table is placed, and called as soon as they count
+const PINNED={"chasmia-verasul-and-hollin-fells":"CON","ambarino-university-square":"DEM","ambarino-bedford-falls":"DEM","ambarino-hartley-and-bois-joli":"DEM","pittston-esquerico-reyes-and-conklin":"CON","pittston-escarlata-san-aurelio-and-spearhead":"CON"};
 const EARLY_FROM=0.10, EARLY_PROJ=0.25, EARLY_NOW=0.15; // early calls: region at least 10% in, projected lead 25+ pts, current lead 15+ pts
 // Voting runs until tomorrow morning: until the polls close, no more than half the races are called (the safest first).
 const POLLS_CLOSE=new Date("2026-11-15T07:00:00-06:00"); // 7:00 a.m. Central, Sunday 15 November
@@ -609,10 +611,12 @@ function buildLive(){
   // and a called seat stays called; the shares counted so far are then nudged so that leader is ahead.
   Object.keys(DATA.regions).forEach(r=>{const L=LIVE.reg[r]; if(!L||!L.seats||!(L.pct>0)) return;
     const ids=S.filter(s=>s.region===r&&out[s.id]).map(s=>s.id), lead=id=>out[id].cands.reduce((a,c)=>c.s0>a.s0?c:a);
+    ids.forEach(id=>{const p=PINNED[id], o=out[id]; if(!p||!(L.seats[p]>0)) return; const w=lead(id), u=o.cands.find(c=>c.party===p); // pinned seats start as the pinned party's
+      if(u&&w!==u){u.s0=w.s0+0.03; const t=o.cands.reduce((a,c)=>a+c.s0,0); o.cands.forEach(c=>c.s0/=t)}});
     for(let g=0;g<600;g++){const cnt={};ids.forEach(id=>{const p=lead(id).party;cnt[p]=(cnt[p]||0)+1});
       const under=Object.keys(L.seats).find(p=>(cnt[p]||0)<L.seats[p]); if(!under) break;
       const over=Object.keys(cnt).filter(p=>cnt[p]>(L.seats[p]||0)); let best=null,gap=9;
-      ids.forEach(id=>{const w=lead(id); if(!over.includes(w.party)) return; const u=out[id].cands.find(c=>c.party===under); if(!u) return; const d=w.s0-u.s0; if(d<gap){gap=d;best=id}});
+      ids.forEach(id=>{const w=lead(id); if(!over.includes(w.party)||PINNED[id]===w.party) return; const u=out[id].cands.find(c=>c.party===under); if(!u) return; const d=w.s0-u.s0; if(d<gap){gap=d;best=id}});
       if(!best) break; const o=out[best], u=o.cands.find(c=>c.party===under); u.s0+=gap+0.004+srand(best+under)()*0.03;
       const t=o.cands.reduce((a,c)=>a+c.s0,0); o.cands.forEach(c=>c.s0/=t)}});
   for(const id in out){const o=out[id], w0=o.cands.reduce((a,c)=>c.s0>a.s0?c:a), top=Math.max(...o.cands.filter(c=>c!==w0).map(c=>c.share),0);
@@ -630,9 +634,10 @@ function buildLive(){
     // early calls, like a safe state called at poll close: once the region is counting, a seat whose own lean (its 2072 result
     // swung by the region) puts the leader 25+ points clear, and whose votes so far agree, is called straight away
     const early=reporting&&RL.pct>=EARLY_FROM&&proj.win===win&&proj.margin>=EARLY_PROJ&&margin>=EARLY_NOW;
-    const called=reporting&&(final||o.f>=0.999||shown||early||(RL.pct>=CALL_FROM&&o.f>=0.5&&margin*100>5+40*(1-o.f)));
+    const pinned=reporting&&PINNED[id]===win;
+    const called=reporting&&(final||o.f>=0.999||shown||pinned||early||(RL.pct>=CALL_FROM&&o.f>=0.5&&margin*100>5+40*(1-o.f)));
     res[id]={r:{cands:c,inc:o.inc,turnout:null},c,tot,win,prev:o.prev,flip:!!win&&win!==o.prev,margin,pct:o.f,called,reporting,expected:o.expected,proj}}
-  capCalls(Object.keys(res).map(id=>{const o=res[id], k=typeof callTimes==="object"&&callTimes[id]&&callTimes[id].w===o.win?1:0;
+  capCalls(Object.keys(res).map(id=>{const o=res[id], k=(typeof callTimes==="object"&&callTimes[id]&&callTimes[id].w===o.win)||PINNED[id]===o.win?1:0;
     return {o,keep:k,safety:LIVE.reg[byId[id].region].final||o.pct>=0.999?1e9:Math.max(o.margin*100-(5+40*(1-o.pct)),o.proj.margin*100-20)}}),S.length);
   return res;
 }
