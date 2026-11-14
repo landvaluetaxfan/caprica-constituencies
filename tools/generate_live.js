@@ -54,6 +54,17 @@ NAMED_LIVE.forEach(([name, region, party, seatName]) => {
   out[s.id][party] = name;
   console.error(`${name} stands for ${party} in ${s.name}, ${region}`);
 });
+// sitting MPs who have changed party since 2072: [name, 2076 party]. They swap places with that
+// party's generated candidate in their seat, so no other name moves.
+const SWITCHED = [
+  ["George Miliband", "JF"], // Democrat in 2072, now Jasmine-Scarfelts (also its Senate candidate in Kazana)
+];
+SWITCHED.forEach(([name, party]) => {
+  const id = Object.keys(out).find(k => Object.values(out[k]).includes(name)); if (!id) throw `no seat for ${name}`;
+  const row = out[id], old = Object.keys(row).find(p => row[p] === name);
+  [row[old], row[party]] = [row[party], name];
+  console.error(`${name} stands for ${party} (not ${old}) in ${id}; ${row[old]} takes the ${old} slot`);
+});
 const lines = html.split(/\r?\n/);
 const k = lines.findIndex(l => l.startsWith("const CANDS_LIVE = "));
 const text = "const CANDS_LIVE = " + JSON.stringify(out) + ";";
