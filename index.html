@@ -93,7 +93,7 @@
   .rgh{position:sticky;top:0;z-index:1;background:#fff;font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#444;padding:10px 0 4px;border-bottom:1px solid #121212}
   .rgh span{color:#999;font-weight:600;letter-spacing:0;text-transform:none;margin-left:6px}
   .rgn{margin:6px 0 4px;font-size:12px;line-height:1.45;color:#555}
-  #tip .rnote{font-size:12px;line-height:1.45;color:#555;margin-top:7px;padding-top:6px;border-top:1px solid #eee}
+  #tip .rnote{font-size:12px;line-height:1.45;color:#444;margin-top:7px;padding-top:6px;border-top:1px solid #eee;width:0;min-width:100%}
   .race{padding:7px 4px 7px;border-bottom:1px solid #eee;cursor:pointer;border-radius:2px}
   .race:hover,.race.hot{background:#f6f6f6}
   .race.flash{animation:flash 1.2s}
@@ -208,12 +208,218 @@ const REGION_NOTES={
   "Ambrosia":"A small, affluent region of four seats. Leans right but splits evenly, with one seat each for the Democrats, Manifest, Renaissance and the People’s Party.",
   "Reno":"The capital region of Syon and Capital Park, full of public servants and professionals. The Democrats’ governorship base, otherwise the most evenly split region in the country.",
   "Montiablo":"The Montiablo Bay metropolis and its hinterland. People’s Party heartland in the affluent suburbs, Avenir in the hinterland, and the Democrats fighting for the professional inner suburbs.",
-  "Oplana":"A left-leaning but fragmented region centred on Langston. The city votes left; the coastal Santa Valentina seats lean right.",
+  "Oplana":"A left-leaning but fragmented region centred on Langston. The city and the coast vote left; the wealthier suburbs of Cabo and Kirkwood lean right.",
   "Costa Blanca":"A Spanish-heritage working-class coast around Buenida and Domicilio Blanca. Rejuvenation’s heartland; the Democrats hold the better-off seats.",
   "Pittston":"A county-based region around Losana and Río Claro. A liberal swing region and the New Progressives’ best ground.",
   "Cambria":"Mountain and mining country around Battle Mountain, Alto and Sionaq Springs. The old industrial seats vote Rejuvenation; the rest scatter across the parties.",
   "Mezata":"The commercial hub of Mercado and its hinterland. Leans hard left, but the left vote splits, so Renaissance wins the professional suburbs on low shares.",
   "Ventura":"The coast and hills around San Vicente and Coralisle. Leans right overall, but its cities are some of the Democrats’ best ground; the hills vote right."
+};
+// what each constituency is like (the results sentence is added from RESULTS when shown)
+const SEAT_NOTES={
+  "myrati-cas-arwydd-west":"The western half of Port Aaron's old town and its harbourfront, where Welsh is still the first language in most households.",
+  "myrati-cas-arwydd":"Central Port Aaron, taking in the castle quarter, the main shopping streets and the newer migrant neighbourhoods behind the station.",
+  "myrati-abermeiron":"The market town of Abermeiron and the farms and quarry villages that run north from Port Aaron toward Port Heaton.",
+  "myrati-aberllew":"The western fringe of Port Aaron and the coastal town of Aberllew, a mix of council estates and fishing villages.",
+  "myrati-bae-glas":"Blue Bay's seafront and the retirement and holiday-home villages along the south-west coast.",
+  "myrati-cas-hardd":"The Port Heaton docks and the former steelworks estates east of Blue Bay, still among the poorest areas in the region.",
+  "myrati-morfach":"Upland sheep country around Morfach and Llanhew on the border with Independent Myrati, where cross-border trade and local issues decide most votes.",
+  "chasmia-chasberg":"The city of Chasberg, the regional capital, with its banks, teaching hospital and well-paid commuter streets.",
+  "chasmia-verasul-and-hollin-fells":"A huge rural seat in the north-west covering Verasul, the Hollin Fells and a string of wealthy villages on the edge of Lisieux's commuter belt.",
+  "chasmia-chasberg-south-and-morrick":"Chasberg's southern outskirts and the farming country around Morrick, a conservative, church-going area.",
+  "chasmia-saint-aubinles-pres":"Saint-Aubin and the meadow villages west of Lisieux, a fast-growing area of young families who commute into the city.",
+  "chasmia-morrick-and-verasul":"The mill towns of Morrick and the eastern side of Verasul, older industrial communities with a long trade-union tradition.",
+  "chasmia-lisieux-centre":"Central Lisieux, from the cathedral and law courts to the expensive apartments along the river.",
+  "chasmia-lisieux-east":"Lisieux's eastern districts, home to university staff, public-sector workers and renters in older housing.",
+  "chasmia-littlewoods-and-the-southern-dales":"The largest seat in Chasmia, covering Littlewoods and the thinly populated Southern Dales, with small towns spread along the valley roads.",
+  "chasmia-hautmont":"Hautmont and Lisieux's western suburbs, a commuter area of detached houses and business parks.",
+  "carnapol-montfleury":"Montfleury on the northern edge of Dubois, with its hospital, teaching campus and older working-class streets.",
+  "carnapol-dubois-ouest":"The western districts of Dubois, home to many of the city's immigrant communities and its largest public-housing estates.",
+  "carnapol-vieux-dubois":"The old city of Dubois: the government quarter, the historic centre and densely packed apartment streets.",
+  "carnapol-pointe-aux-saules":"Pointe-aux-Saules and the eastern riverside suburbs, a comfortable area of detached homes and marinas.",
+  "carnapol-saint-remi":"Saint-Rémi, a crowded inner district known for its markets and its large student and immigrant population.",
+  "carnapol-dubois-sud":"The southern edge of Dubois and the farmland beyond it, an area of older homeowners and Catholic parishes.",
+  "carnapol-le-plateau":"Le Plateau, a working-class district of rail yards and three-storey walk-ups south of the centre.",
+  "carnapol-riviere-aux-cedres":"The newer south-eastern suburbs along the Rivière-aux-Cèdres, popular with young professional families.",
+  "moeras-georgetown-and-st-lucia":"Georgetown and St. Lucia, two prosperous port towns with a large shipping and finance workforce.",
+  "moeras-javeyla":"Javeyla and the western side of St. Lucia, a densely settled area with a large minority population.",
+  "moeras-dalaran-and-port-penelope":"Dalaran and Port Penelope, polder farming towns and the ferry port on the southern coast.",
+  "kalahooska-machan":"The town of Machan and the farmland stretching west to the Caille city limits, traditionally Labour country.",
+  "kalahooska-wyndham":"Wyndham and the commuter villages between Carraway and Greenhaven, one of the fastest-growing parts of the region.",
+  "kalahooska-marshall":"The town of Marshall, a regional market and rail hub.",
+  "kalahooska-stockdale":"Stockdale and the rural district north of Marshall, a mix of farming country and newer commuter estates.",
+  "kalahooska-caille-north":"Caille's northern suburbs, mostly owner-occupied houses built after the war.",
+  "kalahooska-mid-kalahooska":"The thinly populated centre of the region, with cattle stations, small towns and long distances between them.",
+  "kalahooska-carraway":"The town of Carraway and its surrounding farms.",
+  "kalahooska-saltmarsh":"Saltmarsh, Caille's old port district, now home to many of the city's newer arrivals.",
+  "kalahooska-caille-central":"Central Caille, covering the business district, the university and inner-city apartments.",
+  "kalahooska-brickfield":"Brickfield, an inner Caille district of terraced housing built for the brickworks and factory workers.",
+  "kalahooska-caille-east":"The eastern suburbs of Caille, a mix of older bungalows and public housing.",
+  "kalahooska-hollins-park":"Hollins Park and the south-western Caille suburbs, settled middle-income family neighbourhoods.",
+  "kalahooska-fernhill":"Fernhill, on the western side of Greenhaven, a suburb of commuters and retirees.",
+  "kalahooska-greenhaven-central":"Central Greenhaven, the region's second city, taking in the town hall, the shopping district and the older streets around them.",
+  "kalahooska-kingsmere":"Kingsmere, Greenhaven's industrial north side, built around the rail works and food-processing plants.",
+  "kalahooska-greenhaven-east":"Greenhaven's eastern suburbs, a younger area with many public-sector and hospital workers.",
+  "kalahooska-tolland":"A large rural seat around Tolland, between Greenhaven and Marshall, made up of farms and small towns.",
+  "kalahooska-lowmoor":"Lowmoor, on the outskirts of Caille, with its market gardens and semi-rural estates.",
+  "kalahooska-greenhaven-south":"Greenhaven's southern suburbs and the road out to Resina.",
+  "kalahooska-wexley":"Wexley, the largest seat in the region, covering the empty south-west and its scattered farming and mining settlements.",
+  "kalahooska-resina":"The town of Resina and the farming districts of the south-east.",
+  "kalahooska-fort-prospect":"Fort Prospect, an old garrison town in the south-west and the heartland of Kalahooska regionalism.",
+  "ambarino-bedford-falls":"Farmland and commuter villages on the south-west edge of Ambarino City.",
+  "ambarino-university-square":"Covers the university and the neighbourhoods where most of its students live.",
+  "ambarino-ambarino-west":"A well-off residential district west of the city centre, popular with professionals.",
+  "ambarino-belmont":"Older terraced streets and newer apartment blocks in the middle of the city.",
+  "ambarino-ambarino-centre":"The business district, the old town and the inner-city estates around them.",
+  "ambarino-foret-rouge":"Suburban estates and woodland on the north-east side of the city.",
+  "ambarino-hartley-and-bois-joli":"Hill villages and forestry country north of the city.",
+  "ambarino-saint-clement":"An ethnically mixed inner-city district south-west of the centre.",
+  "ambarino-ambarino-south":"Densely built southern neighbourhoods with large immigrant communities.",
+  "ambarino-montclair":"Middle-income suburbs on the south-east side of the city.",
+  "ambarino-vallee-verte":"An industrial valley south of the city, with rail yards and factories.",
+  "pleucadeuc-plouzennec":"Plouzennec and the countryside north of Notanville, small-farm country where the old Labour co-operatives still have members.",
+  "pleucadeuc-montagnehautes-terres":"The Montagne highlands in the north-east, a large and sparsely populated seat of ski resorts, timber towns and summer homes.",
+  "pleucadeuc-notanville-sud":"The southern half of Notanville, a prosperous town of family firms and private schools.",
+  "pleucadeuc-janvier":"Janvier and the farming parishes between Notanville and Valcartier, among the most devout parts of the region.",
+  "pleucadeuc-lanveur":"Lanveur, a dense district on Valcartier's edge with a large population of migrant families.",
+  "pleucadeuc-valcartier-nord":"Valcartier's northern outskirts and the farm villages toward Janvier.",
+  "pleucadeuc-valcartier-centre":"Central Valcartier, the regional capital's business and government quarter.",
+  "pleucadeuc-kerangall":"Kerangall and the farmland east of Valcartier toward Glazcarneau, dairy country with a strong Catholic tradition.",
+  "pleucadeuc-glazcarneau":"The coastal town of Glazcarneau, a ferry port with a well-off retired population.",
+  "pleucadeuc-decoteau":"Decoteau, a suburb of Valcartier with new housing estates and a large commuter population.",
+  "pleucadeuc-kerbriant":"Kerbriant, an inner Valcartier district of public housing and small workshops.",
+  "pleucadeuc-locmaria":"Locmaria, a well-to-do district of Valcartier around the old university.",
+  "pleucadeuc-vieux-valcartier":"Vieux-Valcartier, the city's old working-class quarter around the docks.",
+  "pleucadeuc-valcartier-sud":"Valcartier's southern suburbs, a mix of public-sector workers and younger families.",
+  "pleucadeuc-levrard":"Lévrard and the rural south-west, farming country between Fievreau and Valcartier.",
+  "pleucadeuc-fievreau-nord":"The northern half of Fievreau, a conservative market town known for its pilgrimage church.",
+  "pleucadeuc-penhoat":"Penhoat and the coastal farmland around Fievreau.",
+  "pleucadeuc-fievreau-est":"The eastern side of Fievreau, with its newer estates and light-industry parks.",
+  "pleucadeuc-point-arthur":"Point Arthur, a fishing port on the south-west tip of the region, and the villages along the coast road to Lévrard.",
+  "kazana-meauxsloit":"The town of Meauxsloit, a regional service centre north-west of Raudea.",
+  "kazana-pedra-branca":"Pedra Branca, Raudea's wealthiest suburb, with hillside villas overlooking the harbour.",
+  "kazana-raudea-north":"Raudea's northern edge and the semi-rural districts toward Meauxsloit, an area of factories and low-cost housing.",
+  "kazana-raudea-central":"Central Raudea, a dense district of offices, markets and old tenement blocks.",
+  "kazana-cais-da-raudea":"Raudea's renovated waterfront, now mostly apartments, restaurants and offices.",
+  "kazana-ilha-longa-and-raudea-east":"Ilha Longa and Raudea's eastern districts, a mix of island fishing communities and large public-housing estates.",
+  "kazana-marae-peninsula":"The Marae peninsula north of Marae Bay, with commuter towns, vineyards and beach villages.",
+  "kazana-boa-vista":"Boa Vista, a hillside district above Marae Bay with large immigrant communities.",
+  "kazana-luminar-west":"The western side of Luminar, a former mining and shipbuilding town.",
+  "kazana-farol":"Farol, Luminar's harbour district, built around the lighthouse and the fishing port.",
+  "kazana-santa-luzia":"Santa Luzia, the suburbs between Marae Bay and Mariton, popular with teachers, nurses and civil servants.",
+  "kazana-marae-bay-west":"The western districts of Marae Bay, densely populated and ethnically mixed.",
+  "kazana-marae-bay-central":"Central Marae Bay, the commercial heart of the region's largest city.",
+  "kazana-vila-nova":"Vila Nova, a working-class district of Marae Bay built around the old cannery.",
+  "kazana-ribeira":"Ribeira, Marae Bay's riverside district of docks and warehouses.",
+  "kazana-marae-bay-east":"Marae Bay's eastern districts, home to much of the city's port workforce.",
+  "kazana-porto-velho":"Porto Velho, Mariton's old harbour town, now a mix of commuters and long-time residents.",
+  "kazana-mariton-central":"Central Mariton, a busy port city centre with a large union membership.",
+  "kazana-mariton-south":"Southern Mariton, a district of shipyards and terraced housing.",
+  "kazana-serra-verde":"Serra Verde, a large rural seat of hill farms and small towns between Luminar and Dalton.",
+  "kazana-joao-verde":"João Verde and the vineyards and estates east of Luminar, the most conservative corner of the region.",
+  "kazana-dalton":"The mining town of Dalton and the valleys around it.",
+  "kazana-saint-athena-and-cape-vue":"Saint Athena and Cape Vue, remote coastal and farming country in the region's south-east.",
+  "ambrosia-auburne":"The town of Auburne, the region's only sizeable city and its most diverse.",
+  "ambrosia-ambrosian-downs":"The Ambrosian Downs, rolling farmland and horse country around Auburne with some of the most valuable land in Caprica.",
+  "ambrosia-strawberry-and-meridian":"The southern farm towns of Strawberry and Meridian, where fruit picking and food processing are the main employers.",
+  "ambrosia-garrison":"Garrison, a military town that has grown into a prosperous commuter centre.",
+  "reno-coleston":"Coleston, Syon's north-eastern suburbs and the villages beyond them, a comfortable area of detached homes.",
+  "reno-kingsbridge":"Kingsbridge, a well-off inner suburb of Syon popular with senior civil servants and diplomats.",
+  "reno-syon-central":"Central Syon, the capital's core, covering parliament, the ministries and the apartment blocks around them.",
+  "reno-marietta":"Marietta, a prosperous eastern district of Syon with many lawyers, lobbyists and consultants.",
+  "reno-capital-park":"Capital Park and the suburbs west toward Redmont, a large commuter seat with many public-sector households.",
+  "reno-orlean":"Orléan, Syon's French-speaking eastern suburbs, a mix of long-established working families and newer arrivals.",
+  "reno-syon-south":"Syon's southern districts, the capital's main working-class area, with large public-housing estates.",
+  "reno-holmdel":"Holmdel, a conservative suburb between Redmont and Capital Park, built around the old army base.",
+  "reno-redmont":"The town of Redmont, an affluent satellite of the capital.",
+  "reno-renokipling":"Reno and Kipling, small towns and farmland in the south of the region.",
+  "montiablo-hollingworth":"Hollingworth, on the north-western edge of Montiablo, where the city gives way to farms and older family suburbs.",
+  "montiablo-montiablo-north":"Montiablo's northern suburbs, home to many hospital, university and council workers.",
+  "montiablo-alameda":"Alameda, a suburb of churches and family homes with a large Spanish-speaking Catholic population.",
+  "montiablo-norcastle":"Norcastle, an inner-north district that has filled with young professionals over the last decade.",
+  "montiablo-san-fernando":"San Fernando, a western suburb of owner-occupiers and small businesses.",
+  "montiablo-pinewood":"Pinewood, an inner-west district of public housing and bus depots.",
+  "montiablo-los-olivos":"Los Olivos, a wealthy south-western suburb with some of the most expensive homes in the city.",
+  "montiablo-westbourne":"Westbourne, a densely populated inner suburb with many renters and recent graduates.",
+  "montiablo-cathedral":"The cathedral district, Montiablo's old upper-class quarter.",
+  "montiablo-bellwood":"Bellwood, a well-off inner suburb popular with doctors, lawyers and academics.",
+  "montiablo-las-palmas":"Las Palmas, a comfortable south-western suburb of family homes.",
+  "montiablo-montiablo-central":"Central Montiablo, the downtown core with its rooming houses, social housing and nightlife.",
+  "montiablo-ciudad-vieja":"Ciudad Vieja, the old city, now one of Montiablo's most diverse neighbourhoods.",
+  "montiablo-grand-parade":"Grand Parade, the city's main boulevard and the apartment districts along it.",
+  "montiablo-market-quarter":"The Market Quarter, Montiablo's commercial centre and the well-off residential streets around it.",
+  "montiablo-riverside":"Riverside, a district of converted warehouses and new apartment towers.",
+  "montiablo-saint-jude":"Saint Jude, an established north-eastern suburb with an older population.",
+  "montiablo-harbourside":"Harbourside, the port district, with a mix of dock workers and older homeowners.",
+  "montiablo-bayview":"Bayview, an expensive bayfront suburb north-east of the centre.",
+  "montiablo-southwood":"Southwood, a prosperous outer suburb in the south-west.",
+  "montiablo-la-ensenada":"La Ensenada, a southern beach suburb that has grown quickly in recent years.",
+  "montiablo-port-munsey":"Port Munsey, the outer south-eastern suburbs and the marina town at the end of the bay.",
+  "oplana-ashgrove":"Ashgrove, on Langston's north-west edge, an area of factories, warehouses and low-cost housing.",
+  "oplana-langston-central":"Central Langston, the region's main city centre.",
+  "oplana-munsey":"Munsey, a middle-class suburb of Langston.",
+  "oplana-langston-east":"Langston's eastern districts, a working-class area around the port and rail yards.",
+  "oplana-cabo":"Cabo and the coastal suburbs north-east of Langston, a well-off area of holiday homes and retirees.",
+  "oplana-kirkwood":"Kirkwood, an affluent south-western suburb of Langston.",
+  "oplana-grayndler":"Grayndler, a large seat between Langston and Santa Valentina covering commuter towns and farmland.",
+  "oplana-santa-valentina-west":"The western half of Santa Valentina, a diverse coastal town.",
+  "oplana-punta-valentina":"Punta Valentina and the eastern side of Santa Valentina, a resort area with many seasonal workers.",
+  "costa-blanca-miramar":"Miramar, Domicilio Blanca's seafront district of hotels and expensive apartments.",
+  "costa-blanca-el-centro":"El Centro, the business and shopping core of Domicilio Blanca.",
+  "costa-blanca-la-marina":"La Marina, Domicilio Blanca's port district.",
+  "costa-blanca-domicilio-blanca-central":"Central Domicilio Blanca, covering the old town and densely populated immigrant neighbourhoods.",
+  "costa-blanca-buenida-west":"Buenida's western suburbs and hinterland, a newer area of gated estates and golf courses.",
+  "costa-blanca-villa-hermosa":"Villa Hermosa, a large public-housing district in northern Buenida.",
+  "costa-blanca-san-andres":"San Andrés, a working-class Buenida district built around the textile mills.",
+  "costa-blanca-buenida-central":"Central Buenida, where unemployment is among the highest in the country.",
+  "costa-blanca-las-flores":"Las Flores, an inner Buenida suburb of public-sector and hospital workers.",
+  "costa-blanca-san-isidro":"San Isidro, Domicilio Blanca's industrial edge, with its refinery and container terminal.",
+  "costa-blanca-domicilio-blanca-south":"The southern suburbs of Domicilio Blanca, a lower-middle-class area of terraces and small businesses.",
+  "costa-blanca-sierra-blanca":"The Sierra Blanca, the mountain villages between Buenida and Domicilio Blanca.",
+  "costa-blanca-santa-maria":"The town of Santa Maria, a regional centre for the farm country around it.",
+  "costa-blanca-los-campos":"Los Campos and the irrigated farmland around Santa Maria.",
+  "costa-blanca-valle-del-sol":"Valle del Sol, a large agricultural seat of orchards and greenhouses in the south-west.",
+  "costa-blanca-santa-rosita":"Santa Rosita, a farmworkers' town in the far south-west.",
+  "pittston-hinton-and-larocque":"Hinton and Larocque counties in the north-west, cattle and grain country.",
+  "pittston-waterford-carver-and-estrella":"The western counties of Waterford, Carver and Estrella, a mix of prosperous farm towns and lakeside retirement communities.",
+  "pittston-escarlata-san-aurelio-and-spearhead":"The eastern counties of Escarlata, San Aurelio and Spearhead, where commuter towns are spreading out from Losana.",
+  "pittston-esquerico-reyes-and-conklin":"Esquerico, Reyes and Conklin counties in the south, a growing area of small towns and new subdivisions.",
+  "pittston-losana-north":"Northern Losana, the regional capital's university and government district.",
+  "pittston-losana-south":"Southern Losana and the edge of Río Claro, a well-off area of professionals and business owners.",
+  "pittston-rio-claro":"Río Claro, a small, densely built city with a large immigrant population.",
+  "cambria-oluksee":"Oluksee, a vast and thinly populated northern seat with a large Indigenous population.",
+  "cambria-la-croix":"La Croix and the mining district around Gryphon, where most jobs are in the copper and nickel mines.",
+  "cambria-gryphon":"The town of Gryphon, the region's administrative centre.",
+  "cambria-sionaq-springs":"Sionaq Springs, Alto's outer districts and the smelter town of Ampollá.",
+  "cambria-battle-mountain-and-fayre":"Battle Mountain and Fayre, ski resorts and ranch country in the south.",
+  "cambria-alto-west":"The western side of Alto, the region's largest town, with its rail yards and union halls.",
+  "cambria-alto-east":"Alto's eastern suburbs, home to mine managers, engineers and their families.",
+  "mezata-mercado-north":"Mercado's northern suburbs, an affluent area of gated communities and private schools.",
+  "mezata-san-pedro":"San Pedro, a middle-class district of Mercado popular with young professionals.",
+  "mezata-san-cristobal":"San Cristóbal, a newer Mercado suburb of apartment towers and office parks.",
+  "mezata-la-merced":"La Merced, an inner Mercado district of markets and older housing.",
+  "mezata-mercado-central":"Central Mercado, the city's commercial core and its crowded residential streets.",
+  "mezata-los-arcos":"Los Arcos, Mercado's old colonial quarter, heavily gentrified over the last twenty years.",
+  "mezata-mercado-south":"Southern Mercado, a working-class district of factories and informal housing.",
+  "mezata-el-puerto":"El Puerto, Mercado's redeveloped port area, now home to banks and trading houses.",
+  "mezata-las-acacias":"Las Acacias, on Mercado's outer edge, a commuter suburb of new housing developments.",
+  "mezata-new-roschau":"New Roschau and the farmland north of Mercado, settled by German-speaking farmers in the last century.",
+  "mezata-rancho-rojos":"The town of Rancho Rojos, a market centre for the surrounding ranches.",
+  "mezata-valle-rojo":"Valle Rojo, an agricultural valley of large estates and landless farmworkers.",
+  "mezata-arroyo-seco":"Arroyo Seco, a dry farming district on the edge of Rancho Rojos.",
+  "mezata-casteledo":"The town of Casteledo and the countryside around it in the south-west.",
+  "mezata-fort-ales":"Fort Alés, a conservative frontier town in the south, and the ranch country around it.",
+  "ventura-sierra-ventura":"The Sierra Ventura, the hill country above San Vicente, with its vineyards and commuter villages.",
+  "ventura-las-colinas":"Las Colinas, a hillside suburb of San Vicente with many professionals.",
+  "ventura-san-vicente-west":"San Vicente's western suburbs, a growing area of young families.",
+  "ventura-san-vicente-central":"Central San Vicente, the city's old town and commercial centre.",
+  "ventura-el-prado":"El Prado, a densely populated district of San Vicente with a large immigrant community.",
+  "ventura-la-catedral":"La Catedral, San Vicente's historic quarter around the cathedral.",
+  "ventura-el-faro":"El Faro, the working-class port district of San Vicente.",
+  "ventura-san-vicente-south":"San Vicente's southern suburbs, an affluent area of detached homes.",
+  "ventura-puerto-ventura":"Puerto Ventura, the harbour town east of San Vicente.",
+  "ventura-coralisle-west":"The western side of Coralisle, an island town that lives on tourism and fishing.",
+  "ventura-coralisle-east":"Coralisle's eastern half, with its resort hotels and holiday homes."
 };
 // electoral pacts: the two parties in each pair never stand against each other
 const PACT_PAIRS=[["SDA","REJ"],["NPP","RE"],["PP","AC"]];
@@ -370,6 +576,37 @@ function layout(){
 }
 addEventListener("resize",layout);
 
+// one plain sentence on how the seat voted, built from the results so it stays in step with them
+const PN={DEM:"the Democrats",DM:"Manifest",SDA:"the Social Democrats",REJ:"Rejuvenation",NPP:"the New Progressives",RE:"Renaissance",PP:"the People’s Party",AC:"Avenir",REG:"Régionale",IND:"an independent"};
+const LEADER_TITLE={"Adriana Flash":"Democratic co-leader","Mandy Trottier":"Democratic co-leader","Robert Bluespan":"Renaissance co-leader","David Breen Cutter":"Renaissance co-leader",
+  "Safiya Bethune-Fayyad":"Social Democratic leader","Jon Fraser":"People’s Party leader","Klinton Arkas":"New Progressive leader","Alexandria Yuan Kew Lee":"Rejuvenation leader",
+  "Jaco van Ryneveld":"Avenir leader","Eve Callen":"Régionale leader"};
+const cap=t=>t.charAt(0).toUpperCase()+t.slice(1);
+function voteNote(s){
+  const o=OUT[s.id]; if(!o) return "";
+  const c=o.c,w=c[0],ru=c[1],r=o.r,pts=o.margin*100,diff=w.votes-(ru?ru.votes:0),share=Math.round(w.votes/o.tot*100);
+  const P=PN[w.party], R=ru?(ru.party==="IND"?`independent ${ru.name}`:PN[ru.party]):"the field";
+  const n=pts<2?pts.toFixed(1):String(Math.round(pts));
+  const by=pts<1?`by ${fmt(diff)} votes`:`by ${n} points`;
+  const lead=LEADER_TITLE[w.name], who=lead?`${lead} ${w.name}`:w.name, forP=lead||w.party==="IND"?"":` for ${P}`;
+  let t;
+  if(o.flip){
+    const from=o.prev==="IND"?"an independent":PN[o.prev], def=r.inc&&r.inc!==w.name?`, unseating ${r.inc}`:"";
+    t=w.party==="IND"?`Independent ${w.name} took it from ${from}${def}${def?", and":" and"} finished ${pts<1?`${fmt(diff)} votes`:`${n} points`} ahead of ${R}.`
+      :`${cap(P)} took it from ${from}${def}. ${who} won with ${share}% of the vote, ${pts<1?`${fmt(diff)} votes`:`${n} points`} ahead of ${R}.`;
+  } else if(r.inc===w.name){
+    const as=w.party==="IND"?" as an independent":forP;
+    t=pts>=15?`${who} held it comfortably${as}, ${n} points ahead of ${R}.`
+     :pts<3?`${who} held on${as} ${by} over ${R}.`
+     :`${who} held it${as} with ${/^(8|11|18)(\.|$)/.test(n)?"an":"a"} ${n}-point majority over ${R}.`;
+  } else {
+    t=w.party==="IND"?`${w.name} kept it in independent hands, ${by} over ${R}.`
+     :`${cap(P)} held the seat with a new MP, ${who}, who won ${by} over ${R}.`;
+  }
+  if(r.turnout<56.5) t+=` Turnout was ${r.turnout}%, one of the lowest in the country.`;
+  else if(r.turnout>73) t+=` Turnout, at ${r.turnout}%, was one of the highest in the country.`;
+  return t;
+}
 const tip=document.getElementById("tip"); let cur=null;
 function fmt(n){return n.toLocaleString("en-US")}
 function showTip(s,e){
@@ -381,8 +618,9 @@ function showTip(s,e){
       body=`<table><tr><th>Candidate</th><th>Party</th><th class="n">Votes</th><th class="n">Pct.</th></tr>`+
       c.map((x,k)=>`<tr class="${k?"":"win"}"><td style="${k?"":`background:${pcol(x.party)};color:${ink(pcol(x.party))}`}"><span class="chip" style="background:${k?pcol(x.party):"transparent"}"></span>${x.name}${x.name===r.inc?"*":""}${k?"":" ✓"}${x.name===r.leader?`<span class="lead">Leader</span>`:""}</td><td>${pshort(x.party)}</td><td class="n">${fmt(x.votes)}</td><td class="n">${fmtPct(x.votes/tot)}</td></tr>`).join("")+
       `</table><div class="foot"><span>${o.flip?`<b style="color:${wc==="#F2C230"||wc==="#14C2DA"?"#121212":wc}">${pshort(o.win)} gain</b> from ${pshort(o.prev)}`:`${pshort(o.win)} hold`}</span><span>${r.turnout?`Turnout ${r.turnout}%`:""}${r.inc?" · *Incumbent":""}</span></div>`+
-      (r.aside&&r.aside.length?`<div class="foot" style="margin-top:2px"><span>Stood aside under pacts: ${r.aside.map(p=>`${pshort(p)} (for ${pshort(PACT_PAIRS.find(x=>x.includes(p)).find(q=>q!==p))})`).join(", ")}</span></div>`:"");}
-    else body=`<div class="facts">Est. population <b>${fmt(s.pop)}</b><br>Balance <b>${(s.dev>=0?"+":"")+(s.dev*100).toFixed(1)}%</b> against the ${s.region} quota<br><span style="color:#777">Seat ${s.num} of ${DATA.regions[s.region].seats} in ${s.region}</span></div>`+(mode==="region"&&REGION_NOTES[s.region]?`<div class="rnote">${REGION_NOTES[s.region]}</div>`:"");
+      (r.aside&&r.aside.length?`<div class="foot" style="margin-top:2px;width:0;min-width:100%"><span>Stood aside under pacts: ${r.aside.map(p=>`${pshort(p)} (for ${pshort(PACT_PAIRS.find(x=>x.includes(p)).find(q=>q!==p))})`).join(", ")}</span></div>`:"")+
+      `<div class="rnote">${SEAT_NOTES[s.id]||""} ${voteNote(s)}</div>`;}
+    else body=`<div class="facts">Est. population <b>${fmt(s.pop)}</b><br>Balance <b>${(s.dev>=0?"+":"")+(s.dev*100).toFixed(1)}%</b> against the ${s.region} quota<br><span style="color:#777">Seat ${s.num} of ${DATA.regions[s.region].seats} in ${s.region}</span></div>`+(SEAT_NOTES[s.id]?`<div class="rnote">${SEAT_NOTES[s.id]}</div>`:"");
     tip.innerHTML=`<h4>${s.name}</h4><div class="sub">${sub}</div>${body}`;
   }
   const W=window.innerWidth,H=window.innerHeight,tw=tip.offsetWidth,th=tip.offsetHeight;
