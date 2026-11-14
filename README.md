@@ -8,9 +8,9 @@ An interactive draft map of the Caprican House of Representatives' 203 single-me
 
 ## Results
 
-The Results view has two elections: **2080 · Live** (the default) and the **2076 general election** (open it with `#2076`).
+The Results view has two elections: **2076 · Live** (the default) and the **2072 general election** (open it with `#2072`).
 
-**2080 · Live** reads the published count sheet every five minutes: the share of each region counted so far and each party's share of it, plus the national popular vote. Seat results are simulated from that: each seat starts from its 2076 result (mapped onto the 2080 parties by `MAP_EX_2080`; Renaissance and the New Progressives fight 2080 as part of Convergence), swings with its region, and reports at its own pace. How many seats each party leads in follows the sheet's seat table for each region (the last complete table is kept if a fetch comes back blank). Seats are called only when most of the vote is in and the lead is safe. Sitting MPs stand again for their successor party; other candidates come from `tools/generate_2080.js`. If the sheet cannot be reached, a saved snapshot (`LIVE_SNAPSHOT`) is used.
+**2076 · Live** reads the published count sheet every five minutes: the share of each region counted so far and each party's share of it, plus the national popular vote. Seat results are simulated from that: each seat starts from its 2072 result (mapped onto the 2076 parties by `MAP_TO_LIVE`; Renaissance and the New Progressives fight 2076 as part of Convergence), swings with its region, and reports at its own pace. How many seats each party leads in follows the sheet's seat table for each region (the last complete table is kept if a fetch comes back blank). Seats are called only when most of the vote is in and the lead is safe. Sitting MPs stand again for their successor party; other candidates come from `tools/generate_live.js`. If the sheet cannot be reached, a saved snapshot (`LIVE_SNAPSHOT`) is used.
 
 
 The Results view lays the page out to fit the window: metropolitan insets stacked on the left, the main map in the middle, and on the right the House seat totals with a list of every constituency (vote-share bar coloured by party, with gains/flips tagged and filterable).

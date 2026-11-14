@@ -1,8 +1,8 @@
-// Senate candidates for 2080, from the Senate candidate sheet.
+// Senate candidates for 2076, from the Senate candidate sheet.
 // Usage: node tools/senate_candidates.js   (rewrites the SENATE_CANDS line in index.html)
 //
 // The sheet has one row per region and one column per party (REJ, SDA, DEM, DM, AR, JM, SP, NPP, CDM, RE, PP, AC, IND).
-// Each candidate keeps their own party and is counted for the 2080 alliance it belongs to (ALLIANCE below).
+// Each candidate keeps their own party and is counted for the 2076 alliance it belongs to (ALLIANCE below).
 const fs = require("fs"), path = require("path");
 const FILE = path.join(__dirname, "..", "index.html");
 const SHEET = "https://docs.google.com/spreadsheets/d/1_C0QFdjF0NECU-ILMeHisX9GUqIB_8l244NXA8hYP7s/export?format=csv";
@@ -26,7 +26,7 @@ const ALLIANCE = { REJ: "AA", SDA: "AA", DEM: "DEM", DM: "DM", AR: "AR", JM: "JF
   const k = lines.findIndex(l => l.startsWith("const SENATE_CANDS = "));
   const t = "const SENATE_CANDS = " + JSON.stringify(out) + ";";
   if (k >= 0) lines[k] = t;
-  else { const j = lines.findIndex(l => l.startsWith("const CANDS_2080 = ")); lines.splice(j + 1, 0, "// Senate candidates, one row per region (see tools/senate_candidates.js); p = own party, a = 2080 alliance", t); }
+  else { const j = lines.findIndex(l => l.startsWith("const CANDS_LIVE = ")); lines.splice(j + 1, 0, "// Senate candidates, one row per region (see tools/senate_candidates.js); p = own party, a = 2076 alliance", t); }
   fs.writeFileSync(FILE, lines.join("\n"));
   console.error("SENATE_CANDS written:", Object.values(out).reduce((a, c) => a + c.length, 0), "candidates in", Object.keys(out).length, "regions");
 })();
