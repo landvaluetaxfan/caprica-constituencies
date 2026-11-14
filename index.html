@@ -521,6 +521,7 @@ S.forEach(s=>{const r=RESULTS[s.id]; if(!r) return; const tot=r.cands.reduce((a,
   const R=REGBASE[s.region]=REGBASE[s.region]||{w:0}; R.w+=s.pop; for(const p in b) R[p]=(R[p]||0)+b[p]*s.pop});
 for(const r in REGBASE){const R=REGBASE[r]; for(const p in R) if(p!=="w") R[p]/=R.w}
 let LIVE=null, LIVE_TIME=null, LIVE_SRC="";
+const CALL_FROM=0.45; // share of a region's vote counted before any of its seats can be called
 function buildLive(){
   const out={}; if(!LIVE) return out;
   S.forEach(s=>{
@@ -529,32 +530,41 @@ function buildLive(){
     const f=R>=0.999?1:R<=0?0:1-Math.pow(1-R,k); // every seat in a counting region has some votes in
     const turnout=0.6+rnd()*0.14, expected=Math.round(s.pop*0.74*turnout), counted=Math.round(expected*f);
     const base=BASE[s.id]||{}, rb=REGBASE[s.region]||{};
-    const x={}; L.stand.forEach(p=>{const T=L.share[p]||0, b=base[p]||0, rbp=rb[p]||0;
+    const x={}, x0={}; L.stand.forEach(p=>{const T=L.share[p]||0, b=base[p]||0, rbp=rb[p]||0;
       let v=rbp>0.005?0.65*b*(T/rbp)+0.35*T:0.9*T;
       if(p==="IND") v=b>0?b*0.85:0.01+rnd()*0.02; // independents run on a personal vote, not the regional swing
+      const lo=T>0||p==="IND"?0.004:0; x0[p]=Math.max(v,lo); // x0: where the seat ends up once fully counted
       const n=(rnd()+rnd()+rnd()-1.5)/1.5; v*=Math.exp(n*0.22*Math.sqrt(1-f));
-      x[p]=Math.max(v,T>0||p==="IND"?0.004:0)});
+      x[p]=Math.max(v,lo)});
     const sx=Object.values(x).reduce((a,b)=>a+b,0)||1; for(const p in x) x[p]/=sx;
+    const s0=Object.values(x0).reduce((a,b)=>a+b,0)||1; for(const p in x0) x0[p]/=s0;
     const names=(CANDS_2080[s.id]||{});
     const exW=[...RESULTS[s.id].cands].sort((a,b)=>b.votes-a.votes)[0];
     const prev=MAP_EX_2080[exW.party];
-    const cands=L.stand.map(p=>({name:names[p]||p,party:p,votes:Math.round(counted*x[p]),share:x[p]}));
+    const cands=L.stand.map(p=>({name:names[p]||p,party:p,votes:Math.round(counted*x[p]),share:x[p],s0:x0[p]}));
     out[s.id]={x,cands,counted,expected,f,prev,inc:cands.some(c=>c.name===exW.name)?exW.name:null,region:s.region};
   });
-  // seat leads follow the sheet's seat table for every region with votes counted
+  // seat leads follow the sheet's seat table for every region with votes counted. Which seat goes to which
+  // party is settled on the fully-counted shares (s0), so a seat's leader doesn't change as the count fills in
+  // and a called seat stays called; the shares counted so far are then nudged so that leader is ahead.
   Object.keys(DATA.regions).forEach(r=>{const L=LIVE.reg[r]; if(!L||!L.seats||!(L.pct>0)) return;
-    const ids=S.filter(s=>s.region===r&&out[s.id]).map(s=>s.id), lead=id=>out[id].cands.reduce((a,c)=>c.share>a.share?c:a);
+    const ids=S.filter(s=>s.region===r&&out[s.id]).map(s=>s.id), lead=id=>out[id].cands.reduce((a,c)=>c.s0>a.s0?c:a);
     for(let g=0;g<600;g++){const cnt={};ids.forEach(id=>{const p=lead(id).party;cnt[p]=(cnt[p]||0)+1});
       const under=Object.keys(L.seats).find(p=>(cnt[p]||0)<L.seats[p]); if(!under) break;
       const over=Object.keys(cnt).filter(p=>cnt[p]>(L.seats[p]||0)); let best=null,gap=9;
-      ids.forEach(id=>{const w=lead(id); if(!over.includes(w.party)) return; const u=out[id].cands.find(c=>c.party===under); if(!u) return; const d=w.share-u.share; if(d<gap){gap=d;best=id}});
-      if(!best) break; const o=out[best], u=o.cands.find(c=>c.party===under); u.share+=gap+0.004+srand(best+under)()*0.03;
-      const t=o.cands.reduce((a,c)=>a+c.share,0); o.cands.forEach(c=>{c.share/=t;c.votes=Math.round(o.counted*c.share)})}});
+      ids.forEach(id=>{const w=lead(id); if(!over.includes(w.party)) return; const u=out[id].cands.find(c=>c.party===under); if(!u) return; const d=w.s0-u.s0; if(d<gap){gap=d;best=id}});
+      if(!best) break; const o=out[best], u=o.cands.find(c=>c.party===under); u.s0+=gap+0.004+srand(best+under)()*0.03;
+      const t=o.cands.reduce((a,c)=>a+c.s0,0); o.cands.forEach(c=>c.s0/=t)}});
+  for(const id in out){const o=out[id], w0=o.cands.reduce((a,c)=>c.s0>a.s0?c:a), top=Math.max(...o.cands.filter(c=>c!==w0).map(c=>c.share),0);
+    if(w0.share<=top) w0.share=top+0.004+srand(id+"|lead")()*0.025;
+    const t=o.cands.reduce((a,c)=>a+c.share,0); o.cands.forEach(c=>{c.share/=t;c.votes=Math.round(o.counted*c.share)})}
   const res={};
   for(const id in out){const o=out[id], c=[...o.cands].sort((a,b)=>b.votes-a.votes||b.share-a.share), tot=o.counted;
     const reporting=tot>0, win=reporting?c[0].party:null, margin=reporting?(c[0].votes-(c[1]?c[1].votes:0))/tot:0;
-    const final=!!LIVE.reg[o.region].final;
-    const called=reporting&&(final||o.f>=0.999||(o.f>=0.75&&margin*100>3+40*(1-o.f)));
+    const RL=LIVE.reg[o.region], final=!!RL.final;
+    // calls start later in the day: only once the region is ~45% counted, and only for safe leads.
+    // The lead needed shrinks as the seat's count fills in: 25 pts at half counted, 15 at three-quarters, 9 at 90%.
+    const called=reporting&&(final||o.f>=0.999||(RL.pct>=CALL_FROM&&o.f>=0.5&&margin*100>5+40*(1-o.f)));
     res[id]={r:{cands:c,inc:o.inc,turnout:null},c,tot,win,prev:o.prev,flip:!!win&&win!==o.prev,margin,pct:o.f,called,reporting,expected:o.expected}}
   return res;
 }
