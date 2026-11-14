@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Caprica — 203 Constituencies (Draft)</title>
+<title>Caprica Elects</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -183,9 +183,8 @@
 </head>
 <body>
 <div class="wrap">
-  <div class="kicker">Caprican House of Representatives · Boundary review</div>
-  <h1>Draft map of Caprica’s 203 single-member constituencies</h1>
-  <p class="dek" id="dek">Each of the 17 regions keeps its seat allocation and is divided into constituencies of roughly equal population. Hover over or tap any constituency for its name and details. The metropolitan insets below the main map show the dense cities.</p>
+  <h1>Caprica Elects</h1>
+  <p class="dek" id="dek" hidden>Each of the 17 regions keeps its seat allocation and is divided into constituencies of roughly equal population. Hover over or tap any constituency for its name and details. The metropolitan insets below the main map show the dense cities.</p>
   <div class="controls">
     <div class="seg" id="mode">
       <button data-m="region" class="on">Regions</button>
@@ -936,6 +935,9 @@ const HEADSHOTS={
   "Silvia Palacios":{src:"img/headshots/silvia-palacios.webp",crop:[110,60,760]},
   "Kelly Ayotte":{src:"img/headshots/kelly-ayotte.png",crop:[20,10,230]},
   "William Rodgers":{src:"img/headshots/william-rodgers.webp",crop:[25,15,475]},
+  "Consuelo Preiss":{src:"img/headshots/consuelo-preiss.png",crop:[165,35,220]},
+  "Leonardo A. Domínguez":{src:"img/headshots/leonardo-a-dominguez.png",crop:[115,45,250]},
+  "Natalia Toledo Cervantes":{src:"img/headshots/natalia-toledo-cervantes.png",crop:[55,20,440]},
 };
 const headImg={};
 function loadHead(name){const h=HEADSHOTS[name]; if(!h) return Promise.resolve(null);
@@ -957,7 +959,7 @@ async function callCanvas(id,withPhoto){
   // top strip
   x.fillStyle="#121212"; x.fillRect(0,0,W,72);
   x.fillStyle="#e3173e"; x.beginPath(); x.arc(M+8,36,8,0,7); x.fill();
-  x.fillStyle="#fff"; x.font=FONT(800,22); x.fillText("CAPRICA DECIDES 2076",M+28,44);
+  x.fillStyle="#fff"; x.font=FONT(800,22); x.fillText("CAPRICA ELECTS 2076",M+28,44);
   const t=(callTimes[id]||{}).t||Date.now(); x.textAlign="right"; x.font=FONT(600,22); x.fillText(`RACE CALL · ${hhmm(t)}`,W-M,44); x.textAlign="left";
   // the call
   x.fillStyle=col; x.fillRect(0,72,W,190);
