@@ -65,7 +65,9 @@ function name(region) {
     const n = pick(pool[0]) + " " + pick(pool[1]);
     if (!used.has(n)) { used.add(n); return n; }
   }
-  return pick(POOLS.anglo[0]) + " " + pick(POOLS.anglo[1]) + "-" + pick(POOLS.anglo[1]);
+  let n = pick(POOLS.anglo[0]) + " " + pick(POOLS.anglo[1]) + "-" + pick(POOLS.anglo[1]);
+  for (let k = 0; used.has(n); k++) n = n.replace(/-[^-]+$/, "") + "-" + POOLS.anglo[1][k % POOLS.anglo[1].length] + (k >= POOLS.anglo[1].length ? " " + k : "");
+  used.add(n); return n;
 }
 
 const out = {};
@@ -104,10 +106,10 @@ console.error("flips", flips);
 // Winners are placed before losers, in list order; the script fails if a region runs out of seats for a party.
 const NAMED = [
   { name: "Kerri Bouvier", region: "Ambarino", party: "REJ" },
-  { name: "Rainier Leclerc", region: "Ambarino", party: "DEM" },
+  { name: "Rainier Leclerc", region: "Ambarino", party: "DEM", win: false }, // the full Democratic list fills all 4 Ambarino seats
   { name: "Yeeun Bluespan II", region: "Ambarino", party: "IND", win: false },
   { name: "Alina Charliennes", region: "Ambrosia", party: "DEM" },
-  { name: "Minette Niamh", region: "Moeras", party: "DEM" },
+  { name: "Minette Niamh", region: "Moeras", party: "DEM", win: false }, // Moeras's one Democratic seat goes to Christian Lindner
   // People's Party (House)
   { name: "Alistair Foulke-McKeon", region: "Ambrosia", party: "PP" },
   { name: "Jon Fraser", region: "Montiablo", party: "PP" },
@@ -139,6 +141,24 @@ const NAMED = [
       ["Myrati","Sophie Jean-Larsson"],["Oplana","Meredith Astor"],["Pittston","Shirley Ballas"],["Pleucadeuc","Ophélie Merrine"],
       ["Reno","Christina McElroy"],["Ventura","Sydney Kostas Pastry II"],["Ventura","Nicholas Jakobssen"]]
     .map(([region, name]) => ({ name, region, party: "DM", inc: true })),
+  // Democrats (full list of winners; Ambrosia's Alina Charliennes is above, Cambria's is unnamed)
+  ...Object.entries({
+    Ambarino: ["Jordan Montgomery", "Ezequiel Duran", "Corey Seager", "Cam Cauley"],
+    Carnapol: ["Marion Wheeler"],
+    Chasmia: ["Ghislaine Plessis", "Marina Sadoul"],
+    "Costa Blanca": ["David Davalillo", "Robert Garcia", "Ricardo Obrero", "Madeline Blair Flash"],
+    Kalahooska: ["Donald Trump", "Jackson G. Smith"],
+    Kazana: ["Luna Day", "Winston Santos", "Ben Peoples", "Sophia Hammerschmidt", "Diane Poulin"],
+    Mezata: ["Lina Castrillón", "Maria Jose Padrón"],
+    Moeras: ["Christian Lindner"],
+    Montiablo: ["Alphonse de Bourbon", "Jose Manuel Mesonero", "Jack Leiter"],
+    Myrati: ["Dafydd Jenkins", "Branwyn Stackpoole"],
+    Oplana: ["Cagney Metzger", "Amanda F. Jenkins"],
+    Pittston: ["MacKenzie Gore"],
+    Pleucadeuc: ["René Cellier", "Céleste Du Toit"],
+    Reno: ["Gavin Collyer", "Nathan Eovaldi"],
+    Ventura: ["Erika Hasumi-Inaba", "Jacob Latz", "John Wyatt Langford"],
+  }).flatMap(([region, names]) => names.map(name => ({ name, region, party: "DEM" }))),
 ];
 const sorted = c => [...c].sort((a, b) => b.votes - a.votes);
 const namedIn = {}; // seat id -> count of named people placed there
