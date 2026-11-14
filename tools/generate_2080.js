@@ -13,7 +13,7 @@ const DATA = JSON.parse(line("const DATA = ").slice(13).replace(/;\s*$/, ""));
 const RESULTS = JSON.parse(line("const RESULTS = ").slice(16).replace(/;\s*$/, ""));
 
 // 2076 parties -> 2080 parties (keep in step with MAP_EX_2080 in index.html)
-const MAP = { SDA: "AA", REJ: "AA", DEM: "DEM", DM: "DM", REG: "AR", NPP: "CON", RE: "CON", PP: "PP", AC: "A", IND: "IND" }; // PP is not standing in 2080
+const MAP = { SDA: "AA", REJ: "AA", DEM: "DEM", DM: "DM", REG: "AR", NPP: "CON", RE: "CON", PP: "A", AC: "A", IND: "IND" };
 const P2080 = ["AA", "DEM", "DM", "AR", "JF", "CON", "A", "IND"];
 
 let seed = 20800101;
