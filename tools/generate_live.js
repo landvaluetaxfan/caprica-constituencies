@@ -43,6 +43,7 @@ DATA.seats.forEach(s => {
 // strongest seat in the region (one it held in 2072 if possible), replacing a generated candidate.
 const NAMED_LIVE = [
   ["Élodie Vasmer", "Cambria", "AA", "Alto West"], // Social Democrat, standing for the Autumn Accords
+  ["Kelly Ayotte", "Pittston", "CON", "Losana South"], // Caprican Democratic Movement, standing for Convergence
 ];
 NAMED_LIVE.forEach(([name, region, party, seatName]) => {
   const seats = DATA.seats.filter(s => s.region === region && (!seatName || s.name === seatName));
