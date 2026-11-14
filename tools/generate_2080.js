@@ -37,6 +37,18 @@ DATA.seats.forEach(s => {
   });
   out[s.id] = row;
 });
+// named 2080 candidates: [name, region, 2080 party, seat (optional)]. Without a seat they go to the party's
+// strongest seat in the region (one it held in 2076 if possible), replacing a generated candidate.
+const NAMED_2080 = [
+  ["Élodie Vasmer", "Cambria", "AA", "Alto West"], // Social Democrat, standing for the Autumn Accords
+];
+NAMED_2080.forEach(([name, region, party, seatName]) => {
+  const seats = DATA.seats.filter(s => s.region === region && (!seatName || s.name === seatName));
+  const held = seats.filter(s => MAP[[...RESULTS[s.id].cands].sort((a, b) => b.votes - a.votes)[0].party] === party);
+  const s = (held.length ? held : seats)[0]; if (!s) throw `no seat in ${region} for ${name}`;
+  out[s.id][party] = name;
+  console.error(`${name} stands for ${party} in ${s.name}, ${region}`);
+});
 const lines = html.split(/\r?\n/);
 const k = lines.findIndex(l => l.startsWith("const CANDS_2080 = "));
 const text = "const CANDS_2080 = " + JSON.stringify(out) + ";";
