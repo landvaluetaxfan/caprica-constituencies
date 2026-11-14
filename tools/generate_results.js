@@ -233,6 +233,9 @@ S.forEach(s => {
 // named MPs added after the fact are swapped in for the generated name, so no other seat changes: [seat, generated name, MP]
 const SWAPS = [["pittston-esquerico-reyes-and-conklin", "Teresa Domínguez", "Paul Otrione"]];
 SWAPS.forEach(([id, from, to]) => { const r = out[id]; r.cands.forEach(c => { if (c.name === from) c.name = to; }); if (r.inc === from) r.inc = to; });
+// current party leaders who weren't placed as leaders (so no seat moves): true = leader badge, false = no longer leader
+const LEADER_NOW = { "Klinton Arkas": false, "Paul Otrione": true, "Cordelia Lynn Edinburgh": true };
+S.forEach(s => { const r = out[s.id], w = r.cands[0].name; if (LEADER_NOW[w] === true) r.leader = w; else if (LEADER_NOW[w] === false) delete r.leader; });
 
 // ---------- report + write
 const tally = (f) => { const t = {}; S.forEach(s => { const p = f(s); t[p] = (t[p] || 0) + 1; }); return t; };
