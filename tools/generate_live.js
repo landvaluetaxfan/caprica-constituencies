@@ -54,16 +54,17 @@ NAMED_LIVE.forEach(([name, region, party, seatName]) => {
   out[s.id][party] = name;
   console.error(`${name} stands for ${party} in ${s.name}, ${region}`);
 });
-// sitting MPs who have changed party since 2072: [name, 2076 party]. They swap places with that
-// party's generated candidate in their seat, so no other name moves.
+// sitting MPs who have changed party since 2072: [name, 2076 party, seat id]. They take that party's
+// slot in the given seat; the generated candidate they replace takes their old slot, so no other name moves.
 const SWITCHED = [
-  ["George Miliband", "JF"], // Democrat in 2072, now Jasmine-Scarfelts (also its Senate candidate in Kazana)
+  // Democrat for Meauxsloit in 2072, now Jasmine-Scarfelts (also its Senate candidate in Kazana), standing in the seat it wins
+  ["George Miliband", "JF", "kazana-raudea-north"],
 ];
-SWITCHED.forEach(([name, party]) => {
-  const id = Object.keys(out).find(k => Object.values(out[k]).includes(name)); if (!id) throw `no seat for ${name}`;
-  const row = out[id], old = Object.keys(row).find(p => row[p] === name);
-  [row[old], row[party]] = [row[party], name];
-  console.error(`${name} stands for ${party} (not ${old}) in ${id}; ${row[old]} takes the ${old} slot`);
+SWITCHED.forEach(([name, party, to]) => {
+  const from = Object.keys(out).find(k => Object.values(out[k]).includes(name)); if (!from || !out[to]) throw `no seat for ${name}`;
+  const A = out[from], B = out[to], old = Object.keys(A).find(p => A[p] === name), bumped = B[party];
+  A[old] = A[party]; A[party] = bumped; B[party] = name;
+  console.error(`${name} stands for ${party} in ${to}; in ${from} ${A[old]} takes the ${old} slot and ${bumped} the ${party} slot`);
 });
 const lines = html.split(/\r?\n/);
 const k = lines.findIndex(l => l.startsWith("const CANDS_LIVE = "));
