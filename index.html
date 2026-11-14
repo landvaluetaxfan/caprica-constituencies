@@ -540,7 +540,7 @@ function parseLive(text){
   const rows=parseCSV(text), regs=Object.keys(DATA.regions);
   const block=label=>{const i=rows.findIndex(r=>r[0]===label); if(i<0) return null; const head=rows[i].slice(1,9); const o={};
     rows.slice(i+1,i+1+regs.length+2).forEach(r=>{if(regs.includes(r[0])) o[r[0]]=Object.fromEntries(head.map((p,k)=>[p,r[k+1]]))}); return {head,o}};
-  const W=block("Weight"), C=block("Candidates?"), F=block("Seats");
+  const W=block("Weight"), C=block("Candidates?"), F=block("Seats"), PVR=block("PV"); // PV: the sheet's projection of each region's final vote
   if(!W) throw new Error("count sheet: no Weight table");
   const pvRow=rows.find(r=>r[0]==="Popular Vote"), head=W.head;
   const reg={};
@@ -550,7 +550,8 @@ function parseLive(text){
     const finTot=fin?head.reduce((a,p)=>a+fin[p],0):0;
     // the sheet's seat table: the region's seats by party as the count stands (complete once the region is fully counted)
     const done=sum>=99.9, seats=finTot===DATA.regions[r].seats?fin:null;
-    reg[r]={pct:Math.min(1,sum/100),share:Object.fromEntries(head.map(p=>[p,sum?v[p]/sum:0])),stand,seats,final:done&&seats?seats:null}});
+    const pr=PVR&&PVR.o[r]?Object.fromEntries(head.map(p=>[p,num(PVR.o[r][p])])):null, prT=pr?head.reduce((a,p)=>a+pr[p],0):0;
+    reg[r]={pct:Math.min(1,sum/100),share:Object.fromEntries(head.map(p=>[p,sum?v[p]/sum:0])),proj:prT>0?Object.fromEntries(head.map(p=>[p,pr[p]/prT])):null,stand,seats,final:done&&seats?seats:null}});
   const pv=pvRow?Object.fromEntries(head.map((p,k)=>[p,num(pvRow[k+1])/100])):null;
   // Senate: the first "Senate Res" table is the final round in each region (one party at 100% = won outright).
   // Its header carries markers such as "AA-" or "(DM)"; only the letters are the party code.
@@ -586,10 +587,13 @@ function buildLive(){
     const f=R>=0.999?1:R<=0?0:1-Math.pow(1-R,k); // every seat in a counting region has some votes in
     const turnout=0.6+rnd()*0.14, expected=Math.round(s.pop*0.74*turnout), counted=Math.round(expected*f);
     const base=BASE[s.id]||{}, rb=REGBASE[s.region]||{};
-    const x={}, x0={}; L.stand.forEach(p=>{const T=L.share[p]||0, b=base[p]||0, rbp=rb[p]||0;
-      let v=rbp>0.005?0.65*b*(T/rbp)+0.35*T:0.9*T;
-      if(p==="IND") v=b>0?b*0.85:0.01+rnd()*0.02; // independents run on a personal vote, not the regional swing
-      const lo=T>0||p==="IND"?0.004:0; x0[p]=Math.max(v,lo); // x0: where the seat ends up once fully counted
+    // x0: where the seat ends up once fully counted, from the sheet's projected regional vote (PV) when it has one;
+    // x: the votes counted so far, from the counted shares (early returns can lean one way, as in Pleucadeuc)
+    const sw=(T,b,rbp)=>rbp>0.005?0.65*b*(T/rbp)+0.35*T:0.9*T;
+    const x={}, x0={}; L.stand.forEach(p=>{const T=L.share[p]||0, T0=L.proj?(L.proj[p]||0):T, b=base[p]||0, rbp=rb[p]||0;
+      let v=sw(T,b,rbp), v0=sw(T0,b,rbp);
+      const ind=p==="IND"?(b>0?b*0.85:0.01+rnd()*0.02):null; if(ind!==null){v=ind;v0=ind} // independents run on a personal vote, not the regional swing
+      const lo=T>0||p==="IND"?0.004:0; x0[p]=Math.max(v0,T0>0||p==="IND"?0.004:0);
       const n=(rnd()+rnd()+rnd()-1.5)/1.5; v*=Math.exp(n*0.22*Math.sqrt(1-f));
       x[p]=Math.max(v,lo)});
     const sx=Object.values(x).reduce((a,b)=>a+b,0)||1; for(const p in x) x[p]/=sx;
@@ -757,7 +761,7 @@ function legend(){
     L.innerHTML=`<span class="badge" style="margin-left:0;background:#fde2e2;color:#9b1c1c">${SIM?`Simulated count · ${Math.round(SIM*100)}% preview`:LIVE_SRC==="live"?`Live · updated ${t}`:"Saved snapshot"}</span> `+
       P_ORDER.filter(p=>Object.values(OUT).some(o=>o.c.some(c=>c.party===p))).map(p=>`<span><span class="sw" style="background:${pcol(p)}"></span>${pshort(p)}</span>`).join("")+
       `<span style="color:#777"><span class="sw" style="background:linear-gradient(90deg,${shade("#7B2CBF",0.6)} 50%,#7B2CBF 50%)"></span>Leading · called</span><span style="color:#777"><span class="sw hatchsw"></span>Would be a gain</span><span style="color:#777"><span class="sw" style="background:#dedede"></span>No votes yet</span>`;
-    N.innerHTML=`<b>About the 2076 count.</b> Each region’s share of the vote and how much of it has been counted come from the live count sheet, refreshed every five minutes. Seat-by-seat results are simulated from that: every seat starts from its result in the 2072 election and swings with its region, and seats report at different speeds. How many seats each party leads in follows the sheet’s seat table for each region, so the seat totals match the sheet as the count moves. Safe seats are called early: once its region is counting, a seat projected to be won by 25 points or more, with the votes so far agreeing, is called straight away. Other seats are called once their region is about 45% counted and the lead is safe. Voting continues until tomorrow morning, so until the polls close no more than half the seats (101 of 203) are called, the safest first. Convergence is the electoral alliance of Renaissance, the New Progressives and the Caprican Democratic Movement. The Autumn Accords bring together the Social Democrats and Rejuvenation, the Alliance brings together Avenir and the People’s Party, and Jasmine–Scarfelts is an alliance of independents.`;
+    N.innerHTML=`<b>About the 2076 count.</b> Each region’s share of the vote and how much of it has been counted come from the live count sheet, refreshed every five minutes. Seat-by-seat results are simulated from that: every seat starts from its result in the 2072 election and swings with its region, and seats report at different speeds. How many seats each party leads in follows the sheet’s seat table for each region, so the seat totals match the sheet as the count moves. Safe seats are called early: once its region is counting, a seat projected to be won by 25 points or more, with the votes so far agreeing, is called straight away. Projections use the count sheet’s projected regional vote, not just the votes counted so far, so a region whose early returns lean one way isn’t called on those alone. Other seats are called once their region is about 45% counted and the lead is safe. Voting continues until tomorrow morning, so until the polls close no more than half the seats (101 of 203) are called, the safest first. Convergence is the electoral alliance of Renaissance, the New Progressives and the Caprican Democratic Movement. The Autumn Accords bring together the Social Democrats and Rejuvenation, the Alliance brings together Avenir and the People’s Party, and Jasmine–Scarfelts is an alliance of independents.`;
     return;
   }
   if(mode==="region") L.innerHTML=Object.entries(DATA.regions).map(([r,v])=>`<span><span class="sw" style="background:${REG_COL[r]}"></span>${r} <span style="color:#888">${v.seats}</span></span>`).join("");
@@ -878,7 +882,7 @@ function revealRace(s){
 
 // ---- race calls: a feed of called seats, a shareable call graphic for each, and a pop-up when a new call comes in
 // When each seat was first seen called is kept per viewer, so the feed can run newest first.
-const CALL_KEY="caprica2076calls"; // new key: older saves could hold calls taken from the built-in snapshot
+const CALL_KEY="caprica2076calls-v2"; // new key each time the call rules are corrected, so no one keeps a call the current rules wouldn't make
 let callTimes={}; if(!SIM) try{callTimes=JSON.parse(localStorage.getItem(CALL_KEY)||"{}")||{}}catch(e){callTimes={}}
 let callsSeen=null;
 function trackCalls(){ // records call times; returns seats called since the last check
