@@ -156,7 +156,7 @@
       <button data-m="results">Results</button>
       <button data-m="dev">Population balance</button>
     </div>
-    <div class="seg" id="elec" aria-label="Election"><button data-e="2080" class="on"><span class="livedot"></span>2080 · Live</button><button data-e="ex">Example election</button></div>
+    <div class="seg" id="elec" aria-label="Election"><button data-e="2080" class="on"><span class="livedot"></span>2080 · Live</button><button data-e="ex">2076 election</button></div>
     <input type="search" id="q" placeholder="Find a seat, candidate or MP…" title="Search constituencies, regions and candidate names. Press Enter to jump to the first match." autocomplete="off">
     <span id="count" style="font-size:12.5px;color:#666"></span>
   </div>
@@ -221,10 +221,10 @@ const PARTIES_2080 = {
   A:  {name:"Avenir Caprica",short:"Avenir",color:"#1E9E55"},
   IND:{name:"Independent",short:"Independents",color:"#8E8E8E"}
 };
-// previous-election parties -> their 2080 successor (used for gains and for MPs standing again)
+// 2076 parties -> their 2080 successor (used for gains and for MPs standing again)
 const MAP_EX_2080={SDA:"AA",REJ:"AA",DEM:"DEM",DM:"DM",REG:"AR",NPP:"JF",RE:"CON",PP:"CON",AC:"A",IND:"IND"};
 const LIVE_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vQUiVKWlB8ttAXMp7BnrXmHSQjrRWcpHZSRIuSKD-v7e95IxONqT3gXgpRfHT-pwCZR7lOQe3U5F7C1/pub?output=csv";
-// the election on screen: "2080" (live) or "ex" (the example previous election)
+// the election on screen: "2080" (live) or "ex" (the 2076 general election)
 let ELEC="2080", PARTIES=PARTIES_2080, P_ORDER=Object.keys(PARTIES), GOV=GOV_EX, OPP=OPP_EX;
 // what each region is like and how it votes
 const REGION_NOTES={
@@ -511,7 +511,7 @@ function parseLive(text){
   const pv=pvRow?Object.fromEntries(head.map((p,k)=>[p,num(pvRow[k+1])/100])):null;
   return {head,reg,pv};
 }
-// previous result of every seat, in 2080 parties
+// 2076 result of every seat, in 2080 parties
 const BASE={}, REGBASE={};
 S.forEach(s=>{const r=RESULTS[s.id]; if(!r) return; const tot=r.cands.reduce((a,x)=>a+x.votes,0), b={};
   r.cands.forEach(x=>{const p=MAP_EX_2080[x.party]; b[p]=(b[p]||0)+x.votes/tot}); BASE[s.id]=b;
@@ -623,13 +623,13 @@ function legend(){
   const L=document.getElementById("legend"), N=document.getElementById("note"), D=document.getElementById("dek");
   D.textContent=mode!=="results"?DEK_DEFAULT:LIVE_MODE()
     ?"The 2080 count, live. Seats are coloured by the party ahead: pale while votes are still being counted, solid once the seat is called. Grey seats have no votes counted yet. Hover over a seat for the count so far."
-    :"Each constituency is coloured by its winner; lighter shades mark closer races. Hover over a seat for the full count, or use the list on the right to browse seats and flips. Metropolitan insets are on the left.";
+    :"The 2076 general election. Each constituency is coloured by its winner; lighter shades mark closer races. Hover over a seat for the full count, or use the list on the right to browse seats and flips. Metropolitan insets are on the left.";
   if(mode==="results"&&LIVE_MODE()){
     const t=LIVE_TIME?LIVE_TIME.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"}):null;
     L.innerHTML=`<span class="badge" style="margin-left:0;background:#fde2e2;color:#9b1c1c">${LIVE_SRC==="live"?`Live · updated ${t}`:"Saved snapshot"}</span> `+
       P_ORDER.filter(p=>Object.values(OUT).some(o=>o.c.some(c=>c.party===p))).map(p=>`<span><span class="sw" style="background:${pcol(p)}"></span>${pshort(p)}</span>`).join("")+
       `<span style="color:#777"><span class="sw" style="background:linear-gradient(90deg,${shade("#7B2CBF",0.6)} 50%,#7B2CBF 50%)"></span>Leading · called</span><span style="color:#777"><span class="sw" style="background:#dedede"></span>No votes yet</span>`;
-    N.innerHTML=`<b>About the 2080 count.</b> Each region’s share of the vote and how much of it has been counted come from the live count sheet, refreshed every five minutes. Seat-by-seat results are simulated from that: every seat starts from its result at the last election and swings with its region, and seats report at different speeds. A seat is called only when most of its vote is in and the lead is safe; once a region is fully counted, its seats are set to match the sheet’s seat totals for that region. Party codes AA, AR, JF and CON are the sheet’s own.`;
+    N.innerHTML=`<b>About the 2080 count.</b> Each region’s share of the vote and how much of it has been counted come from the live count sheet, refreshed every five minutes. Seat-by-seat results are simulated from that: every seat starts from its result in the 2076 election and swings with its region, and seats report at different speeds. A seat is called only when most of its vote is in and the lead is safe; once a region is fully counted, its seats are set to match the sheet’s seat totals for that region. Party codes AA, AR, JF and CON are the sheet’s own.`;
     return;
   }
   if(mode==="region") L.innerHTML=Object.entries(DATA.regions).map(([r,v])=>`<span><span class="sw" style="background:${REG_COL[r]}"></span>${r} <span style="color:#888">${v.seats}</span></span>`).join("");
@@ -656,7 +656,7 @@ function seatSummaryLive(){
   const pv=LIVE&&LIVE.pv, pvOrder=pv?Object.keys(pv).filter(p=>PARTIES[p]&&pv[p]>0).sort((a,b)=>pv[b]-pv[a]):[];
   const row=p=>{const d=won[p]+lead[p]-(PREV[p]||0);return `<div class="prow${rParty===p?" on":""}" data-p="${p}" title="${PARTIES[p].name}: ${won[p]} won, leading in ${lead[p]} — show only these seats"><span class="sw" style="background:${pcol(p)}"></span><span class="pn">${pshort(p)}</span><span class="ps">${won[p]}<span style="font-weight:500;color:#888"> +${lead[p]}</span></span><span class="chg">${d>0?"+"+d:d<0?"−"+(-d):"–"}</span></div>`};
   const half=Math.ceil(order.length/2);
-  pt.innerHTML=`<div class="livehd" style="grid-column:1/-1"><span>Won <b>+</b> leading · change on last election</span><span>${(cnt/exp*100).toFixed(0)}% of expected vote counted</span></div>`+
+  pt.innerHTML=`<div class="livehd" style="grid-column:1/-1"><span>Won <b>+</b> leading · change on 2076</span><span>${(cnt/exp*100).toFixed(0)}% of expected vote counted</span></div>`+
     `<div>${order.slice(0,half).map(row).join("")}</div><div>${order.slice(half).map(row).join("")}</div>`+
     (pv?`<div style="grid-column:1/-1;margin-top:6px"><div class="pgh">Popular vote</div><div class="pvrow" style="margin-top:6px">${pvOrder.map(p=>`<i style="width:${pv[p]*100}%;background:${pcol(p)}" title="${pshort(p)} ${(pv[p]*100).toFixed(1)}%"></i>`).join("")}</div>`+
       `<div class="pvl">${pvOrder.map(p=>`<span><span class="sw" style="background:${pcol(p)};display:inline-block;width:8px;height:8px;border-radius:1px;margin-right:4px"></span>${pshort(p)} <b>${(pv[p]*100).toFixed(1)}%</b></span>`).join("")}</div></div>`:"");
@@ -841,10 +841,10 @@ q.addEventListener("keydown",e=>{if(e.key!=="Enter"||!qText)return;
   if(mode==="results"){if(!inView(s)){rFilter="all";rParty=null;document.querySelectorAll("#rfilter button").forEach(x=>x.classList.toggle("on",x.dataset.f==="all"));recolor();renderRaces()} revealRace(s)}
   const p=(pathsById[s.id]||[])[0]; if(!p) return; const b=p.getBoundingClientRect();
   cur=null; showTip(s,{clientX:b.left+b.width/2,clientY:b.top+b.height/2});});
-loadElection(location.hash==="#example"?"ex":"2080");
+loadElection(location.hash==="#2076"||location.hash==="#example"?"ex":"2080");
 document.querySelectorAll("#elec button").forEach(b=>b.onclick=()=>{loadElection(b.dataset.e);recolor();renderRaces();hideTip()});
 fetchLive(); setInterval(fetchLive,5*60*1000);
-setMode(location.hash==="#results"||location.hash==="#example"?"results":"region");
+setMode(["#results","#2076","#example"].includes(location.hash)?"results":"region");
 if(mode==="results")document.querySelectorAll("#mode button").forEach(x=>x.classList.toggle("on",x.dataset.m==="results"));
 </script>
 </body>

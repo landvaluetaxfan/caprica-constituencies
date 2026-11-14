@@ -8,9 +8,9 @@ An interactive draft map of the Caprican House of Representatives' 203 single-me
 
 ## Results
 
-The Results view has two elections: **2080 · Live** (the default) and an **example election** (open it with `#example`).
+The Results view has two elections: **2080 · Live** (the default) and the **2076 general election** (open it with `#2076`).
 
-**2080 · Live** reads the published count sheet every five minutes: the share of each region counted so far and each party's share of it, plus the national popular vote. Seat results are simulated from that: each seat starts from its example-election result (mapped onto the 2080 parties by `MAP_EX_2080`), swings with its region, and reports at its own pace. Seats are called only when most of the vote is in and the lead is safe; when a region is fully counted, its seats are set to match the sheet's seat table. Sitting MPs stand again for their successor party; other candidates come from `tools/generate_2080.js`. If the sheet cannot be reached, a saved snapshot (`LIVE_SNAPSHOT`) is used.
+**2080 · Live** reads the published count sheet every five minutes: the share of each region counted so far and each party's share of it, plus the national popular vote. Seat results are simulated from that: each seat starts from its 2076 result (mapped onto the 2080 parties by `MAP_EX_2080`), swings with its region, and reports at its own pace. Seats are called only when most of the vote is in and the lead is safe; when a region is fully counted, its seats are set to match the sheet's seat table. Sitting MPs stand again for their successor party; other candidates come from `tools/generate_2080.js`. If the sheet cannot be reached, a saved snapshot (`LIVE_SNAPSHOT`) is used.
 
 
 The Results view lays the page out to fit the window: metropolitan insets stacked on the left, the main map in the middle, and on the right the House seat totals with a list of every constituency (vote-share bar coloured by party, with gains/flips tagged and filterable).

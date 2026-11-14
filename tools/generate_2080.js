@@ -2,7 +2,7 @@
 // Usage: node tools/generate_2080.js   (rewrites the CANDS_2080 line in index.html)
 //
 // Every seat gets one candidate per 2080 party; the page only shows the parties the count sheet
-// says are standing in that region. Sitting MPs from the previous (example) election stand again
+// says are standing in that region. Sitting MPs from the 2076 election stand again
 // for the party their old party maps to (MAP below); everyone else gets a generated name.
 const fs = require("fs"), path = require("path");
 const { makeNamer } = require("./names.js");
@@ -12,7 +12,7 @@ const line = p => html.split("\n").find(l => l.startsWith(p));
 const DATA = JSON.parse(line("const DATA = ").slice(13).replace(/;\s*$/, ""));
 const RESULTS = JSON.parse(line("const RESULTS = ").slice(16).replace(/;\s*$/, ""));
 
-// previous parties -> 2080 parties (keep in step with MAP_EX_2080 in index.html)
+// 2076 parties -> 2080 parties (keep in step with MAP_EX_2080 in index.html)
 const MAP = { SDA: "AA", REJ: "AA", DEM: "DEM", DM: "DM", REG: "AR", NPP: "JF", RE: "CON", PP: "CON", AC: "A", IND: "IND" };
 const P2080 = ["AA", "DEM", "DM", "AR", "JF", "CON", "A", "IND"];
 
