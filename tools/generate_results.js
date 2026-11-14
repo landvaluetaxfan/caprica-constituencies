@@ -106,7 +106,7 @@ console.error("flips", flips);
 // Winners are placed before losers, in list order; the script fails if a region runs out of seats for a party.
 const NAMED = [
   { name: "Kerri Bouvier", region: "Ambarino", party: "REJ" },
-  { name: "Rainier Leclerc", region: "Ambarino", party: "DEM", win: false }, // the full Democratic list fills all 4 Ambarino seats
+  { name: "Rainier Leclerc", region: "Ambarino", party: "DEM" },
   { name: "Yeeun Bluespan II", region: "Ambarino", party: "IND", win: false },
   { name: "Alina Charliennes", region: "Ambrosia", party: "DEM" },
   { name: "Minette Niamh", region: "Moeras", party: "DEM", win: false }, // Moeras's one Democratic seat goes to Christian Lindner
@@ -143,7 +143,7 @@ const NAMED = [
     .map(([region, name]) => ({ name, region, party: "DM", inc: true })),
   // Democrats (full list of winners; Ambrosia's Alina Charliennes is above, Cambria's is unnamed)
   ...Object.entries({
-    Ambarino: ["Jordan Montgomery", "Ezequiel Duran", "Corey Seager", "Cam Cauley"],
+    Ambarino: ["Jordan Montgomery", "Ezequiel Duran", "Corey Seager"], // 4th seat: Rainier Leclerc (above)
     Carnapol: ["Marion Wheeler"],
     Chasmia: ["Ghislaine Plessis", "Marina Sadoul"],
     "Costa Blanca": ["David Davalillo", "Robert Garcia", "Ricardo Obrero", "Madeline Blair Flash"],
@@ -159,6 +159,7 @@ const NAMED = [
     Reno: ["Gavin Collyer", "Nathan Eovaldi"],
     Ventura: ["Erika Hasumi-Inaba", "Jacob Latz", "John Wyatt Langford"],
   }).flatMap(([region, names]) => names.map(name => ({ name, region, party: "DEM" }))),
+  { name: "Cam Cauley", region: "Ambarino", party: "DEM", win: false },
 ];
 const sorted = c => [...c].sort((a, b) => b.votes - a.votes);
 const namedIn = {}; // seat id -> count of named people placed there
