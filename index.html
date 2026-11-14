@@ -22,7 +22,7 @@
   .seg button{font:600 12.5px "Libre Franklin",sans-serif;border:0;background:#fff;padding:7px 11px;cursor:pointer;color:#333}
   .seg button+button{border-left:1px solid #ccc}
   .seg button.on{background:#121212;color:#fff}
-  input[type=search]{font:13px "Libre Franklin",sans-serif;padding:7px 10px;border:1px solid #ccc;border-radius:4px;min-width:220px}
+  input[type=search]{font:13px "Libre Franklin",sans-serif;padding:7px 10px;border:1px solid #ccc;border-radius:4px;min-width:260px;max-width:100%}
   .legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:#333;margin:4px 0 8px}
   .legend span.sw{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:5px;vertical-align:-2px}
   .mapbox{position:relative}
@@ -103,6 +103,8 @@
   .rs{display:flex;justify-content:space-between;font-size:11.5px;color:#555;gap:8px}
   .rs b{font-weight:700;color:#222}
   .rs .mg{font-variant-numeric:tabular-nums;white-space:nowrap}
+  .cm{margin-top:4px;font-size:11.5px;color:#333;background:#fff6c7;border-radius:2px;padding:2px 6px;display:flex;align-items:center;gap:5px}
+  .cm .sw{width:8px;height:8px;border-radius:1px;flex:none}
   .empty{font-size:13px;color:#777;padding:20px 0}
 
   #tip{position:fixed;z-index:10;pointer-events:none;background:#fff;border-radius:3px;box-shadow:0 2px 14px rgba(0,0,0,.22);width:max-content;min-width:340px;max-width:min(470px,calc(100vw - 16px));padding:12px 14px 10px;opacity:0;transition:opacity .08s}
@@ -135,7 +137,7 @@
       <button data-m="results">Results</button>
       <button data-m="dev">Population balance</button>
     </div>
-    <input type="search" id="q" placeholder="Find a constituency…" autocomplete="off">
+    <input type="search" id="q" placeholder="Find a seat, candidate or MP…" title="Search constituencies, regions and candidate names. Press Enter to jump to the first match." autocomplete="off">
     <span id="count" style="font-size:12.5px;color:#666"></span>
   </div>
   <div class="legend" id="legend"></div>
@@ -208,7 +210,10 @@ Object.values(OUT).forEach(o=>{SEATS[o.win]++;PREV[o.prev]++});
 const N_FLIPS=Object.values(OUT).filter(o=>o.flip).length;
 
 let mode="region", rFilter="all", rSort="region", rParty=null, qText="";
-function matchesQ(s){return !qText||s.name.toLowerCase().includes(qText)||s.region.toLowerCase().includes(qText)}
+const norm=t=>t.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
+function seatQ(s){return norm(s.name).includes(qText)||norm(s.region).includes(qText)}
+function candQ(s){const o=OUT[s.id]; return qText&&o?o.c.filter(x=>norm(x.name).includes(qText)):[]}
+function matchesQ(s){return !qText||seatQ(s)||candQ(s).length>0}
 function inView(s){const o=OUT[s.id]; if(!o) return false;
   if(rFilter==="flips"&&!o.flip) return false;
   if(rParty&&o.win!==rParty) return false; return true}
@@ -280,7 +285,8 @@ function raceRow(s){const o=OUT[s.id], c=o.c, col=pcol(o.win);
   const segs=c.map((x,k)=>`<i style="width:${x.votes/o.tot*100}%;background:${k?shade(pcol(x.party),0.5):pcol(x.party)}" title="${pshort(x.party)} ${fmtPct(x.votes/o.tot)}%"></i>`).join("");
   const tag=o.flip?`<span class="tag gain" style="--c:${col};--fg:${ink(col)}">${o.win} gain <em>from ${o.prev}</em></span>`:`<span class="tag hold">${o.win} hold</span>`;
   return `<div class="race" data-id="${s.id}"><div class="rh"><span class="rn">${s.name}${rSort!=="region"?` <span class="rr">${s.region}</span>`:""}</span>${tag}</div>`+
-    `<div class="bar">${segs}</div><div class="rs"><span><b>${c[0].name}</b> · ${pshort(o.win)} ${fmtPct(c[0].votes/o.tot)}%</span><span class="mg">+${fmtPct(o.margin)} over ${c[1]?c[1].party:"—"}</span></div></div>`}
+    `<div class="bar">${segs}</div><div class="rs"><span><b>${c[0].name}</b> · ${pshort(o.win)} ${fmtPct(c[0].votes/o.tot)}%</span><span class="mg">+${fmtPct(o.margin)} over ${c[1]?c[1].party:"—"}</span></div>`+
+    (seatQ(s)?"":candQ(s).map(x=>{const k=c.indexOf(x);return `<div class="cm"><span class="sw" style="background:${pcol(x.party)}"></span><b>${x.name}</b>${x.name===o.r.inc?" (incumbent)":""} · ${pshort(x.party)} · ${k?["","2nd","3rd"][k]||(k+1)+"th":"won"}, ${fmtPct(x.votes/o.tot)}%</div>`}).join(""))+`</div>`}
 function renderRaces(){
   seatSummary();
   const list=document.getElementById("rlist");
@@ -356,10 +362,17 @@ function highlight(s){
   if(!s)return; (pathsById[s.id]||[]).forEach(p=>{const sv=p.ownerSVGElement; el("path",{d:s.d,class:"hilite"},sv._hl)});
 }
 const q=document.getElementById("q"), cnt=document.getElementById("count");
-q.addEventListener("input",()=>{qText=q.value.trim().toLowerCase();let n=0;
-  S.forEach(s=>{const m=matchesQ(s);if(m&&qText)n++;(pathsById[s.id]||[]).forEach(p=>p.classList.toggle("dim",!m))});
-  cnt.textContent=qText?`${n} match${n===1?"":"es"}`:"";
+q.addEventListener("input",()=>{qText=norm(q.value.trim());let n=0,nc=0;
+  S.forEach(s=>{const m=matchesQ(s);if(m&&qText){n++;nc+=candQ(s).length}(pathsById[s.id]||[]).forEach(p=>p.classList.toggle("dim",!m))});
+  cnt.textContent=qText?`${n} seat${n===1?"":"s"}${nc?` · ${nc} candidate${nc===1?"":"s"}`:""}${n?" · Enter to jump":""}`:"";
   if(mode==="results")renderRaces()});
+// Enter: jump to the first match (switching to Results when the match is a candidate)
+q.addEventListener("keydown",e=>{if(e.key!=="Enter"||!qText)return;
+  const s=S.find(s=>matchesQ(s)); if(!s) return; e.preventDefault();
+  if(mode!=="results"&&!seatQ(s)) document.querySelector('#mode button[data-m="results"]').click();
+  if(mode==="results"){if(!inView(s)){rFilter="all";rParty=null;document.querySelectorAll("#rfilter button").forEach(x=>x.classList.toggle("on",x.dataset.f==="all"));recolor();renderRaces()} revealRace(s)}
+  const p=(pathsById[s.id]||[])[0]; if(!p) return; const b=p.getBoundingClientRect();
+  cur=null; showTip(s,{clientX:b.left+b.width/2,clientY:b.top+b.height/2});});
 setMode(location.hash==="#results"?"results":"region");
 if(mode==="results")document.querySelectorAll("#mode button").forEach(x=>x.classList.toggle("on",x.dataset.m==="results"));
 </script>
