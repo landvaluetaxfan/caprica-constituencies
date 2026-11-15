@@ -594,7 +594,8 @@ const SEN_CALL_FROM=0.75; // Senate races wait until later in the night: the reg
 // where the count sheet leaves a single candidate on 100% of the final round, the strongest other candidate is shown
 // as the runner-up so the result looks like a real count: on the share set here, or a steady 9–16% otherwise
 const SEN_RUNNER={"Pleucadeuc":0.126};
-const SEN_SAFE=0.20; // once the polls have closed, a Senate race with a final-round lead of 20 points or more is called whatever has been counted
+const SEN_SAFE=0.20;
+const SEN_CALLED={"Moeras":"JF"}; // Senate races called by hand: called whenever this party leads // once the polls have closed, a Senate race with a final-round lead of 20 points or more is called whatever has been counted
 // preview a later stage of the count: ?sim=0.7 lifts every counting region to at least 70% counted (nothing is saved)
 const SIM=Math.min(1,Math.max(0,+(new URLSearchParams(location.search).get("sim"))||0));
 function applySim(L){ if(SIM) for(const r in L.reg){const g=L.reg[r]; if(g.pct>0){g.pct=Math.max(g.pct,SIM); if(g.pct>=0.999&&g.seats) g.final=g.seats}} return L }
@@ -1046,6 +1047,7 @@ const HEADSHOTS={
   "Tato Lily":{src:"img/headshots/tato-lily.png",crop:[86,0,340]},
   "Walter Black":{src:"img/headshots/walter-black.jpg",crop:[230,0,360]},
   "Adam Scholz":{src:"img/headshots/adam-scholz.jpg",crop:[0,0,600]},
+  "Jasmin Bergvall":{src:"img/headshots/jasmin-bergvall.png",crop:[130,20,420]},
   // Manifest MPs (600×600 portraits)
   "Amelia McLean":{src:"img/headshots/amelia-mclean.jpg",crop:[25,5,550]},
   "Avery Sladen":{src:"img/headshots/avery-sladen.jpg",crop:[25,5,550]},
@@ -1184,7 +1186,7 @@ function buildSenate(){
       if(ru){ const v2=SEN_RUNNER[r]!=null?SEN_RUNNER[r]:Math.round((0.09+srand(r+"|senrunner")()*0.07)*1000)/1000;
         fin[0]={...fin[0],v:1-v2}; fin.push({p:ru.a,v:v2,c:ru}) } }
     const rep=pct>0&&fin.length>0, win=rep?fin[0].p:null, margin=rep?fin[0].v-(fin[1]?fin[1].v:0):0;
-    const called=rep&&(pct>=0.999||(!pollsOpen()&&Math.round(margin*1000)>=SEN_SAFE*1000)||(pct>=SEN_CALL_FROM&&margin*100>5+40*(1-pct)));
+    const called=rep&&(SEN_CALLED[r]===win||pct>=0.999||(!pollsOpen()&&Math.round(margin*1000)>=SEN_SAFE*1000)||(pct>=SEN_CALL_FROM&&margin*100>5+40*(1-pct)));
     SEN[r]={r,pct,fin:rep?fin:[],win,margin,outright:rep&&fin.length===1,called,cands,others:cands.filter(x=>!rep||!fin.some(f=>f.c===x))};
   });
   capCalls(Object.values(SEN).map(x=>({o:x,keep:0,safety:x.pct>=0.999?1e9:x.margin*100-(5+40*(1-x.pct))})),17);
