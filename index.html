@@ -683,7 +683,7 @@ let liveOnce=false;
 async function fetchLive(){
   try{const r=await fetch(LIVE_URL,{cache:"no-store"}); if(!r.ok) throw new Error(r.status); LIVE=applySim(keepSeats(parseLive(await r.text()))); LIVE_SRC="live"; LIVE_TIME=new Date()}
   catch(e){ if(!LIVE){LIVE=applySim(keepSeats(parseLive(LIVE_SNAPSHOT),true)); LIVE_SRC="snapshot"} }
-  buildSenate();
+  buildSenate(); { const sf=trackSenCalls(); if(sf.length) showSenToasts(sf) }
   if(ELEC==="live"){loadElection("live"); const fresh=trackCalls(); if(liveOnce&&fresh.length) showCallToasts(fresh); liveOnce=true}
   if(ELEC==="live"||mode==="senate"){recolor(); if(mode==="results"||mode==="senate") renderRaces(); cur=null}
 }
@@ -937,6 +937,7 @@ const rlist=document.getElementById("rlist");
 rlist.addEventListener("mouseover",e=>{const r=e.target.closest(".race"); if(!r) return; if(r.dataset.r) highlightRegion(r.dataset.r); else highlight(byId[r.dataset.id])});
 rlist.addEventListener("mouseleave",()=>highlight(null));
 rlist.addEventListener("click",e=>{const cbtn=e.target.closest("[data-call]"); if(cbtn){e.stopPropagation(); openCall(cbtn.dataset.call); return}
+  const sbtn=e.target.closest("[data-scall]"); if(sbtn){e.stopPropagation(); openSenCall(sbtn.dataset.scall); return}
   const r=e.target.closest(".race"); if(!r) return; e.stopPropagation();
   if(r.dataset.r){ // a Senate race: show its hover box next to the region on the main map
     const lab=DATA.regions[r.dataset.r].lab, mb=main.getBoundingClientRect(), vb=main.viewBox.baseVal, k=Math.min(mb.width/vb.width,mb.height/vb.height);
@@ -1104,19 +1105,19 @@ async function callCanvas(id,withPhoto){
   x.textAlign="right"; x.fillText(SIM?"SIMULATED COUNT · PREVIEW":"Source: Caprica count sheet",W-M,H-34); x.textAlign="left";
   return cv;
 }
-let callShown=null, callPhoto=null;
+let callShown=null, callPhoto=null, callKind="house";
 async function openCall(id,withPhoto){
   if(withPhoto===undefined) withPhoto=!!HEADSHOTS[OUT[id].c[0].name]; // with a photo by default when there is one
   const cv=await callCanvas(id,withPhoto), m=document.getElementById("callmodal"), img=document.getElementById("cmximg");
-  img.src=cv.toDataURL("image/png"); img.alt=`Race call: ${callHeadline(OUT[id])} in ${byId[id].name}`; callShown=id; callPhoto=withPhoto;
+  img.src=cv.toDataURL("image/png"); img.alt=`Race call: ${callHeadline(OUT[id])} in ${byId[id].name}`; callShown=id; callPhoto=withPhoto; callKind="house";
   document.querySelectorAll("#cmxlay button").forEach(b=>b.classList.toggle("on",(b.dataset.p==="1")===withPhoto));
   m.classList.add("on"); hideTip();
 }
-document.querySelectorAll("#cmxlay button").forEach(b=>b.onclick=()=>openCall(callShown,b.dataset.p==="1"));
+document.querySelectorAll("#cmxlay button").forEach(b=>b.onclick=()=>(callKind==="senate"?openSenCall:openCall)(callShown,b.dataset.p==="1"));
 document.getElementById("cmxclose").onclick=()=>document.getElementById("callmodal").classList.remove("on");
 document.getElementById("callmodal").onclick=e=>{if(e.target.id==="callmodal") e.currentTarget.classList.remove("on")};
 document.addEventListener("keydown",e=>{if(e.key==="Escape") document.getElementById("callmodal").classList.remove("on")});
-document.getElementById("cmxdl").onclick=()=>{const a=document.createElement("a"); a.href=document.getElementById("cmximg").src; a.download=`call-${callShown}${callPhoto?"-photo":""}.png`; document.body.appendChild(a); a.click(); a.remove()};
+document.getElementById("cmxdl").onclick=()=>{const a=document.createElement("a"); a.href=document.getElementById("cmximg").src; a.download=`${callKind==="senate"?"senate-call-"+norm(callShown).replace(/[^a-z]+/g,"-"):"call-"+callShown}${callPhoto?"-photo":""}.png`; document.body.appendChild(a); a.click(); a.remove()};
 function showCallToasts(ids){
   const box=document.getElementById("toasts"), show=ids.slice(-3);
   show.forEach(id=>{const o=OUT[id], s=byId[id], d=document.createElement("div"); d.className="toast"; d.style.setProperty("--c",pcol(o.win));
@@ -1160,7 +1161,8 @@ function senateRow(r){const x=SEN[r];
     (h?`<div class="cm sen"><span class="sw" style="background:${spc(f.p)}"></span>Also standing for the House in ${h.name}</div>`:"")}).join("");
   const oth=x.others.length?`<div class="soth">${x.fin.length?"Also stood":"Candidates"}: ${x.others.map(c=>`${c.n} (${partyLine(c)})`).join(", ")}</div>`:"";
   return `<div class="race srace" data-r="${r}"><div class="rh"><span class="rn">${r}</span>${senateTag(x)}</div>${fin}${oth}`+
-    `<div class="rs"><span>${!x.win?"":x.outright?(x.called?"Won outright":"Leading outright"):`Final round · +${fmtPct(x.margin)} pts`}</span><span class="cnted">${x.pct>=0.999?"Final":Math.round(x.pct*100)+"% counted"}</span></div></div>`}
+    `<div class="rs"><span>${!x.win?"":x.outright?(x.called?"Won outright":"Leading outright"):`Final round · +${fmtPct(x.margin)} pts`}</span><span class="cnted">${x.pct>=0.999?"Final":Math.round(x.pct*100)+"% counted"}</span></div>`+
+    (x.called?`<button class="cc-btn" data-scall="${r}" style="width:100%;margin:8px 0 0">Call graphic ↗</button>`:"")+`</div>`}
 function senateTip(r){const x=SEN[r];
   const rows=x.fin.length?x.fin.map((f,k)=>`<tr class="${k?"":"win"}"><td style="${k?"":`background:${x.called?spc(f.p):shade(spc(f.p),0.6)};color:${x.called?ink(spc(f.p)):"#121212"}`}"><span class="chip" style="background:${k?spc(f.p):"transparent"}"></span>${f.c.n}${!k&&x.called?" ✓":""}</td><td>${partyLine(f.c)}</td><td class="n">${fmtPct(f.v)}</td></tr>`).join("")
     :x.cands.map(c=>`<tr><td><span class="chip" style="background:${spc(c.a)}"></span>${c.n}</td><td>${partyLine(c)}</td><td class="n">–</td></tr>`).join("");
@@ -1185,6 +1187,107 @@ function renderSenate(){
   const half=Math.ceil(order.length/2);
   pt.innerHTML=`<div class="livehd" style="grid-column:1/-1"><span>Senate seats won <b>+</b> leading</span><span>${calledN} of 17 called</span></div><div>${order.slice(0,half).map(row).join("")}</div><div>${order.slice(half).map(row).join("")}</div>`;
   rlist.innerHTML=Object.keys(DATA.regions).sort().filter(r=>!qText||norm(r).includes(qText)||SEN[r].cands.some(c=>norm(c.n).includes(qText))).map(senateRow).join("")||`<div class="empty">No Senate races match.</div>`;
+}
+
+// ---- Senate calls: when each was first seen called (per viewer), a pop-up for new ones, and a shareable graphic
+const SEN_CALL_KEY="caprica2076sencalls-v1";
+let senTimes={}; if(!SIM) try{senTimes=JSON.parse(localStorage.getItem(SEN_CALL_KEY)||"{}")||{}}catch(e){senTimes={}}
+let senSeen=null;
+function trackSenCalls(){ if(LIVE_SRC!=="live"||SIM) return [];
+  const now=Date.now(), fresh=[], seen=new Set();
+  for(const r in SEN){const x=SEN[r]; if(x.called){seen.add(r); const k=senTimes[r]; if(!k||k.w!==x.win) senTimes[r]={t:now,w:x.win}; if(senSeen&&!senSeen.has(r)) fresh.push(r)} else delete senTimes[r]}
+  const first=!senSeen; senSeen=seen; try{localStorage.setItem(SEN_CALL_KEY,JSON.stringify(senTimes))}catch(e){}
+  return first?[]:fresh }
+function showSenToasts(rs){ const box=document.getElementById("toasts");
+  rs.slice(-3).forEach(r=>{const x=SEN[r], d=document.createElement("div"); d.className="toast"; d.style.setProperty("--c",spc(x.win));
+    d.innerHTML=`<small>Senate call · ${hhmm(Date.now())}</small><b>${sps(x.win)} wins ${r}</b><span>${x.fin[0].c.n} · ${x.outright?"won outright":"+"+fmtPct(x.margin)+" pts in the final round"}</span>`;
+    d.onclick=()=>{d.remove(); openSenCall(r)}; box.appendChild(d); setTimeout(()=>d.remove(),15000)});
+  if(rs.length>3){const d=document.createElement("div"); d.className="toast"; d.style.setProperty("--c","#121212");
+    d.innerHTML=`<small>Senate calls</small><b>${rs.length-3} more Senate race${rs.length-3===1?"":"s"} called</b><span>See them under Senate</span>`;
+    d.onclick=()=>{d.remove(); document.querySelector('#mode button[data-m="senate"]').click()}; box.appendChild(d); setTimeout(()=>d.remove(),15000)}}
+const headKey=n=>HEADSHOTS[n]?n:Object.keys(HEADSHOTS).find(k=>nameKey(k)===nameKey(n))||null; // "Jason J. Herrera" uses Jason Herrera's photo
+const REGBOX={};
+function regionBox(r){ if(REGBOX[r]) return REGBOX[r]; let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+  DATA.regions[r].d.replace(/(-?[\d.]+)[ ,](-?[\d.]+)/g,(m,a,b)=>{a=+a;b=+b;if(a<x0)x0=a;if(a>x1)x1=a;if(b<y0)y0=b;if(b>y1)y1=b}); return REGBOX[r]=[x0,y0,x1,y1]}
+function drawRegionMap(x,r,X,Y,W,H){
+  const b=regionBox(r), cx=(b[0]+b[2])/2, cy=(b[1]+b[3])/2, size=Math.max(60,Math.max(b[2]-b[0],b[3]-b[1])*1.35), k=W/size, col=spc(SEN[r].win);
+  x.save(); x.beginPath(); x.rect(X,Y,W,H); x.clip(); x.fillStyle="#f4f7fa"; x.fillRect(X,Y,W,H);
+  x.translate(X+W/2-cx*k,Y+H/2-cy*k); x.scale(k,k);
+  x.fillStyle="#ececec"; x.fill(new Path2D(DATA.indep));
+  Object.entries(DATA.regions).forEach(([q,v])=>{ if(q===r) return; const s=SEN[q], p=new Path2D(v.d);
+    x.fillStyle=s&&s.win?shade(spc(s.win),s.called?0.35:0.62):"#dedede"; x.fill(p); x.strokeStyle="#fff"; x.lineWidth=3/k; x.stroke(p)});
+  const me=new Path2D(DATA.regions[r].d); x.fillStyle=col; x.fill(me);
+  x.strokeStyle="rgba(255,255,255,.35)"; x.lineWidth=1/k; S.filter(s=>s.region===r).forEach(s=>x.stroke(new Path2D(s.d))); // its House seats, faintly
+  x.strokeStyle="#121212"; x.lineWidth=4/k; x.lineJoin="round"; x.stroke(me);
+  x.restore();
+  const LW=118, LX=X+W-LW-10, LY=Y+H-LW-10, lk=LW/955;
+  x.save(); x.fillStyle="rgba(255,255,255,.94)"; x.fillRect(LX,LY,LW,LW); x.strokeStyle="#ddd"; x.lineWidth=1; x.strokeRect(LX+.5,LY+.5,LW-1,LW-1);
+  x.translate(LX-20*lk,LY+(LW-945*lk)/2-30*lk); x.scale(lk,lk);
+  Object.entries(DATA.regions).forEach(([q,v])=>{x.fillStyle=q===r?"#5a5a5a":"#cfcfcf"; x.fill(new Path2D(v.d))});
+  x.restore();
+  x.strokeStyle="#ddd"; x.lineWidth=2; x.strokeRect(X,Y,W,H);
+}
+function senSentence(r){ const x=SEN[r], w=x.fin[0], ru=x.fin[1], t=LEADER_TITLE[w.c.n], who=t?`${t} ${w.c.n}`:w.c.n;
+  let s=x.outright||!ru?`${who} wins the ${r} Senate seat outright for ${pnL(x.win)}.`
+    :`${who} wins the ${r} Senate seat for ${pnL(x.win)}, ${fmtPct(x.margin)} points ahead of ${ru.c.n} (${sps(ru.p)}) in the final round.`;
+  const h=houseOf(w.c.n); if(h) s+=` ${w.c.n} is also standing for the House in ${h.name}.`;
+  return s }
+async function senCanvas(r,withPhoto){
+  try{await Promise.all(["500","600","700","800"].map(w=>document.fonts.load(FONT(w,20))))}catch(e){}
+  const X0=SEN[r], w=X0.fin[0], hk=headKey(w.c.n), head=withPhoto&&hk?await loadHead(hk):null;
+  const col=spc(X0.win), fg=ink(col), W=1080, H=1080, M=60;
+  const cv=document.createElement("canvas"); cv.width=W; cv.height=H; const x=cv.getContext("2d");
+  x.fillStyle="#fff"; x.fillRect(0,0,W,H); x.textBaseline="alphabetic";
+  x.fillStyle="#121212"; x.fillRect(0,0,W,72);
+  x.fillStyle="#e3173e"; x.beginPath(); x.arc(M+8,36,8,0,7); x.fill();
+  x.fillStyle="#fff"; x.font=FONT(800,22); x.fillText("CAPRICA ELECTS 2076",M+28,44);
+  const tm=(senTimes[r]||{}).t||Date.now(); x.textAlign="right"; x.font=FONT(600,22); x.fillText(`SENATE CALL · ${hhmm(tm)}`,W-M,44); x.textAlign="left";
+  x.fillStyle=col; x.fillRect(0,72,W,190);
+  x.fillStyle=fg; x.font=FONT(700,24); x.fillText("PROJECTED WINNER · SENATE",M,120);
+  const hl=`${sps(X0.win)} wins`.toUpperCase(); fitFont(x,hl,800,78,W-2*M,44); x.fillText(hl,M,200);
+  x.font=FONT(600,30); x.fillText(X0.outright?`Won outright in ${r}`:`${r}’s seat in the Senate`,M,242);
+  drawRegionMap(x,r,M,292,400,400);
+  const RX=M+400+40, RW=W-M-RX; let y=322;
+  x.fillStyle="#777"; x.font=FONT(700,22); x.fillText("SENATE · ONE SEAT PER REGION",RX,y); y+=58;
+  fitFont(x,r,800,56,RW,36); x.fillStyle="#121212"; x.fillText(r,RX,y); y+=26;
+  x.fillStyle="#e2e2e2"; x.fillRect(RX,y,RW,2); y+=44;
+  const pl=partyLine(w.c);
+  if(withPhoto){ const D=150, py=y-36, NX=RX+D+22, NW=RW-D-22;
+    drawHeadshot(x,hk||w.c.n,head,RX,py,D,col);
+    x.font=FONT(800,34); const nl=wrapText(x,w.c.n,NW).slice(0,2); let ny=py+D/2-(nl.length>1?28:6); x.fillStyle="#121212";
+    nl.forEach(l=>{x.fillText(l,NX,ny);ny+=40});
+    x.fillStyle=col; x.fillRect(NX,ny-14,14,14); x.fillStyle="#555"; fitFont(x,pl,600,22,NW-22,15); x.fillText(pl,NX+22,ny);
+    y=py+D+40;
+  } else {
+    x.fillStyle=col; x.fillRect(RX,y-26,16,26); x.fillStyle="#121212"; x.font=FONT(800,36);
+    wrapText(x,w.c.n,RW-28).forEach(l=>{x.fillText(l,RX+28,y);y+=42}); y-=6;
+    x.fillStyle="#555"; fitFont(x,pl,600,24,RW-28,15); x.fillText(pl,RX+28,y+14); y+=58;
+  }
+  { const room=700-y; let sp=25, lines; do{x.font=FONT(500,sp); lines=wrapText(x,senSentence(r),RW); if((lines.length-1)*sp*1.35<=room) break; sp-=2}while(sp>=17);
+    x.fillStyle="#333"; lines.forEach(l=>{if(y<=700){x.fillText(l,RX,y);y+=Math.round(sp*1.35)}})}
+  y=748; x.fillStyle="#121212"; x.fillRect(M,y-30,W-2*M,3);
+  x.font=FONT(800,20); x.fillText(X0.outright?"RESULT":"FINAL ROUND",M,y); x.textAlign="right"; x.fillStyle="#777"; x.font=FONT(600,20);
+  x.fillText(X0.pct>=0.999?"All votes counted":`${Math.round(X0.pct*100)}% of the vote counted`,W-M,y); x.textAlign="left"; y+=24;
+  const rows=X0.fin.slice(0,3), max=rows[0].v, BX=M+460, BW=W-M-150-BX;
+  rows.forEach((f,i)=>{const ry=y+i*72;
+    x.fillStyle=spc(f.p); x.fillRect(M,ry+14,12,44);
+    x.fillStyle="#121212"; x.font=FONT(i?600:800,28); let n=f.c.n; while(x.measureText(n).width>BX-M-40&&n.length>4) n=n.slice(0,-2); if(n!==f.c.n) n=n.trim()+"…";
+    x.fillText(n,M+24,ry+38); x.fillStyle="#777"; fitFont(x,partyLine(f.c),500,19,BX-M-40,14); x.fillText(partyLine(f.c),M+24,ry+62);
+    x.fillStyle=i?shade(spc(f.p),0.25):spc(f.p); x.fillRect(BX,ry+22,Math.max(4,BW*f.v/max),28);
+    x.fillStyle="#121212"; x.font=FONT(800,30); x.textAlign="right"; x.fillText(fmtPct(f.v)+"%",W-M,ry+47); x.textAlign="left"});
+  if(X0.others.length&&rows.length<3){ x.fillStyle="#777"; x.font=FONT(500,19); const ol=wrapText(x,"Also stood: "+X0.others.map(c=>c.n).join(", "),W-2*M);
+    x.fillText(ol.length>1?ol[0].replace(/,?\s*\S+$/,"")+"…":ol[0],M,y+rows.length*72+30)}
+  x.fillStyle="#e2e2e2"; x.fillRect(M,H-74,W-2*M,2); x.fillStyle="#777"; x.font=FONT(500,19);
+  x.fillText(X0.outright?"Won outright: the only candidate left in the final round":`Final-round lead of ${fmtPct(X0.margin)} pts`,M,H-34);
+  x.textAlign="right"; x.fillText(SIM?"SIMULATED COUNT · PREVIEW":"Source: Caprica count sheet",W-M,H-34); x.textAlign="left";
+  return cv;
+}
+async function openSenCall(r,withPhoto){
+  if(withPhoto===undefined) withPhoto=!!headKey(SEN[r].fin[0].c.n);
+  const cv=await senCanvas(r,withPhoto), m=document.getElementById("callmodal"), img=document.getElementById("cmximg");
+  img.src=cv.toDataURL("image/png"); img.alt=`Senate call: ${sps(SEN[r].win)} wins ${r}`; callShown=r; callPhoto=withPhoto; callKind="senate";
+  document.querySelectorAll("#cmxlay button").forEach(b=>b.classList.toggle("on",(b.dataset.p==="1")===withPhoto));
+  m.classList.add("on"); hideTip();
 }
 
 // ---- fit the Results stage to the window
