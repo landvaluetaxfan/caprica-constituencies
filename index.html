@@ -26,6 +26,16 @@
   .legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:#333;margin:4px 0 8px}
   .legend span.sw{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:5px;vertical-align:-2px}
   .mapbox{position:relative}
+  #main{touch-action:pan-y;--z:1;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+  .mapbox.zoomed #main{touch-action:none;cursor:grab}
+  .mapbox.dragging #main,.mapbox.dragging #main path.seat{cursor:grabbing}
+  #main text.rl{font-size:calc(11px / var(--z));stroke-width:calc(2.6px / var(--z))}
+  #main text.inum{font-size:calc(10px / var(--z))}
+  .zoomui{position:absolute;right:6px;top:6px;z-index:2;display:flex;flex-direction:column;background:#fff;border:1px solid #ccc;border-radius:4px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+  .zoomui button{font:600 18px/1 "Libre Franklin",sans-serif;width:32px;height:32px;padding:0;border:0;background:#fff;color:#121212;cursor:pointer;-webkit-appearance:none;appearance:none}
+  .zoomui button+button{border-top:1px solid #ddd}
+  .zoomui button:disabled{color:#c4c4c4;cursor:default}
+  .zoomui button[data-z="reset"]{font-size:15px}
   svg{display:block;width:100%;height:auto}
   path.seat{stroke:#fff;stroke-width:.55;vector-effect:non-scaling-stroke;stroke-linejoin:round;cursor:pointer;transition:opacity .15s,fill .2s}
   path.seat.dim{opacity:.25}
@@ -734,7 +744,7 @@ function drawMap(svg,ids,regs,main){
 }
 const main=document.getElementById("main");
 drawMap(main,S.map(s=>s.i),Object.keys(DATA.regions),true);
-el("text",{x:96,y:744,class:"rl",style:"fill:#8a8a8a;stroke:none;font-size:9px"},main).textContent="Independent Myrati";
+el("text",{x:96,y:744,class:"rl",style:"fill:#8a8a8a;stroke:none;font-size:calc(9px / var(--z))"},main).textContent="Independent Myrati";
 Object.entries(DATA.regions).forEach(([r,v])=>{el("text",{x:v.lab[0],y:v.lab[1],class:"rl"},main).textContent=r});
 const ig=document.getElementById("insets");
 DATA.insets.forEach((ins,k)=>{
@@ -747,6 +757,60 @@ DATA.insets.forEach((ins,k)=>{
   card.appendChild(sv);ig.appendChild(card);
   drawMap(sv,ins.ids,ins.regs,false);
 });
+
+// ---- zoom on the main map: + / − / reset buttons, double-click, Ctrl/⌘ + scroll or a trackpad pinch,
+// a two-finger pinch on phones, and drag to move around once zoomed in. Works by changing the viewBox.
+(()=>{
+  const V0=[20,30,955,945], KMAX=12, box=main.parentNode; let k=1, vx=V0[0], vy=V0[1], moved=false;
+  const ui=document.createElement("div"); ui.className="zoomui";
+  ui.innerHTML=`<button type="button" data-z="in" title="Zoom in" aria-label="Zoom in">+</button><button type="button" data-z="out" title="Zoom out" aria-label="Zoom out">−</button><button type="button" data-z="reset" title="Show the whole map" aria-label="Reset zoom">⟲</button>`;
+  box.appendChild(ui);
+  const B=ui.querySelector('[data-z="in"]'), O=ui.querySelector('[data-z="out"]'), R=ui.querySelector('[data-z="reset"]');
+  // screen <-> map units: the map keeps its shape, so only the base scale and letterbox offset are needed
+  const frame=()=>{const r=main.getBoundingClientRect(), b=Math.min(r.width/V0[2],r.height/V0[3]); return {b,ox:r.left+(r.width-V0[2]*b)/2,oy:r.top+(r.height-V0[3]*b)/2}};
+  const toMap=(cx,cy,f=frame())=>[vx+(cx-f.ox)/(f.b*k), vy+(cy-f.oy)/(f.b*k)];
+  function apply(){
+    const w=V0[2]/k, h=V0[3]/k;
+    vx=Math.min(Math.max(vx,V0[0]),V0[0]+V0[2]-w); vy=Math.min(Math.max(vy,V0[1]),V0[1]+V0[3]-h);
+    main.setAttribute("viewBox",`${vx} ${vy} ${w} ${h}`); main.style.setProperty("--z",k);
+    box.classList.toggle("zoomed",k>1.001); O.disabled=R.disabled=k<=1.001; B.disabled=k>=KMAX-0.001;
+  }
+  function zoomAt(k2,px,py){ k2=Math.min(KMAX,Math.max(1,k2)); if(Math.abs(k2-k)<1e-6) return;
+    vx=px-(px-vx)*k/k2; vy=py-(py-vy)*k/k2; k=k2; hideTip(); apply() }
+  const centre=()=>[vx+V0[2]/k/2, vy+V0[3]/k/2];
+  B.onclick=e=>{e.stopPropagation(); zoomAt(k*1.7,...centre())};
+  O.onclick=e=>{e.stopPropagation(); zoomAt(k/1.7,...centre())};
+  R.onclick=e=>{e.stopPropagation(); k=1; hideTip(); apply()};
+  main.addEventListener("dblclick",e=>{e.preventDefault(); zoomAt(k*2,...toMap(e.clientX,e.clientY))});
+  main.addEventListener("wheel",e=>{ if(!e.ctrlKey&&!e.metaKey) return; e.preventDefault(); // plain scrolling still scrolls the page
+    const d=e.deltaY*(e.deltaMode===1?16:e.deltaMode===2?400:1); zoomAt(k*Math.exp(-d*0.004),...toMap(e.clientX,e.clientY))},{passive:false});
+  // Safari on a Mac trackpad sends gesture events rather than Ctrl + wheel
+  const pts=new Map(); let g0=null;
+  main.addEventListener("gesturestart",e=>{e.preventDefault(); if(pts.size) return; g0={k,p:toMap(e.clientX,e.clientY)}});
+  main.addEventListener("gesturechange",e=>{e.preventDefault(); if(pts.size||!g0) return; zoomAt(g0.k*e.scale,...g0.p)});
+  main.addEventListener("gestureend",e=>{e.preventDefault(); g0=null});
+  // dragging and two-finger pinching (pointer events cover mouse, pen and touch)
+  let last=null, pinch=null, travel=0;
+  const two=()=>{const [a,c]=[...pts.values()]; return {d:Math.hypot(a.x-c.x,a.y-c.y)||1, x:(a.x+c.x)/2, y:(a.y+c.y)/2}};
+  main.addEventListener("pointerdown",e=>{ if(e.pointerType==="mouse"&&e.button!==0) return;
+    pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(pts.size===1){last={x:e.clientX,y:e.clientY}; travel=0; moved=false; pinch=null}
+    if(pts.size===2){const m=two(); pinch={d0:m.d,k0:k,p:toMap(m.x,m.y)}}});
+  main.addEventListener("pointermove",e=>{ if(!pts.has(e.pointerId)) return; pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    const f=frame();
+    if(pts.size>=2&&pinch){const m=two(); k=Math.min(KMAX,Math.max(1,pinch.k0*m.d/pinch.d0));
+      vx=pinch.p[0]-(m.x-f.ox)/(f.b*k); vy=pinch.p[1]-(m.y-f.oy)/(f.b*k); moved=true; hideTip(); apply(); return}
+    if(pts.size===1&&last&&k>1.001){const dx=e.clientX-last.x, dy=e.clientY-last.y; last={x:e.clientX,y:e.clientY}; travel+=Math.abs(dx)+Math.abs(dy);
+      if(travel<5) return;
+      if(!moved){moved=true; box.classList.add("dragging"); try{main.setPointerCapture(e.pointerId)}catch(_){}; hideTip()}
+      vx-=dx/(f.b*k); vy-=dy/(f.b*k); apply()}});
+  const up=e=>{ pts.delete(e.pointerId); box.classList.remove("dragging");
+    if(pts.size===1){const p=[...pts.values()][0]; last={x:p.x,y:p.y}; pinch=null} if(!pts.size) last=null };
+  ["pointerup","pointercancel","lostpointercapture"].forEach(t=>main.addEventListener(t,up));
+  // a drag or pinch is not a click on the seat under it
+  main.addEventListener("click",e=>{ if(moved){e.stopPropagation(); e.preventDefault(); moved=false} },true);
+  apply();
+})();
 
 function recolor(){S.forEach(s=>(pathsById[s.id]||[]).forEach(p=>p.setAttribute("fill",fill(s,p.ownerSVGElement.id!=="main"))));legend()}
 const DEK_DEFAULT=document.getElementById("dek").textContent;
