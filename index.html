@@ -262,14 +262,14 @@ const PARTIES_EX = {
 // the government formed after this election (left of the seat bar) and the opposition
 const GOV_EX=["DEM","DM","SDA","REJ","REG"], OPP_EX=["RE","NPP","PP","AC","IND"];
 // ---- 2076 (live). Codes are the count sheet's. Convergence = Renaissance + New Progressives + Caprican Democratic Movement;
-// AA = Autumn Accords (SDA + Rejuvenation), AR = Régionale, JF = Jasmine Movement–Scarfelts independent alliance,
+// AA = Autumn Accords (SDA + Rejuvenation), AR = Régionale, JF = Jasfelts (the Jasmine Movement–Scarfelts independent alliance),
 // A = Alliance (Avenir + People’s Party).
 const PARTIES_LIVE = {
   AA: {name:"Autumn Accords (Social Democrats and Rejuvenation)",short:"Autumn Accords",color:"#E3173E"},
   DEM:{name:"Democratic Party of Caprica",short:"Democrats",color:"#7B2CBF"},
   DM: {name:"Democracy Manifest",short:"Manifest",color:"#14C2DA"},
   AR: {name:"Régionale",short:"Régionale",color:"#F2C230"},
-  JF: {name:"Jasmine Movement–Scarfelts independent alliance",short:"Jasmine–Scarfelts",color:"#6B8E23"},
+  JF: {name:"Jasfelts",short:"Jasfelts",color:"#6B8E23"},
   CON:{name:"Convergence (Renaissance, New Progressives and the Caprican Democratic Movement)",short:"Convergence",color:"#1E9E55"},
   A:  {name:"Alliance (Avenir and the People’s Party)",short:"Alliance",color:"#2B4FA8"},
   IND:{name:"Independent",short:"Independents",color:"#8E8E8E"}
@@ -581,7 +581,7 @@ const CALL_FROM=0.45; // share of a region's vote counted before any of its seat
 // seats the organiser has called for a named candidate: kept for that party when the seat table is placed, and called as soon as they count
 const PINNED={"chasmia-verasul-and-hollin-fells":"CON","ambarino-university-square":"DEM","ambarino-bedford-falls":"DEM","ambarino-hartley-and-bois-joli":"DEM","pittston-esquerico-reyes-and-conklin":"CON","pittston-escarlata-san-aurelio-and-spearhead":"CON"};
 // seats the fit hands to a party whenever the region's seat table gives it one, without calling them early:
-// Raudea North is where Jasmine–Scarfelts wins its Kazana seat, with George Miliband
+// Raudea North is where Jasfelts wins its Kazana seat, with George Miliband
 const SEAT_FOR={"kazana-raudea-north":"JF"}, FIT={...PINNED,...SEAT_FOR};
 const EARLY_FROM=0.10, EARLY_PROJ=0.25, EARLY_NOW=0.15; // early calls: region at least 10% in, projected lead 25+ pts, current lead 15+ pts
 // Voting runs until tomorrow morning: until the polls close, no more than half the races are called (the safest first).
@@ -833,7 +833,7 @@ function legend(){
     L.innerHTML=`<span class="badge" style="margin-left:0;background:#fde2e2;color:#9b1c1c">${SIM?`Simulated count · ${Math.round(SIM*100)}% preview`:LIVE_SRC==="live"?`Live · updated ${t}`:"Saved snapshot"}</span> `+
       P_ORDER.filter(p=>Object.values(OUT).some(o=>o.c.some(c=>c.party===p))).map(p=>`<span><span class="sw" style="background:${pcol(p)}"></span>${pshort(p)}</span>`).join("")+
       `<span style="color:#777"><span class="sw" style="background:linear-gradient(90deg,${shade("#7B2CBF",0.6)} 50%,#7B2CBF 50%)"></span>Leading · called</span><span style="color:#777"><span class="sw hatchsw"></span>Would be a gain</span><span style="color:#777"><span class="sw" style="background:#dedede"></span>No votes yet</span>`;
-    N.innerHTML=`<b>About the 2076 count.</b> Each region’s share of the vote and how much of it has been counted come from the live count sheet, refreshed every five minutes. Seat-by-seat results are simulated from that: every seat starts from its result in the 2072 election and swings with its region, and seats report at different speeds. How many seats each party leads in follows the sheet’s seat table for each region, so the seat totals match the sheet as the count moves. Safe seats are called early: once its region is counting, a seat projected to be won by 25 points or more, with the votes so far agreeing, is called straight away. Projections use the count sheet’s projected regional vote, not just the votes counted so far, so a region whose early returns lean one way isn’t called on those alone. Other seats are called once their region is about 45% counted and the lead is safe. Voting continues until tomorrow morning, so until the polls close no more than half the seats (101 of 203) are called, the safest first. Convergence is the electoral alliance of Renaissance, the New Progressives and the Caprican Democratic Movement. The Autumn Accords bring together the Social Democrats and Rejuvenation, the Alliance brings together Avenir and the People’s Party, and Jasmine–Scarfelts is an alliance of independents.`;
+    N.innerHTML=`<b>About the 2076 count.</b> Each region’s share of the vote and how much of it has been counted come from the live count sheet, refreshed every five minutes. Seat-by-seat results are simulated from that: every seat starts from its result in the 2072 election and swings with its region, and seats report at different speeds. How many seats each party leads in follows the sheet’s seat table for each region, so the seat totals match the sheet as the count moves. Safe seats are called early: once its region is counting, a seat projected to be won by 25 points or more, with the votes so far agreeing, is called straight away. Projections use the count sheet’s projected regional vote, not just the votes counted so far, so a region whose early returns lean one way isn’t called on those alone. Other seats are called once their region is about 45% counted and the lead is safe. Voting continues until tomorrow morning, so until the polls close no more than half the seats (101 of 203) are called, the safest first. Convergence is the electoral alliance of Renaissance, the New Progressives and the Caprican Democratic Movement. The Autumn Accords bring together the Social Democrats and Rejuvenation, the Alliance brings together Avenir and the People’s Party, and Jasfelts brings together the Jasmine Movement and the Scarfelts, an alliance of independents.`;
     return;
   }
   if(mode==="region") L.innerHTML=Object.entries(DATA.regions).map(([r,v])=>`<span><span class="sw" style="background:${REG_COL[r]}"></span>${r} <span style="color:#888">${v.seats}</span></span>`).join("");
@@ -1231,7 +1231,7 @@ function voteNote(s){
   return t;
 }
 // ---- live (2076) hover box and note
-const PN_LIVE={AA:"the Autumn Accords",DEM:"the Democrats",DM:"Manifest",AR:"Régionale",JF:"Jasmine–Scarfelts",CON:"Convergence",A:"the Alliance",IND:"an independent"};
+const PN_LIVE={AA:"the Autumn Accords",DEM:"the Democrats",DM:"Manifest",AR:"Régionale",JF:"Jasfelts",CON:"Convergence",A:"the Alliance",IND:"an independent"};
 const pnL=p=>PN_LIVE[p]||p;
 function liveNote(s,o){
   const pct=Math.round(o.pct*100);

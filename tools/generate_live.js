@@ -61,7 +61,7 @@ NAMED_LIVE.forEach(([name, region, party, seatName]) => {
 // sitting MPs who have changed party since 2072: [name, 2076 party, seat id]. They take that party's
 // slot in the given seat; the generated candidate they replace takes their old slot, so no other name moves.
 const SWITCHED = [
-  // Democrat for Meauxsloit in 2072, now Jasmine-Scarfelts (also its Senate candidate in Kazana), standing in the seat it wins
+  // Democrat for Meauxsloit in 2072, now Jasfelts (also its Senate candidate in Kazana), standing in the seat it wins
   ["George Miliband", "JF", "kazana-raudea-north"],
 ];
 SWITCHED.forEach(([name, party, to]) => {
