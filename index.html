@@ -591,6 +591,7 @@ const pollsOpen=()=>Date.now()<POLLS_CLOSE.getTime();
 function capCalls(items,total){ if(!pollsOpen()) return; const max=Math.floor(total/2), c=items.filter(x=>x.o.called); if(c.length<=max) return;
   c.sort((a,b)=>(b.keep-a.keep)||(b.safety-a.safety)).slice(max).forEach(x=>x.o.called=false) }
 const SEN_CALL_FROM=0.75; // Senate races wait until later in the night: the region must be three-quarters counted
+const SEN_SAFE=0.20; // once the polls have closed, a Senate race with a final-round lead of 20 points or more is called whatever has been counted
 // preview a later stage of the count: ?sim=0.7 lifts every counting region to at least 70% counted (nothing is saved)
 const SIM=Math.min(1,Math.max(0,+(new URLSearchParams(location.search).get("sim"))||0));
 function applySim(L){ if(SIM) for(const r in L.reg){const g=L.reg[r]; if(g.pct>0){g.pct=Math.max(g.pct,SIM); if(g.pct>=0.999&&g.seats) g.final=g.seats}} return L }
@@ -1145,7 +1146,7 @@ function buildSenate(){
     const g=LIVE.reg[r]||{pct:0}, fr=(LIVE.sen||{})[r]||{}, cands=SENATE_CANDS[r]||[], pct=g.final?1:(g.pct||0);
     const fin=Object.entries(fr).sort((a,b)=>b[1]-a[1]).map(([p,v])=>({p,v,c:cands.find(x=>x.a===p)||{n:`${sps(p)} candidate`,p,a:p}}));
     const rep=pct>0&&fin.length>0, win=rep?fin[0].p:null, margin=rep?fin[0].v-(fin[1]?fin[1].v:0):0;
-    const called=rep&&(pct>=0.999||(pct>=SEN_CALL_FROM&&margin*100>5+40*(1-pct)));
+    const called=rep&&(pct>=0.999||(!pollsOpen()&&Math.round(margin*1000)>=SEN_SAFE*1000)||(pct>=SEN_CALL_FROM&&margin*100>5+40*(1-pct)));
     SEN[r]={r,pct,fin:rep?fin:[],win,margin,outright:rep&&fin.length===1,called,cands,others:cands.filter(x=>!rep||!fin.some(f=>f.c===x))};
   });
   capCalls(Object.values(SEN).map(x=>({o:x,keep:0,safety:x.pct>=0.999?1e9:x.margin*100-(5+40*(1-x.pct))})),17);
