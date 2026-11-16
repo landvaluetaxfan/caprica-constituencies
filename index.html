@@ -640,7 +640,8 @@ const SEN_FINAL={"Ambarino":["DEM",0.1477],"Ambrosia":["A",0.1559],"Cambria":["A
   "Costa Blanca":["CON",0.0940],"Kalahooska":["AR",0.5695],"Kazana":{A:0.5336,AA:0.3663,JF:0.1001},"Mezata":["CON",0.3084],"Moeras":{JF:0.5069,DEM:0.3677,CON:0.1253},"Montiablo":["A",0.2746],
   "Myrati":{CON:0.6197,JF:0.1944,IND:0.1859},"Oplana":["AA",0.1216],"Pittston":["CON",0.1237],"Pleucadeuc":["A",0.7161],"Reno":["A",0.2644],"Ventura":["CON",0.4130]};
 // the presidency: decided by ranked-choice voting; the final round is between these two tickets
-const PRES={margin:0.036,rcv:true,
+// first round: Flash led on first preferences; Alametsä overtook her on the transfers from the other candidates
+const PRES={margin:0.0062,rcv:true,first:{CON:0.4270,DEM:0.4649},firstOther:0.1081,
   tickets:[{p:"CON",n:"Reijo Alametsä",mate:"Tony Blair",line:"Caprican Democratic Movement · Renaissance"},
            {p:"DEM",n:"Adriana Flash",mate:"Kosta Piastri",line:"Democrats"}]};
 // preview a later stage of the count: ?sim=0.7 lifts every counting region to at least 70% counted (nothing is saved)
@@ -1330,10 +1331,13 @@ function renderSenate(){
 // ---- the presidency (one national race, ranked-choice): shown above the Senate races
 const presFin=()=>PRES.tickets.map((t,i)=>({...t,v:i?(1-PRES.margin)/2:(1+PRES.margin)/2}));
 function presSentence(){ const [w,l]=presFin();
-  return `${w.n} and ${w.mate} win the presidency for ${pnL(w.p)}, ${fmtPct(PRES.margin)} points ahead of ${l.n} and ${l.mate} (${sps(l.p)}) in the ranked-choice final round.` }
+  const f=PRES.first, behind=f&&f[w.p]<f[l.p];
+  return `${w.n} and ${w.mate} win the presidency for ${pnL(w.p)}, ${fmtPct(PRES.margin)} points ahead of ${l.n} and ${l.mate} (${sps(l.p)}) in the ranked-choice final round`+
+    (behind?`, after trailing ${fmtPct(f[l.p])}% to ${fmtPct(f[w.p])}% on first preferences and winning most of the transfers.`:".") }
 function presRow(){ const fin=presFin(), col=spc(fin[0].p);
   return `<div class="race srace pres"><div class="rh"><span class="rn">President</span><span class="tag gain" style="--c:${col};--fg:${ink(col)}">${sps(fin[0].p)} wins</span></div>`+
     fin.map((t,i)=>`<div class="sfin"><span class="chip" style="background:${spc(t.p)}"></span><b>${t.n}</b><span class="sp">with ${t.mate} · ${t.line}</span><span class="sv">${fmtPct(t.v)}%</span></div><div class="sbar"><i style="width:${t.v*100}%;background:${i?shade(spc(t.p),0.45):spc(t.p)}"></i></div>`).join("")+
+    (PRES.first?`<div class="soth">First round: ${fin.map(t=>`${t.n} ${fmtPct(PRES.first[t.p])}%`).join(", ")}, others ${fmtPct(PRES.firstOther)}%</div>`:"")+
     `<div class="rs"><span>Ranked-choice final round · +${fmtPct(PRES.margin)} pts</span><span class="cnted">Final</span></div>`+
     `<button class="cc-btn" data-pcall="1" style="width:100%;margin:8px 0 0">Call graphic ↗</button></div>` }
 
@@ -1506,7 +1510,7 @@ function bigPct(x,v,X,Y,px,maxW,fill){ // "57.4" with a raised "%"
 function bcSpec(kind,key){
   if(kind==="president"){ const f=presFin();
     return {kind,title:"Caprica",tag:"RANKED CHOICE",pct:1,round:"FINAL ROUND",lead:PRES.margin,
-      c:f.map(t=>({n:t.n,p:t.p,v:t.v,line:`${sps(t.p).toUpperCase()} · WITH ${t.mate.toUpperCase()}`,head:headKey(t.n)}))} }
+      c:f.map(t=>({n:t.n,p:t.p,v:t.v,sub:PRES.first?`FIRST ROUND ${fmtPct(PRES.first[t.p])}%`:null,line:`${sps(t.p).toUpperCase()} · WITH ${t.mate.toUpperCase()}`,head:headKey(t.n)}))} }
   if(kind==="senate"){ const X0=SEN[key];
     return {kind,title:key,tag:X0.pct>=0.999?"FINAL RESULT":"RACE CALL",pct:X0.pct,round:X0.outright?"RESULT":"FINAL ROUND",lead:X0.margin,
       c:X0.fin.slice(0,3).map(f=>({n:f.c.n,p:f.p,v:f.v,line:partyLine(f.c).toUpperCase(),head:headKey(f.c.n)}))} }
@@ -1521,14 +1525,14 @@ function sidePanel(x,l,img,LX,LY,LW,LH,withPhoto,kind,dim){ const lb=tone(deep(s
       if(l.inc){ x.font=BFONT(700,20,"l"); const iw=track(x,"INCUMBENT",0,null,1.5)+20; x.fillStyle="rgba(10,20,40,.85)"; x.fillRect(LPX+LD-iw-8,LPY+LD-42,iw,32); x.fillStyle="#fff"; track(x,"INCUMBENT",LPX+LD-iw+2,LPY+LD-19,1.5) } }
     if(!tall){ // a compact panel, for the runner-up and third place stacked
       bigPct(x,l.v,LX+32,LY+104,withPhoto?92:112,LNW,"#fff"); let ly=LY+146;
-      if(l.votes!=null){ x.font=BFONT(700,22,"l"); x.fillStyle="rgba(255,255,255,.85)"; track(x,`${l.votes.toLocaleString("en-US")} VOTES`,LX+32,ly,1.5); ly+=34 }
+      if(l.votes!=null||l.sub){ x.font=BFONT(700,22,"l"); x.fillStyle="rgba(255,255,255,.85)"; track(x,l.sub||`${l.votes.toLocaleString("en-US")} VOTES`,LX+32,ly,1.5); ly+=34 }
       fitT(x,l.line,700,22,LNW,14,"l",1.2); x.fillStyle="rgba(255,255,255,.88)"; track(x,l.line,LX+32,ly,1.2);
       const [lf,lln]=splitName(l.n), lny=LY+LH-(lf?84:30);
       if(lf){ fitB(x,lf.toUpperCase(),600,30,LW-64,18,"l"); shadowText(x,lf.toUpperCase(),LX+32,lny,"rgba(255,255,255,.88)",3) }
       fitB(x,lln.toUpperCase(),700,58,LW-64,30); shadowText(x,lln.toUpperCase(),LX+32,lny+(lf?64:0),"#fff",4); return }
     bigPct(x,l.v,LX+36,LY+166,withPhoto?132:170,LNW,"#fff");
     x.fillStyle="rgba(255,255,255,.5)"; x.fillRect(LX+36,LY+208,Math.min(LNW,300),3);
-    let ly=LY+254; if(l.votes!=null){ x.font=BFONT(700,26,"l"); x.fillStyle="rgba(255,255,255,.85)"; track(x,`${l.votes.toLocaleString("en-US")} VOTES`,LX+36,ly,1.5); ly+=48 }
+    let ly=LY+254; if(l.votes!=null||l.sub){ x.font=BFONT(700,26,"l"); x.fillStyle="rgba(255,255,255,.85)"; track(x,l.sub||`${l.votes.toLocaleString("en-US")} VOTES`,LX+36,ly,1.5); ly+=48 }
     fitT(x,l.line,700,24,LNW,15,"l",1.2); x.fillStyle="rgba(255,255,255,.88)"; track(x,l.line,LX+36,ly,1.2);
     const [lf,lln]=splitName(l.n), lny=LY+LH-122;
     if(lf){ fitB(x,lf.toUpperCase(),600,40,LW-72,22,"l"); shadowText(x,lf.toUpperCase(),LX+36,lny,"rgba(255,255,255,.88)",3) }
@@ -1584,7 +1588,7 @@ async function bcCanvas(sp,withPhoto){
   bigPct(x,w.v,NX,PY+(withPhoto?186:226),withPhoto?190:250,NW,"#fff");
   let sy=PY+(withPhoto?232:280); x.fillStyle="rgba(255,255,255,.55)"; x.fillRect(NX,sy,Math.min(NW,420),3); sy+=46;
   x.fillStyle="rgba(255,255,255,.85)"; x.font=BFONT(700,28,"l");
-  const sub=w.votes!=null?`${w.votes.toLocaleString("en-US")} VOTES`:sp.round; if(sub){track(x,sub,NX,sy,1.5); sy+=60}
+  const sub=w.sub||(w.votes!=null?`${w.votes.toLocaleString("en-US")} VOTES`:sp.round); if(sub){track(x,sub,NX,sy,1.5); sy+=60}
   const ld=`+${fmtPct(sp.lead)}`; x.font=BFONT(800,50,"n"); shadowText(x,ld,NX,sy,"#fff",3); const lw=x.measureText(ld).width;
   x.font=BFONT(700,26,"l"); x.fillStyle="rgba(255,255,255,.85)"; track(x,"PTS LEAD",NX+lw+14,sy,1.5);
   if(!withPhoto){ bx=WX+WW-120; by=PY+110 }
