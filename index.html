@@ -604,11 +604,12 @@ const SEN_RUNNER={"Pleucadeuc":0.126};
 // once the polls have closed, a Senate race with a final-round lead of 20 points or more is called whatever has been counted
 const SEN_SAFE=0.20;
 const SEN_CALLED={"Moeras":"JF"}; // Senate races called by hand: called whenever this party leads
-// final Senate results: [winning party, final-round margin]. These override the count sheet: the race is shown as
-// fully counted and called, between the winner and the strongest other candidate on the sheet
+// final Senate results: [winning party, final-round margin], or every candidate's final share where more than two are left.
+// These override the count sheet: the race is shown as fully counted and called, between the winner and the strongest
+// other candidate on the sheet (or the candidates given)
 const SEN_FINAL={"Ambarino":["DEM",0.1477],"Ambrosia":["A",0.1559],"Cambria":["AA",0.0423],"Carnapol":["DM",0.4399],"Chasmia":["CON",0.4042],
   "Costa Blanca":["CON",0.0940],"Kalahooska":["AR",0.5695],"Kazana":["A",0.1673],"Mezata":["CON",0.3084],"Moeras":["JF",0.1392],"Montiablo":["A",0.2746],
-  "Myrati":["CON",0.4253],"Oplana":["AA",0.1216],"Pittston":["CON",0.1237],"Pleucadeuc":["A",0.7161],"Reno":["A",0.2644],"Ventura":["CON",0.4130]};
+  "Myrati":{CON:0.6197,JF:0.1944,IND:0.1859},"Oplana":["AA",0.1216],"Pittston":["CON",0.1237],"Pleucadeuc":["A",0.7161],"Reno":["A",0.2644],"Ventura":["CON",0.4130]};
 // the presidency: decided by ranked-choice voting; the final round is between these two tickets
 const PRES={margin:0.036,rcv:true,
   tickets:[{p:"CON",n:"Reijo Alametsä",mate:"Tony Blair",line:"Caprican Democratic Movement · Renaissance"},
@@ -1208,7 +1209,7 @@ function showCallsTab(){
 // ---- Senate: one seat per region, decided on the count sheet's final-round table (always the 2076 parties)
 const P_SEN=Object.keys(PARTIES_LIVE), spc=p=>(PARTIES_LIVE[p]||{}).color||"#888", sps=p=>(PARTIES_LIVE[p]||{}).short||p;
 const COMP={REJ:"Rejuvenation",SDA:"Social Democrats",DEM:"Democrats",DM:"Manifest",AR:"Régionale",JM:"Jasmine Movement",SP:"Scarfelts",NPP:"New Progressives",CDM:"Caprican Democratic Movement",RE:"Renaissance",PP:"People’s Party",AC:"Avenir",IND:"Independent"};
-const partyLine=c=>COMP[c.p]&&c.p!==c.a&&c.a!=="IND"?`${COMP[c.p]} · ${sps(c.a)}`:sps(c.a);
+const partyLine=c=>c.a==="IND"?"Independent":COMP[c.p]&&c.p!==c.a?`${COMP[c.p]} · ${sps(c.a)}`:sps(c.a);
 const RP_TITLE=document.querySelector(".rp-title").innerHTML;
 const nameKey=n=>{const t=norm(n).replace(/[^a-z ]/g," ").split(/\s+/).filter(Boolean);return t[0]+" "+t[t.length-1]};
 const HOUSE_BY_NAME={}; for(const id in CANDS_LIVE) for(const p in CANDS_LIVE[id]) HOUSE_BY_NAME[nameKey(CANDS_LIVE[id][p])]={id,p,n:CANDS_LIVE[id][p]};
@@ -1218,7 +1219,8 @@ function buildSenate(){
   Object.keys(DATA.regions).forEach(r=>{
     const g=LIVE.reg[r]||{pct:0}, fr=(LIVE.sen||{})[r]||{}, cands=SENATE_CANDS[r]||[], F=SEN_FINAL[r], pct=F?1:g.final?1:(g.pct||0);
     let fin=Object.entries(fr).sort((a,b)=>b[1]-a[1]).map(([p,v])=>({p,v,c:cands.find(x=>x.a===p)||{n:`${sps(p)} candidate`,p,a:p}}));
-    if(F){ const wc=cands.find(x=>x.a===F[0])||{n:`${sps(F[0])} candidate`,p:F[0],a:F[0]}, sh=g.share||{};
+    if(F&&!Array.isArray(F)) fin=Object.entries(F).sort((a,b)=>b[1]-a[1]).map(([p,v])=>({p,v,c:cands.find(x=>x.a===p)||{n:`${sps(p)} candidate`,p,a:p}}));
+    else if(F){ const wc=cands.find(x=>x.a===F[0])||{n:`${sps(F[0])} candidate`,p:F[0],a:F[0]}, sh=g.share||{};
       const ru=fin.find(f=>f.p!==F[0]&&cands.includes(f.c))?.c||cands.filter(x=>x!==wc).sort((a,b)=>(sh[b.a]||0)-(sh[a.a]||0))[0];
       fin=[{p:F[0],v:(1+F[1])/2,c:wc}]; if(ru) fin.push({p:ru.a,v:(1-F[1])/2,c:ru}) }
     else if(fin.length===1){ const sh=g.share||{}, ru=cands.filter(x=>x!==fin[0].c&&x.a!==fin[0].p).sort((a,b)=>(sh[b.a]||0)-(sh[a.a]||0))[0];
