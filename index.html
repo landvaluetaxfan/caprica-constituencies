@@ -15,6 +15,10 @@
   .kicker{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
   h1{font-size:30px;line-height:1.15;margin:6px 0 6px;font-weight:800}
   body.res h1{font-size:26px}
+  h1.brand{margin:4px 0 10px;line-height:0}
+  h1.brand img{display:block;height:56px;width:auto;border-radius:3px}
+  body.res h1.brand{margin:0 0 8px}
+  body.res h1.brand img{height:48px}
   .dek{font-size:15px;color:#333;margin:0 0 14px;max-width:760px;line-height:1.45}
   body.res .dek{font-size:14px;margin-bottom:10px}
   .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:10px 0;margin-bottom:10px}
@@ -195,7 +199,7 @@
 </head>
 <body>
 <div class="wrap">
-  <h1>Caprica Elects</h1>
+  <h1 class="brand"><img src="img/caprica-elects-logo.png" alt="Caprica Elects" width="112" height="56"></h1>
   <p class="dek" id="dek" hidden>Each of the 17 regions keeps its seat allocation and is divided into constituencies of roughly equal population. Hover over or tap any constituency for its name and details. The metropolitan insets below the main map show the dense cities.</p>
   <div class="controls">
     <div class="seg" id="mode">
