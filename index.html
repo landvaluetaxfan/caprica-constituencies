@@ -1454,10 +1454,30 @@ function bcSpec(kind,key){
       c:f.map(t=>({n:t.n,p:t.p,v:t.v,line:`${sps(t.p).toUpperCase()} · WITH ${t.mate.toUpperCase()}`,head:headKey(t.n)}))} }
   if(kind==="senate"){ const X0=SEN[key];
     return {kind,title:key,tag:X0.pct>=0.999?"FINAL RESULT":"RACE CALL",pct:X0.pct,round:X0.outright?"RESULT":"FINAL ROUND",lead:X0.margin,
-      c:X0.fin.slice(0,2).map(f=>({n:f.c.n,p:f.p,v:f.v,line:partyLine(f.c).toUpperCase(),head:headKey(f.c.n)}))} }
+      c:X0.fin.slice(0,3).map(f=>({n:f.c.n,p:f.p,v:f.v,line:partyLine(f.c).toUpperCase(),head:headKey(f.c.n)}))} }
   const o=OUT[key], s=byId[key], c=o.c.filter(v=>v.votes>0);
   return {kind:"house",title:s.name,tag:`${s.region.toUpperCase()} · SEAT ${s.num}`,pct:Math.min(1,o.tot/(o.expected||o.tot)),round:"",lead:o.margin,badge:o.flip?"GAIN":"",
     c:c.slice(0,2).map(v=>({n:v.name,p:v.party,v:v.votes/o.tot,votes:v.votes,line:(v.party==="IND"?"Independent":sps(v.party)).toUpperCase(),head:HEADSHOTS[v.name]?v.name:headKey(v.name),inc:o.r.inc===v.name}))} }
+function sidePanel(x,l,img,LX,LY,LW,LH,withPhoto,kind,dim){ const lb=tone(deep(spc(l.p)),dim), tall=LH>450;
+    slab(x,LX,LY,LW,LH,10,lb,10); fluid(x,LX,LY,LW,LH,10,lb,kind+"|"+l.n); gloss(x,LX,LY,LW,LH,10,0.16);
+    rrect(x,LX+1,LY+1,LW-2,LH-2,9); x.lineWidth=2; x.strokeStyle="rgba(255,255,255,.25)"; x.stroke();
+    const LD=tall?250:Math.min(LH-56,200), LPX=LX+LW-(tall?36:28)-LD, LPY=LY+(tall?40:28), LNW=withPhoto?LPX-30-(LX+36):LW-72;
+    if(withPhoto){ bcPhoto(x,img,l.head,LPX,LPY,LD,lb);
+      if(l.inc){ x.font=BFONT(700,20,"l"); const iw=track(x,"INCUMBENT",0,null,1.5)+20; x.fillStyle="rgba(10,20,40,.85)"; x.fillRect(LPX+LD-iw-8,LPY+LD-42,iw,32); x.fillStyle="#fff"; track(x,"INCUMBENT",LPX+LD-iw+2,LPY+LD-19,1.5) } }
+    if(!tall){ // a compact panel, for the runner-up and third place stacked
+      bigPct(x,l.v,LX+32,LY+104,withPhoto?92:112,LNW,"#fff"); let ly=LY+146;
+      if(l.votes!=null){ x.font=BFONT(700,22,"l"); x.fillStyle="rgba(255,255,255,.85)"; track(x,`${l.votes.toLocaleString("en-US")} VOTES`,LX+32,ly,1.5); ly+=34 }
+      fitT(x,l.line,700,22,LNW,14,"l",1.2); x.fillStyle="rgba(255,255,255,.88)"; track(x,l.line,LX+32,ly,1.2);
+      const [lf,lln]=splitName(l.n), lny=LY+LH-(lf?84:30);
+      if(lf){ fitB(x,lf.toUpperCase(),600,30,LW-64,18,"l"); shadowText(x,lf.toUpperCase(),LX+32,lny,"rgba(255,255,255,.88)",3) }
+      fitB(x,lln.toUpperCase(),700,58,LW-64,30); shadowText(x,lln.toUpperCase(),LX+32,lny+(lf?64:0),"#fff",4); return }
+    bigPct(x,l.v,LX+36,LY+166,withPhoto?132:170,LNW,"#fff");
+    x.fillStyle="rgba(255,255,255,.5)"; x.fillRect(LX+36,LY+208,Math.min(LNW,300),3);
+    let ly=LY+254; if(l.votes!=null){ x.font=BFONT(700,26,"l"); x.fillStyle="rgba(255,255,255,.85)"; track(x,`${l.votes.toLocaleString("en-US")} VOTES`,LX+36,ly,1.5); ly+=48 }
+    fitT(x,l.line,700,24,LNW,15,"l",1.2); x.fillStyle="rgba(255,255,255,.88)"; track(x,l.line,LX+36,ly,1.2);
+    const [lf,lln]=splitName(l.n), lny=LY+LH-122;
+    if(lf){ fitB(x,lf.toUpperCase(),600,40,LW-72,22,"l"); shadowText(x,lf.toUpperCase(),LX+36,lny,"rgba(255,255,255,.88)",3) }
+    fitB(x,lln.toUpperCase(),700,80,LW-72,38); shadowText(x,lln.toUpperCase(),LX+36,lny+(lf?84:52),"#fff",4) }
 async function bcCanvas(sp,withPhoto){
   try{await Promise.all([["400","d"],["400","n"],["600","l"],["700","l"]].map(([w,f])=>document.fonts.load(BFONT(w,40,f),"0%ABC")))}catch(e){}
   const [w,l]=sp.c, heads=withPhoto?await Promise.all(sp.c.map(c=>c.head?loadHead(c.head):null)):[], logo=await loadLogo();
@@ -1521,20 +1541,9 @@ async function bcCanvas(sp,withPhoto){
   if(wf){ fitB(x,wf.toUpperCase(),600,46,(withPhoto?bx-62:WX+WW-80)-PX,26,"l"); shadowText(x,wf.toUpperCase(),PX,ny,"rgba(255,255,255,.92)",3) }
   fitB(x,wl.toUpperCase(),700,100,WW-80,48); shadowText(x,wl.toUpperCase(),PX,ny+(wf?100:64),"#fff",5);
   fitT(x,w.line,700,28,WW-90,18,"l",1.5); x.fillStyle="rgba(255,255,255,.9)"; track(x,w.line,PX,ny+(wf?148:112),1.5);
-  // the runner-up, set back a little
-  if(l){ const LX=WX+WW+40, LY=WY+86, LW=W-96-LX, LH=WH-112, lb=tone(deep(spc(l.p)),-0.12);
-    slab(x,LX,LY,LW,LH,10,lb,10); fluid(x,LX,LY,LW,LH,10,lb,sp.kind+"|"+l.n); gloss(x,LX,LY,LW,LH,10,0.16);
-    rrect(x,LX+1,LY+1,LW-2,LH-2,9); x.lineWidth=2; x.strokeStyle="rgba(255,255,255,.25)"; x.stroke();
-    const LD=250, LPX=LX+LW-36-LD, LPY=LY+40, LNW=withPhoto?LPX-30-(LX+36):LW-72;
-    if(withPhoto){ bcPhoto(x,heads[1],l.head,LPX,LPY,LD,lb);
-      if(l.inc){ x.font=BFONT(700,20,"l"); const iw=track(x,"INCUMBENT",0,null,1.5)+20; x.fillStyle="rgba(10,20,40,.85)"; x.fillRect(LPX+LD-iw-8,LPY+LD-42,iw,32); x.fillStyle="#fff"; track(x,"INCUMBENT",LPX+LD-iw+2,LPY+LD-19,1.5) } }
-    bigPct(x,l.v,LX+36,LY+166,withPhoto?132:170,LNW,"#fff");
-    x.fillStyle="rgba(255,255,255,.5)"; x.fillRect(LX+36,LY+208,Math.min(LNW,300),3);
-    let ly=LY+254; if(l.votes!=null){ x.font=BFONT(700,26,"l"); x.fillStyle="rgba(255,255,255,.85)"; track(x,`${l.votes.toLocaleString("en-US")} VOTES`,LX+36,ly,1.5); ly+=48 }
-    fitT(x,l.line,700,24,LNW,15,"l",1.2); x.fillStyle="rgba(255,255,255,.88)"; track(x,l.line,LX+36,ly,1.2);
-    const [lf,lln]=splitName(l.n), lny=LY+LH-122;
-    if(lf){ fitB(x,lf.toUpperCase(),600,40,LW-72,22,"l"); shadowText(x,lf.toUpperCase(),LX+36,lny,"rgba(255,255,255,.88)",3) }
-    fitB(x,lln.toUpperCase(),700,80,LW-72,38); shadowText(x,lln.toUpperCase(),LX+36,lny+(lf?84:52),"#fff",4) }
+  // the other candidates, set back a little: the runner-up on its own, or the runner-up and third place stacked
+  const rest=sp.c.slice(1,3), SX=WX+WW+40, SW=W-96-SX, SY=WY+86, SH=WH-112, gap=26, ph=rest.length>1?(SH-gap)/2:SH;
+  rest.forEach((c,i)=>sidePanel(x,c,heads[i+1],SX,SY+i*(ph+gap),SW,ph,withPhoto,sp.kind,i?-0.24:-0.12));
   if(SIM){ x.font=BFONT(700,22,"l"); x.fillStyle="rgba(180,20,40,.9)"; x.textAlign="right"; x.fillText("SIMULATED COUNT · PREVIEW",W-100,H-30); x.textAlign="left" }
   return cv }
 
