@@ -645,7 +645,8 @@ const PRES={margin:0.036,rcv:true,
            {p:"DEM",n:"Adriana Flash",mate:"Kosta Piastri",line:"Democrats"}]};
 // preview a later stage of the count: ?sim=0.7 lifts every counting region to at least 70% counted (nothing is saved)
 const SIM=Math.min(1,Math.max(0,+(new URLSearchParams(location.search).get("sim"))||0));
-function applySim(L){ if(SIM) for(const r in L.reg){const g=L.reg[r]; if(g.pct>0){g.pct=Math.max(g.pct,SIM); if(g.pct>=0.999&&g.seats) g.final=g.seats}} return L }
+function applySim(L){ if(HOUSE_ALL_CALLED) for(const r in L.reg){const g=L.reg[r]; g.pct=1; g.final=g.final||g.seats||{}} // the count is over: every region fully counted
+  if(SIM) for(const r in L.reg){const g=L.reg[r]; if(g.pct>0){g.pct=Math.max(g.pct,SIM); if(g.pct>=0.999&&g.seats) g.final=g.seats}} return L }
 function buildLive(){
   const out={}; if(!LIVE) return out;
   S.forEach(s=>{
@@ -658,7 +659,7 @@ function buildLive(){
     // x: the votes counted so far, from the counted shares (early returns can lean one way, as in Pleucadeuc)
     const sw=(T,b,rbp)=>rbp>0.005?0.65*b*(T/rbp)+0.35*T:0.9*T;
     const x={}, x0={}; L.stand.forEach(p=>{const T=L.share[p]||0, T0=L.proj?(L.proj[p]||0):T, b=base[p]||0, rbp=rb[p]||0;
-      let v=sw(T,b,rbp), v0=sw(T0,b,rbp);
+      let v0=sw(T0,b,rbp), v=R>=0.999?v0:sw(T,b,rbp); // once a region is fully counted, the result is the projection
       const ind=p==="IND"?(b>0?b*0.85:0.01+rnd()*0.02):null; if(ind!==null){v=ind;v0=ind} // independents run on a personal vote, not the regional swing
       const lo=T>0||p==="IND"?0.004:0; x0[p]=Math.max(v0,T0>0||p==="IND"?0.004:0);
       const n=(rnd()+rnd()+rnd()-1.5)/1.5; v*=Math.exp(n*0.22*Math.sqrt(1-f));
