@@ -586,10 +586,37 @@ for(const r in REGBASE){const R=REGBASE[r]; for(const p in R) if(p!=="w") R[p]/=
 let LIVE=null, LIVE_TIME=null, LIVE_SRC="";
 const CALL_FROM=0.45; // share of a region's vote counted before any of its seats can be called
 // seats the organiser has called for a named candidate: kept for that party when the seat table is placed, and called as soon as they count
-const PINNED={"chasmia-verasul-and-hollin-fells":"CON","ambarino-university-square":"DEM","ambarino-bedford-falls":"DEM","ambarino-hartley-and-bois-joli":"DEM","pittston-esquerico-reyes-and-conklin":"CON","pittston-escarlata-san-aurelio-and-spearhead":"CON"};
+const PINNED={"chasmia-verasul-and-hollin-fells":"CON","ambarino-university-square":"DEM","ambarino-bedford-falls":"DEM","ambarino-hartley-and-bois-joli":"DEM","pittston-esquerico-reyes-and-conklin":"CON"};
 // seats the fit hands to a party whenever the region's seat table gives it one, without calling them early:
 // Raudea North is where Jasfelts wins its Kazana seat, with George Miliband
 const SEAT_FOR={"kazana-raudea-north":"JF"}, FIT={...PINNED,...SEAT_FOR};
+// the final House result, seat by seat: who wins each constituency. It follows the organiser's final seat table for each
+// region (which overrides the sheet's), placed by what each seat is like: the Autumn Accords in the docks, mill towns and
+// estates, Manifest in the dense, diverse inner cities, the Democrats in the professional and public-sector suburbs,
+// Convergence in the business districts and comfortable commuter belts, the Alliance in the farm country and conservative
+// suburbs, Régionale where local identity is strongest, and Jasfelts in hard-pressed small towns and working-class
+// suburbs. Seats already called keep their party wherever the table allows. Where the plan says so, the planned
+// party takes the leader's share and the leader takes the planned party's, so margins stay natural.
+// seats already called before the plan that keep their party under it: they stay called
+const PLAN_CALLED=new Set(["ventura-las-colinas","ventura-san-vicente-south","ventura-coralisle-west","pleucadeuc-valcartier-sud","pleucadeuc-fievreau-nord","pleucadeuc-penhoat","pleucadeuc-point-arthur","pittston-esquerico-reyes-and-conklin","montiablo-la-ensenada","mezata-san-pedro","mezata-mercado-south","mezata-el-puerto","kazana-marae-bay-central","chasmia-verasul-and-hollin-fells","chasmia-hautmont","ambrosia-ambrosian-downs","ambrosia-garrison","ambarino-bedford-falls","ambarino-university-square","ambarino-hartley-and-bois-joli"]);
+const SEAT_PLAN={
+  "ambarino-bedford-falls":"DEM","ambarino-university-square":"DEM","ambarino-hartley-and-bois-joli":"DEM","ambarino-saint-clement":"DM","ambarino-ambarino-south":"DM","ambarino-ambarino-centre":"AA","ambarino-vallee-verte":"AA","ambarino-ambarino-west":"CON","ambarino-belmont":"JF","ambarino-montclair":"JF","ambarino-foret-rouge":"AR",
+  "ambrosia-ambrosian-downs":"A","ambrosia-garrison":"A","ambrosia-auburne":"DM","ambrosia-strawberry-and-meridian":"AR",
+  "cambria-alto-west":"AA","cambria-la-croix":"AA","cambria-gryphon":"DM","cambria-battle-mountain-and-fayre":"CON","cambria-alto-east":"DEM","cambria-oluksee":"AR","cambria-sionaq-springs":"JF",
+  "carnapol-le-plateau":"AA","carnapol-vieux-dubois":"DM","carnapol-saint-remi":"DM","carnapol-pointe-aux-saules":"CON","carnapol-dubois-sud":"A","carnapol-riviere-aux-cedres":"DEM","carnapol-montfleury":"AR","carnapol-dubois-ouest":"JF",
+  "chasmia-verasul-and-hollin-fells":"CON","chasmia-hautmont":"CON","chasmia-chasberg":"DM","chasmia-morrick-and-verasul":"AA","chasmia-lisieux-east":"DEM","chasmia-lisieux-centre":"A","chasmia-chasberg-south-and-morrick":"JF","chasmia-saint-aubinles-pres":"JF","chasmia-littlewoods-and-the-southern-dales":"AR",
+  "costa-blanca-la-marina":"AA","costa-blanca-san-andres":"AA","costa-blanca-villa-hermosa":"AA","costa-blanca-santa-rosita":"AA","costa-blanca-las-flores":"AA","costa-blanca-valle-del-sol":"AA","costa-blanca-domicilio-blanca-south":"DEM","costa-blanca-los-campos":"DEM","costa-blanca-el-centro":"CON","costa-blanca-miramar":"CON","costa-blanca-santa-maria":"CON","costa-blanca-buenida-central":"JF","costa-blanca-san-isidro":"JF","costa-blanca-sierra-blanca":"AR","costa-blanca-domicilio-blanca-central":"DM","costa-blanca-buenida-west":"A",
+  "kalahooska-fort-prospect":"AR","kalahooska-greenhaven-south":"AR","kalahooska-tolland":"AR","kalahooska-mid-kalahooska":"A","kalahooska-caille-central":"DM","kalahooska-saltmarsh":"DM","kalahooska-greenhaven-central":"DM","kalahooska-machan":"DEM","kalahooska-greenhaven-east":"DEM","kalahooska-hollins-park":"DEM","kalahooska-marshall":"DEM","kalahooska-stockdale":"CON","kalahooska-wyndham":"CON","kalahooska-fernhill":"CON","kalahooska-resina":"CON","kalahooska-carraway":"JF","kalahooska-lowmoor":"JF","kalahooska-caille-north":"JF","kalahooska-kingsmere":"AA","kalahooska-brickfield":"AA","kalahooska-caille-east":"AA","kalahooska-wexley":"AA",
+  "kazana-marae-bay-central":"AA","kazana-raudea-central":"AA","kazana-mariton-central":"AA","kazana-mariton-south":"AA","kazana-ribeira":"AA","kazana-marae-bay-east":"AA","kazana-dalton":"AA","kazana-raudea-north":"JF","kazana-vila-nova":"JF","kazana-marae-bay-west":"DM","kazana-santa-luzia":"DEM","kazana-meauxsloit":"DEM","kazana-joao-verde":"A","kazana-saint-athena-and-cape-vue":"A","kazana-ilha-longa-and-raudea-east":"AR","kazana-pedra-branca":"CON","kazana-cais-da-raudea":"CON","kazana-marae-peninsula":"CON","kazana-luminar-west":"CON","kazana-porto-velho":"CON","kazana-serra-verde":"CON","kazana-boa-vista":"CON","kazana-farol":"CON",
+  "mezata-san-pedro":"CON","mezata-el-puerto":"CON","mezata-mercado-south":"CON","mezata-los-arcos":"CON","mezata-las-acacias":"CON","mezata-san-cristobal":"CON","mezata-mercado-north":"A","mezata-fort-ales":"A","mezata-la-merced":"AA","mezata-valle-rojo":"AA","mezata-arroyo-seco":"AA","mezata-mercado-central":"DM","mezata-casteledo":"DEM","mezata-new-roschau":"AR","mezata-rancho-rojos":"JF",
+  "moeras-dalaran":"DEM","moeras-georgetown-st-lucia-and-port-penelope":"JF","moeras-javeyla":"AR",
+  "montiablo-pinewood":"AA","montiablo-montiablo-central":"AA","montiablo-ciudad-vieja":"DM","montiablo-riverside":"DM","montiablo-la-ensenada":"CON","montiablo-grand-parade":"CON","montiablo-los-olivos":"CON","montiablo-bellwood":"CON","montiablo-alameda":"CON","montiablo-market-quarter":"CON","montiablo-montiablo-north":"DEM","montiablo-norcastle":"DEM","montiablo-westbourne":"DEM","montiablo-las-palmas":"DEM","montiablo-southwood":"A","montiablo-bayview":"A","montiablo-port-munsey":"A","montiablo-cathedral":"A","montiablo-saint-jude":"A","montiablo-harbourside":"JF","montiablo-san-fernando":"JF","montiablo-hollingworth":"AR",
+  "myrati-cas-arwydd-west":"IND","myrati-morfach":"IND","myrati-bae-glas":"CON","myrati-cas-arwydd":"DM","myrati-abermeiron":"DEM","myrati-aberllew":"AR","myrati-cas-hardd":"JF",
+  "oplana-langston-central":"AA","oplana-langston-east":"AA","oplana-ashgrove":"AA","oplana-santa-valentina-west":"DM","oplana-kirkwood":"CON","oplana-cabo":"CON","oplana-munsey":"DEM","oplana-grayndler":"AR","oplana-punta-valentina":"JF",
+  "pittston-esquerico-reyes-and-conklin":"CON","pittston-waterford-carver-and-estrella":"A","pittston-escarlata-san-aurelio-and-spearhead":"A","pittston-hinton-and-larocque":"AR","pittston-losana-north":"DEM","pittston-rio-claro":"DM","pittston-losana-south":"DM",
+  "pleucadeuc-valcartier-sud":"A","pleucadeuc-fievreau-nord":"A","pleucadeuc-penhoat":"A","pleucadeuc-point-arthur":"A","pleucadeuc-janvier":"A","pleucadeuc-kerangall":"A","pleucadeuc-levrard":"A","pleucadeuc-valcartier-nord":"A","pleucadeuc-montagnehautes-terres":"A","pleucadeuc-lanveur":"DM","pleucadeuc-plouzennec":"DEM","pleucadeuc-notanville-sud":"CON","pleucadeuc-valcartier-centre":"CON","pleucadeuc-glazcarneau":"CON","pleucadeuc-decoteau":"CON","pleucadeuc-kerbriant":"CON","pleucadeuc-locmaria":"CON","pleucadeuc-vieux-valcartier":"CON","pleucadeuc-fievreau-est":"CON",
+  "reno-syon-south":"AA","reno-syon-central":"DM","reno-capital-park":"DEM","reno-kingsbridge":"CON","reno-orlean":"AR","reno-renokipling":"JF","reno-holmdel":"A","reno-redmont":"A","reno-coleston":"A","reno-marietta":"A",
+  "ventura-san-vicente-south":"CON","ventura-las-colinas":"CON","ventura-coralisle-west":"CON","ventura-el-faro":"AA","ventura-el-prado":"DM","ventura-la-catedral":"DM","ventura-san-vicente-central":"DEM","ventura-puerto-ventura":"DEM","ventura-sierra-ventura":"A","ventura-coralisle-east":"AR","ventura-san-vicente-west":"JF"};
 const EARLY_FROM=0.10, EARLY_PROJ=0.25, EARLY_NOW=0.15; // early calls: region at least 10% in, projected lead 25+ pts, current lead 15+ pts
 // Voting runs until tomorrow morning: until the polls close, no more than half the races are called (the safest first).
 const POLLS_CLOSE=new Date("2026-11-15T07:00:00-06:00"); // 7:00 a.m. Central, Sunday 15 November
@@ -645,8 +672,11 @@ function buildLive(){
   // seat leads follow the sheet's seat table for every region with votes counted. Which seat goes to which
   // party is settled on the fully-counted shares (s0), so a seat's leader doesn't change as the count fills in
   // and a called seat stays called; the shares counted so far are then nudged so that leader is ahead.
-  Object.keys(DATA.regions).forEach(r=>{const L=LIVE.reg[r]; if(!L||!L.seats||!(L.pct>0)) return;
+  const swapLead=(o,p,k)=>{const w=o.cands.reduce((a,c)=>c[k]>a[k]?c:a), u=o.cands.find(c=>c.party===p); if(u&&w!==u){const t=w[k]; w[k]=u[k]; u[k]=t}};
+  Object.keys(DATA.regions).forEach(r=>{const L=LIVE.reg[r]; if(!L||!(L.pct>0)) return;
     const ids=S.filter(s=>s.region===r&&out[s.id]).map(s=>s.id), lead=id=>out[id].cands.reduce((a,c)=>c.s0>a.s0?c:a);
+    if(ids.every(id=>SEAT_PLAN[id])){ ids.forEach(id=>{swapLead(out[id],SEAT_PLAN[id],"s0"); swapLead(out[id],SEAT_PLAN[id],"share")}); return } // the final plan
+    if(!L.seats) return;
     ids.forEach(id=>{const p=FIT[id], o=out[id]; if(!p||!(L.seats[p]>0)) return; const w=lead(id), u=o.cands.find(c=>c.party===p); // pinned seats start as the pinned party's
       if(u&&w!==u){u.s0=w.s0+0.03; const t=o.cands.reduce((a,c)=>a+c.s0,0); o.cands.forEach(c=>c.s0/=t)}});
     for(let g=0;g<600;g++){const cnt={};ids.forEach(id=>{const p=lead(id).party;cnt[p]=(cnt[p]||0)+1});
@@ -670,10 +700,10 @@ function buildLive(){
     // early calls, like a safe state called at poll close: once the region is counting, a seat whose own lean (its 2072 result
     // swung by the region) puts the leader 25+ points clear, and whose votes so far agree, is called straight away
     const early=reporting&&RL.pct>=EARLY_FROM&&proj.win===win&&proj.margin>=EARLY_PROJ&&margin>=EARLY_NOW;
-    const pinned=reporting&&PINNED[id]===win;
+    const pinned=reporting&&(PINNED[id]===win||(PLAN_CALLED.has(id)&&SEAT_PLAN[id]===win));
     const called=reporting&&(final||o.f>=0.999||shown||pinned||early||(RL.pct>=CALL_FROM&&o.f>=0.5&&margin*100>5+40*(1-o.f)));
     res[id]={r:{cands:c,inc:o.inc,turnout:null},c,tot,win,prev:o.prev,flip:!!win&&win!==o.prev,margin,pct:o.f,called,reporting,expected:o.expected,proj}}
-  capCalls(Object.keys(res).map(id=>{const o=res[id], k=(typeof callTimes==="object"&&callTimes[id]&&callTimes[id].w===o.win)||PINNED[id]===o.win?1:0;
+  capCalls(Object.keys(res).map(id=>{const o=res[id], k=(typeof callTimes==="object"&&callTimes[id]&&callTimes[id].w===o.win)||PINNED[id]===o.win||(PLAN_CALLED.has(id)&&SEAT_PLAN[id]===o.win)?1:0;
     return {o,keep:k,safety:LIVE.reg[byId[id].region].final||o.pct>=0.999?1e9:Math.max(o.margin*100-(5+40*(1-o.pct)),o.proj.margin*100-20)}}),S.length);
   return res;
 }
