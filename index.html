@@ -640,8 +640,9 @@ const SEN_FINAL={"Ambarino":["DEM",0.1477],"Ambrosia":["A",0.1559],"Cambria":["A
   "Costa Blanca":["CON",0.0940],"Kalahooska":["AR",0.5695],"Kazana":{A:0.5336,AA:0.3663,JF:0.1001},"Mezata":["CON",0.3084],"Moeras":{JF:0.5069,DEM:0.3677,CON:0.1253},"Montiablo":["A",0.2746],
   "Myrati":{CON:0.6197,JF:0.1944,IND:0.1859},"Oplana":["AA",0.1216],"Pittston":["CON",0.1237],"Pleucadeuc":["A",0.7161],"Reno":["A",0.2644],"Ventura":["CON",0.4130]};
 // the presidency: decided by ranked-choice voting; the final round is between these two tickets
-// first round: Flash led on first preferences; Alametsä overtook her on the transfers from the other candidates
-const PRES={margin:0.0062,rcv:true,first:{CON:0.4270,DEM:0.4649},firstOther:0.1081,
+// first round (vote totals): Alametsä led on first preferences but short of half; the write-in votes were then transferred
+const PRES_R1={CON:18862792,DEM:17399299,other:4394543}, PRES_R1T=PRES_R1.CON+PRES_R1.DEM+PRES_R1.other;
+const PRES={margin:0.0062,rcv:true,firstVotes:PRES_R1,first:{CON:PRES_R1.CON/PRES_R1T,DEM:PRES_R1.DEM/PRES_R1T},firstOther:PRES_R1.other/PRES_R1T,otherName:"Write-in",
   tickets:[{p:"CON",n:"Reijo Alametsä",mate:"Tony Blair",line:"Caprican Democratic Movement · Renaissance"},
            {p:"DEM",n:"Adriana Flash",mate:"Kosta Piastri",line:"Democrats"}]};
 // preview a later stage of the count: ?sim=0.7 lifts every counting region to at least 70% counted (nothing is saved)
@@ -1129,7 +1130,7 @@ const HEADSHOTS={
   "Kyle Delano Marquez":{src:"img/headshots/kyle-delano-marquez.png",crop:[0,12,156]},
   "Kate Masto":{src:"img/headshots/kate-masto.webp",crop:[495,20,480]},
   "Alexandria Yuan Kew Lee":{src:"img/headshots/alexandria-yuan-kew-lee.webp",crop:[350,0,440]},
-  "Adriana Flash":{src:"img/headshots/adriana-flash.webp",crop:[115,150,420]},
+  "Adriana Flash":{src:"img/headshots/adriana-flash.webp",crop:[20,70,560]},
   "Reijo Alametsä":{src:"img/headshots/reijo-alametsa.webp",crop:[60,20,840]},
   // Manifest MPs (600×600 portraits)
   "Amelia McLean":{src:"img/headshots/amelia-mclean.jpg",crop:[25,5,550]},
@@ -1334,11 +1335,11 @@ const presFin=()=>PRES.tickets.map((t,i)=>({...t,v:i?(1-PRES.margin)/2:(1+PRES.m
 function presSentence(){ const [w,l]=presFin();
   const f=PRES.first, behind=f&&f[w.p]<f[l.p];
   return `${w.n} and ${w.mate} win the presidency for ${pnL(w.p)}, ${fmtPct(PRES.margin)} points ahead of ${l.n} and ${l.mate} (${sps(l.p)}) in the ranked-choice final round`+
-    (behind?`, after trailing ${fmtPct(f[l.p])}% to ${fmtPct(f[w.p])}% on first preferences and winning most of the transfers.`:".") }
+    (behind?`, after trailing ${fmtPct(f[l.p])}% to ${fmtPct(f[w.p])}% on first preferences and winning most of the transfers.`:f?`, after leading ${fmtPct(f[w.p])}% to ${fmtPct(f[l.p])}% on first preferences, short of a majority, with ${fmtPct(PRES.firstOther)}% of the vote cast for write-in candidates.`:".") }
 function presRow(){ const fin=presFin(), col=spc(fin[0].p);
   return `<div class="race srace pres"><div class="rh"><span class="rn">President</span><span class="tag gain" style="--c:${col};--fg:${ink(col)}">${sps(fin[0].p)} wins</span></div>`+
     fin.map((t,i)=>`<div class="sfin"><span class="chip" style="background:${spc(t.p)}"></span><b>${t.n}</b><span class="sp">with ${t.mate} · ${t.line}</span><span class="sv">${fmtPct(t.v)}%</span></div><div class="sbar"><i style="width:${t.v*100}%;background:${i?shade(spc(t.p),0.45):spc(t.p)}"></i></div>`).join("")+
-    (PRES.first?`<div class="soth">First round: ${fin.map(t=>`${t.n} ${fmtPct(PRES.first[t.p])}%`).join(", ")}, others ${fmtPct(PRES.firstOther)}%</div>`:"")+
+    (PRES.first?`<div class="soth">First round: ${fin.map(t=>`${t.n} ${fmtPct(PRES.first[t.p])}%`).join(", ")}, write-in ${fmtPct(PRES.firstOther)}%</div>`:"")+
     `<div class="rs"><span>Ranked-choice final round · +${fmtPct(PRES.margin)} pts</span><span class="cnted">Final</span></div>`+
     `<div style="display:flex;gap:6px;margin:8px 0 0"><button class="cc-btn" data-pcall="1" style="flex:1;width:auto;margin:0">Call graphic ↗</button>`+(PRES.first?`<button class="cc-btn" data-prounds="1" style="flex:1;width:auto;margin:0">Rounds graphic ↗</button>`:"")+`</div></div>` }
 
@@ -1541,7 +1542,7 @@ function sidePanel(x,l,img,LX,LY,LW,LH,withPhoto,kind,dim){ const lb=tone(deep(s
     fitB(x,lln.toUpperCase(),700,80,LW-72,38); shadowText(x,lln.toUpperCase(),LX+36,lny+(lf?84:52),"#fff",4) }
 // ---- the presidency round by round (1920×1080): first preferences, the transfers, and the final round
 function presRounds(){ const t=PRES.tickets, f=presFin(), F=PRES.first;
-  const r1=[...t.map(c=>({n:c.n,p:c.p,v:F[c.p],line:`${sps(c.p).toUpperCase()} · WITH ${c.mate.toUpperCase()}`})),{n:"Other candidates",p:"IND",v:PRES.firstOther,line:"ELIMINATED AFTER ROUND 1",other:true}].sort((a,b)=>b.v-a.v);
+  const r1=[...t.map(c=>({n:c.n,p:c.p,v:F[c.p],votes:PRES.firstVotes&&PRES.firstVotes[c.p],line:`${sps(c.p).toUpperCase()} · WITH ${c.mate.toUpperCase()}`})),{n:PRES.otherName||"Other candidates",p:"IND",v:PRES.firstOther,votes:PRES.firstVotes&&PRES.firstVotes.other,line:"ELIMINATED AFTER ROUND 1",other:true}].sort((a,b)=>b.v-a.v);
   const r2=f.map(c=>({n:c.n,p:c.p,v:c.v,gain:c.v-F[c.p],line:`${sps(c.p).toUpperCase()} · WITH ${c.mate.toUpperCase()}`})).sort((a,b)=>b.v-a.v);
   return {r1,r2} }
 async function roundsBody(x,withPhoto){ const {r1,r2}=presRounds(), W=1920;
@@ -1557,11 +1558,12 @@ async function roundsBody(x,withPhoto){ const {r1,r2}=presRounds(), W=1920;
     const top=PY+(final?120:100), rh=final?(PH-150)/2:(PH-115)/3, D=withPhoto?(final?170:140):0, BXL=X+30+(D?D+26:0), BWF=X+PW-30-BXL, scale=0.62;
     rows.forEach((c,i)=>{ const ry=top+i*rh, col=c.other?"#8e8e8e":spc(c.p), dk=deep(col);
       if(D){ bcPhoto(x,heads[c.n]||null,headKey(c.n),X+30,ry+12,D,dk); if(final&&!i) checkBadge(x,X+30+D-34,ry+12+D-34,36) }
-      const [fn,ln]=c.other?["OTHER","CANDIDATES"]:splitName(c.n);
+      const [fn,ln]=c.other?(PRES.otherName?["",PRES.otherName.toUpperCase()]:["OTHER","CANDIDATES"]):splitName(c.n);
       fitB(x,fn.toUpperCase(),600,30,BWF-200,18,"l"); shadowText(x,fn.toUpperCase(),BXL,ry+42,"rgba(255,255,255,.88)",3);
       fitB(x,ln.toUpperCase(),400,final?64:54,BWF-210,30); shadowText(x,ln.toUpperCase(),BXL,ry+(final?102:92),"#fff",4);
       x.textAlign="right"; x.font=BFONT(400,final?70:58,"n"); shadowText(x,fmtPct(c.v)+"%",X+PW-30,ry+(final?100:90),"#fff",4); x.textAlign="left";
-      fitT(x,c.line,700,20,BWF,13,"l",1.2); x.fillStyle="rgba(255,255,255,.85)"; track(x,c.line,BXL,ry+(final?134:122),1.2);
+      fitT(x,c.line,700,20,c.votes?BWF-210:BWF,13,"l",1.2); x.fillStyle="rgba(255,255,255,.85)"; track(x,c.line,BXL,ry+(final?134:122),1.2);
+      if(c.votes){ x.font=BFONT(700,20,"l"); x.fillStyle="rgba(255,255,255,.85)"; const vs=`${c.votes.toLocaleString("en-US")} VOTES`; track(x,vs,X+PW-30,ry+(final?134:122),1.2,"right") }
       const by=ry+(final?152:140), bh=final?42:34, bw=Math.max(8,BWF*c.v/scale);
       rrect(x,BXL,by,BWF,bh,6); x.fillStyle="rgba(0,0,0,.28)"; x.fill();
       let g=x.createLinearGradient(0,by,0,by+bh); g.addColorStop(0,tone(col,0.3)); g.addColorStop(0.5,col); g.addColorStop(1,tone(col,-0.35));
