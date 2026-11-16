@@ -1073,6 +1073,7 @@ const HEADSHOTS={
   "Draqi Arkas":{src:"img/headshots/draqi-arkas.png",crop:[20,0,480]},
   "Morgan Edelstein-Powell":{src:"img/headshots/morgan-edelstein-powell.webp",crop:[50,40,820]},
   "Joe Azhadron Jr.":{src:"img/headshots/joe-azhadron-jr.png",crop:[145,10,290]},
+  "Ronatans":{src:"img/headshots/ronatans.jpg",crop:[50,25,500]},
   // Manifest MPs (600×600 portraits)
   "Amelia McLean":{src:"img/headshots/amelia-mclean.jpg",crop:[25,5,550]},
   "Avery Sladen":{src:"img/headshots/avery-sladen.jpg",crop:[25,5,550]},
@@ -1456,7 +1457,7 @@ function bcSpec(kind,key){
       c:X0.fin.slice(0,2).map(f=>({n:f.c.n,p:f.p,v:f.v,line:partyLine(f.c).toUpperCase(),head:headKey(f.c.n)}))} }
   const o=OUT[key], s=byId[key], c=o.c.filter(v=>v.votes>0);
   return {kind:"house",title:s.name,tag:`${s.region.toUpperCase()} · SEAT ${s.num}`,pct:Math.min(1,o.tot/(o.expected||o.tot)),round:"",lead:o.margin,badge:o.flip?"GAIN":"",
-    c:c.slice(0,2).map(v=>({n:v.name,p:v.party,v:v.votes/o.tot,votes:v.votes,line:sps(v.party).toUpperCase(),head:HEADSHOTS[v.name]?v.name:headKey(v.name),inc:o.r.inc===v.name}))} }
+    c:c.slice(0,2).map(v=>({n:v.name,p:v.party,v:v.votes/o.tot,votes:v.votes,line:(v.party==="IND"?"Independent":sps(v.party)).toUpperCase(),head:HEADSHOTS[v.name]?v.name:headKey(v.name),inc:o.r.inc===v.name}))} }
 async function bcCanvas(sp,withPhoto){
   try{await Promise.all([["400","d"],["400","n"],["600","l"],["700","l"]].map(([w,f])=>document.fonts.load(BFONT(w,40,f),"0%ABC")))}catch(e){}
   const [w,l]=sp.c, heads=withPhoto?await Promise.all(sp.c.map(c=>c.head?loadHead(c.head):null)):[], logo=await loadLogo();
