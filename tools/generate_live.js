@@ -63,6 +63,8 @@ NAMED_LIVE.forEach(([name, region, party, seatName]) => {
 const SWITCHED = [
   // Democrat for Meauxsloit in 2072, now Jasfelts (also its Senate candidate in Kazana), standing in the seat it wins
   ["George Miliband", "JF", "kazana-raudea-north"],
+  // Renaissance MP for Ambarino West in 2072, now Jasfelts (from the Scarfelts; also its Senate candidate in Ambarino), standing again there
+  ["Sejin Bluespan", "JF", "ambarino-ambarino-west"],
 ];
 SWITCHED.forEach(([name, party, to]) => {
   const from = Object.keys(out).find(k => Object.values(out[k]).includes(name)); if (!from || !out[to]) throw `no seat for ${name}`;
