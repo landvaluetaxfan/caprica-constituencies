@@ -995,6 +995,7 @@ rlist.addEventListener("mouseleave",()=>highlight(null));
 rlist.addEventListener("click",e=>{const cbtn=e.target.closest("[data-call]"); if(cbtn){e.stopPropagation(); openCall(cbtn.dataset.call); return}
   const sbtn=e.target.closest("[data-scall]"); if(sbtn){e.stopPropagation(); openSenCall(sbtn.dataset.scall); return}
   if(e.target.closest("[data-pcall]")){e.stopPropagation(); openPresCall(); return}
+  if(e.target.closest("[data-prounds]")){e.stopPropagation(); showGraphic("presrounds","president",!!headKey(PRES.tickets[0].n)); return}
   const r=e.target.closest(".race"); if(!r||r.classList.contains("pres")) return; e.stopPropagation();
   if(r.dataset.r){ // a Senate race: show its hover box next to the region on the main map
     const lab=DATA.regions[r.dataset.r].lab, mb=main.getBoundingClientRect(), vb=main.viewBox.baseVal, k=Math.min(mb.width/vb.width,mb.height/vb.height);
@@ -1128,7 +1129,7 @@ const HEADSHOTS={
   "Kyle Delano Marquez":{src:"img/headshots/kyle-delano-marquez.png",crop:[0,12,156]},
   "Kate Masto":{src:"img/headshots/kate-masto.webp",crop:[495,20,480]},
   "Alexandria Yuan Kew Lee":{src:"img/headshots/alexandria-yuan-kew-lee.webp",crop:[350,0,440]},
-  "Adriana Flash":{src:"img/headshots/adriana-flash.webp",crop:[140,80,440]},
+  "Adriana Flash":{src:"img/headshots/adriana-flash.webp",crop:[115,150,420]},
   "Reijo Alametsä":{src:"img/headshots/reijo-alametsa.webp",crop:[60,20,840]},
   // Manifest MPs (600×600 portraits)
   "Amelia McLean":{src:"img/headshots/amelia-mclean.jpg",crop:[25,5,550]},
@@ -1233,14 +1234,14 @@ async function openCall(id,withPhoto){
   return showGraphic("house",id,withPhoto) }
 // one modal for every call graphic: House, Senate or President, in the classic square or the 16:9 broadcast style
 async function showGraphic(kind,key,withPhoto){
-  const style=kind==="president"?"broadcast":callStyle;
+  const style=kind==="president"||kind==="presrounds"?"broadcast":callStyle;
   const cv=style==="broadcast"?await bcCanvas(bcSpec(kind,key),withPhoto):kind==="senate"?await senCanvas(key,withPhoto):await callCanvas(key,withPhoto);
   const m=document.getElementById("callmodal"), img=document.getElementById("cmximg");
   img.src=cv.toDataURL("image/png");
-  img.alt=kind==="president"?`Presidential call: ${sps(PRES.tickets[0].p)} wins`:kind==="senate"?`Senate call: ${sps(SEN[key].win)} wins ${key}`:`Race call: ${callHeadline(OUT[key])} in ${byId[key].name}`;
+  img.alt=kind==="presrounds"?"Presidential result, round by round":kind==="president"?`Presidential call: ${sps(PRES.tickets[0].p)} wins`:kind==="senate"?`Senate call: ${sps(SEN[key].win)} wins ${key}`:`Race call: ${callHeadline(OUT[key])} in ${byId[key].name}`;
   callShown=key; callPhoto=withPhoto; callKind=kind; callStyleShown=style;
   document.querySelectorAll("#cmxlay button").forEach(b=>b.classList.toggle("on",(b.dataset.p==="1")===withPhoto));
-  document.querySelectorAll("#cmxsty button").forEach(b=>b.classList.toggle("on",b.dataset.s===style)); document.getElementById("cmxsty").style.display=kind==="president"?"none":""; // the presidency only has the broadcast style
+  document.querySelectorAll("#cmxsty button").forEach(b=>b.classList.toggle("on",b.dataset.s===style)); document.getElementById("cmxsty").style.display=kind==="president"||kind==="presrounds"?"none":""; // the presidency only has the broadcast style
   m.classList.toggle("wide",style==="broadcast"); m.classList.add("on"); hideTip();
 }
 document.querySelectorAll("#cmxlay button").forEach(b=>b.onclick=()=>showGraphic(callKind,callShown,b.dataset.p==="1"));
@@ -1248,7 +1249,7 @@ document.querySelectorAll("#cmxsty button").forEach(b=>b.onclick=()=>{ callStyle
 document.getElementById("cmxclose").onclick=()=>document.getElementById("callmodal").classList.remove("on");
 document.getElementById("callmodal").onclick=e=>{if(e.target.id==="callmodal") e.currentTarget.classList.remove("on")};
 document.addEventListener("keydown",e=>{if(e.key==="Escape") document.getElementById("callmodal").classList.remove("on")});
-document.getElementById("cmxdl").onclick=()=>{const a=document.createElement("a"); a.href=document.getElementById("cmximg").src; a.download=`${callKind==="president"?"president-call":callKind==="senate"?"senate-call-"+norm(callShown).replace(/[^a-z]+/g,"-"):"call-"+callShown}${callStyleShown==="broadcast"?"-broadcast":""}${callPhoto?"-photo":""}.png`; document.body.appendChild(a); a.click(); a.remove()};
+document.getElementById("cmxdl").onclick=()=>{const a=document.createElement("a"); a.href=document.getElementById("cmximg").src; a.download=`${callKind==="presrounds"?"president-rounds":callKind==="president"?"president-call":callKind==="senate"?"senate-call-"+norm(callShown).replace(/[^a-z]+/g,"-"):"call-"+callShown}${callStyleShown==="broadcast"?"-broadcast":""}${callPhoto?"-photo":""}.png`; document.body.appendChild(a); a.click(); a.remove()};
 function showCallToasts(ids){
   const box=document.getElementById("toasts"), show=ids.slice(-3);
   show.forEach(id=>{const o=OUT[id], s=byId[id], d=document.createElement("div"); d.className="toast"; d.style.setProperty("--c",pcol(o.win));
@@ -1339,7 +1340,7 @@ function presRow(){ const fin=presFin(), col=spc(fin[0].p);
     fin.map((t,i)=>`<div class="sfin"><span class="chip" style="background:${spc(t.p)}"></span><b>${t.n}</b><span class="sp">with ${t.mate} · ${t.line}</span><span class="sv">${fmtPct(t.v)}%</span></div><div class="sbar"><i style="width:${t.v*100}%;background:${i?shade(spc(t.p),0.45):spc(t.p)}"></i></div>`).join("")+
     (PRES.first?`<div class="soth">First round: ${fin.map(t=>`${t.n} ${fmtPct(PRES.first[t.p])}%`).join(", ")}, others ${fmtPct(PRES.firstOther)}%</div>`:"")+
     `<div class="rs"><span>Ranked-choice final round · +${fmtPct(PRES.margin)} pts</span><span class="cnted">Final</span></div>`+
-    `<button class="cc-btn" data-pcall="1" style="width:100%;margin:8px 0 0">Call graphic ↗</button></div>` }
+    `<div style="display:flex;gap:6px;margin:8px 0 0"><button class="cc-btn" data-pcall="1" style="flex:1;width:auto;margin:0">Call graphic ↗</button>`+(PRES.first?`<button class="cc-btn" data-prounds="1" style="flex:1;width:auto;margin:0">Rounds graphic ↗</button>`:"")+`</div></div>` }
 
 // ---- Senate calls: when each was first seen called (per viewer), a pop-up for new ones, and a shareable graphic
 const SEN_CALL_KEY="caprica2076sencalls-v1";
@@ -1508,6 +1509,7 @@ function bigPct(x,v,X,Y,px,maxW,fill){ // "57.4" with a raised "%"
   x.font=BFONT(800,p,"n"); const w=x.measureText(s).width; shadowText(x,s,X,Y,fill,5);
   x.font=BFONT(700,Math.round(p*0.4),"n"); shadowText(x,"%",X+w+8,Y-p*0.34,fill,3); return p }
 function bcSpec(kind,key){
+  if(kind==="presrounds") return {...bcSpec("president"),kind:"president",tag:"RANKED CHOICE · ROUND BY ROUND",rounds:true};
   if(kind==="president"){ const f=presFin();
     return {kind,title:"Caprica",tag:"RANKED CHOICE",pct:1,round:"FINAL ROUND",lead:PRES.margin,
       c:f.map(t=>({n:t.n,p:t.p,v:t.v,sub:PRES.first?`FIRST ROUND ${fmtPct(PRES.first[t.p])}%`:null,line:`${sps(t.p).toUpperCase()} · WITH ${t.mate.toUpperCase()}`,head:headKey(t.n)}))} }
@@ -1537,6 +1539,49 @@ function sidePanel(x,l,img,LX,LY,LW,LH,withPhoto,kind,dim){ const lb=tone(deep(s
     const [lf,lln]=splitName(l.n), lny=LY+LH-122;
     if(lf){ fitB(x,lf.toUpperCase(),600,40,LW-72,22,"l"); shadowText(x,lf.toUpperCase(),LX+36,lny,"rgba(255,255,255,.88)",3) }
     fitB(x,lln.toUpperCase(),700,80,LW-72,38); shadowText(x,lln.toUpperCase(),LX+36,lny+(lf?84:52),"#fff",4) }
+// ---- the presidency round by round (1920×1080): first preferences, the transfers, and the final round
+function presRounds(){ const t=PRES.tickets, f=presFin(), F=PRES.first;
+  const r1=[...t.map(c=>({n:c.n,p:c.p,v:F[c.p],line:`${sps(c.p).toUpperCase()} · WITH ${c.mate.toUpperCase()}`})),{n:"Other candidates",p:"IND",v:PRES.firstOther,line:"ELIMINATED AFTER ROUND 1",other:true}].sort((a,b)=>b.v-a.v);
+  const r2=f.map(c=>({n:c.n,p:c.p,v:c.v,gain:c.v-F[c.p],line:`${sps(c.p).toUpperCase()} · WITH ${c.mate.toUpperCase()}`})).sort((a,b)=>b.v-a.v);
+  return {r1,r2} }
+async function roundsBody(x,withPhoto){ const {r1,r2}=presRounds(), W=1920;
+  const heads={}; if(withPhoto) for(const c of [...r1,...r2]) if(!c.other&&!(c.n in heads)){const k=headKey(c.n); heads[c.n]=k?await loadHead(k):null}
+  const PW=780, PY=210, PH=770, P1=96, P2=W-96-PW, base="#1c3058";
+  const panel=(X,title,sub,rows,final)=>{
+    slab(x,X,PY,PW,PH,10,base,12); fluid(x,X,PY,PW,PH,10,base,"rounds|"+title); gloss(x,X,PY,PW,PH,10,0.18);
+    x.save(); rrect(x,X,PY,PW,PH,10); x.clip(); let g=x.createLinearGradient(0,PY,0,PY+70);
+    if(final){g.addColorStop(0,"#ffe98a"); g.addColorStop(0.5,"#f5c518"); g.addColorStop(1,"#d39e00")} else {g.addColorStop(0,"#f4f7fb"); g.addColorStop(1,"#cfd8e3")}
+    x.fillStyle=g; x.fillRect(X,PY,PW,70); x.fillStyle="rgba(0,0,0,.28)"; x.fillRect(X,PY+70,PW,3); x.restore();
+    x.fillStyle="#1b1b1b"; x.font=BFONT(400,44); track(x,title,X+30,PY+52,3); const tw=track(x,title,0,null,3);
+    x.font=BFONT(700,24,"l"); x.fillStyle="rgba(20,20,20,.75)"; track(x,sub,X+30+tw+22,PY+48,2);
+    const top=PY+(final?120:100), rh=final?(PH-150)/2:(PH-115)/3, D=withPhoto?(final?170:140):0, BXL=X+30+(D?D+26:0), BWF=X+PW-30-BXL, scale=0.62;
+    rows.forEach((c,i)=>{ const ry=top+i*rh, col=c.other?"#8e8e8e":spc(c.p), dk=deep(col);
+      if(D){ bcPhoto(x,heads[c.n]||null,headKey(c.n),X+30,ry+12,D,dk); if(final&&!i) checkBadge(x,X+30+D-34,ry+12+D-34,36) }
+      const [fn,ln]=c.other?["OTHER","CANDIDATES"]:splitName(c.n);
+      fitB(x,fn.toUpperCase(),600,30,BWF-200,18,"l"); shadowText(x,fn.toUpperCase(),BXL,ry+42,"rgba(255,255,255,.88)",3);
+      fitB(x,ln.toUpperCase(),400,final?64:54,BWF-210,30); shadowText(x,ln.toUpperCase(),BXL,ry+(final?102:92),"#fff",4);
+      x.textAlign="right"; x.font=BFONT(400,final?70:58,"n"); shadowText(x,fmtPct(c.v)+"%",X+PW-30,ry+(final?100:90),"#fff",4); x.textAlign="left";
+      fitT(x,c.line,700,20,BWF,13,"l",1.2); x.fillStyle="rgba(255,255,255,.85)"; track(x,c.line,BXL,ry+(final?134:122),1.2);
+      const by=ry+(final?152:140), bh=final?42:34, bw=Math.max(8,BWF*c.v/scale);
+      rrect(x,BXL,by,BWF,bh,6); x.fillStyle="rgba(0,0,0,.28)"; x.fill();
+      let g=x.createLinearGradient(0,by,0,by+bh); g.addColorStop(0,tone(col,0.3)); g.addColorStop(0.5,col); g.addColorStop(1,tone(col,-0.35));
+      rrect(x,BXL,by,bw,bh,6); x.fillStyle=g; x.fill(); gloss(x,BXL,by,bw,bh,6,0.35);
+      if(final){ const mx=BXL+BWF*0.5/scale; x.save(); x.setLineDash([8,6]); x.strokeStyle="rgba(255,255,255,.8)"; x.lineWidth=3; x.beginPath(); x.moveTo(mx,by-10); x.lineTo(mx,by+bh+10); x.stroke(); x.restore();
+        if(!i){ x.font=BFONT(700,18,"l"); x.fillStyle="rgba(255,255,255,.85)"; x.textAlign="right"; x.fillText("50% TO WIN",mx-8,by-12); x.textAlign="left" } }
+      if(final&&c.gain>0){ const gx=BXL+BWF*(c.v-c.gain)/scale; x.save(); rrect(x,BXL,by,bw,bh,6); x.clip(); x.fillStyle="rgba(255,255,255,.2)"; x.fillRect(gx,by,bw,bh);
+        x.strokeStyle="rgba(255,255,255,.75)"; x.lineWidth=2; x.beginPath(); x.moveTo(gx,by); x.lineTo(gx,by+bh); x.stroke(); x.restore();
+        x.font=BFONT(700,20,"l"); x.fillStyle="#fff"; track(x,`+${fmtPct(c.gain)} FROM TRANSFERS`,BXL,by+bh+28,1.2) } }) };
+  panel(P1,"ROUND 1","FIRST PREFERENCES",r1,false);
+  panel(P2,"ROUND 2","FINAL ROUND",r2,true);
+  // the transfers, between the two rounds: a raised gold arrow
+  const AX=P1+PW+26, AW=P2-26-AX, AY=560, AH=120;
+  x.save(); x.shadowColor="rgba(10,22,45,.4)"; x.shadowBlur=24; x.shadowOffsetY=12;
+  x.beginPath(); x.moveTo(AX,AY+AH*0.25); x.lineTo(AX+AW*0.55,AY+AH*0.25); x.lineTo(AX+AW*0.55,AY); x.lineTo(AX+AW,AY+AH/2); x.lineTo(AX+AW*0.55,AY+AH); x.lineTo(AX+AW*0.55,AY+AH*0.75); x.lineTo(AX,AY+AH*0.75); x.closePath();
+  let g=x.createLinearGradient(0,AY,0,AY+AH); g.addColorStop(0,"#fff0a0"); g.addColorStop(0.5,"#f5c518"); g.addColorStop(1,"#a87a00"); x.fillStyle=g; x.fill(); x.restore();
+  x.textAlign="center"; x.font=BFONT(700,20,"l"); x.fillStyle="#1c3058"; track(x,"TRANSFERS",AX+AW/2,AY-22,2,"center");
+  r2.forEach((c,i)=>{ x.fillStyle=spc(c.p); x.font=BFONT(400,26,"n"); x.fillText("+"+fmtPct(c.gain),AX+AW/2,AY+AH+40+i*58);
+    x.font=BFONT(700,16,"l"); x.fillStyle="#1c3058"; track(x,splitName(c.n)[1].toUpperCase(),AX+AW/2,AY+AH+60+i*58,1,"center") });
+  x.textAlign="left" }
 async function bcCanvas(sp,withPhoto){
   try{await Promise.all([["400","d"],["400","n"],["600","l"],["700","l"]].map(([w,f])=>document.fonts.load(BFONT(w,40,f),"0%ABC")))}catch(e){}
   const [w,l]=sp.c, heads=withPhoto?await Promise.all(sp.c.map(c=>c.head?loadHead(c.head):null)):[], logo=await loadLogo();
@@ -1571,6 +1616,7 @@ async function bcCanvas(sp,withPhoto){
   if(logo){ x.save(); rrect(x,LGX,TY,LGW,TH,6); x.clip(); x.drawImage(logo,LGX,TY,LGW,LGW/2); x.restore() }
   else { x.fillStyle="#fff"; x.font=BFONT(700,30); x.fillText("CAPRICA ELECTS",LGX+16,TY+62) }
   gloss(x,LGX,TY,LGW,TH,6,0.14);
+  if(sp.rounds){ await roundsBody(x,withPhoto); return cv }
   // the winner's panel, under a gold "projected winner" band
   const WW=960, WX=l?150:(W-WW)/2, WY=206, WH=790, wb=deep(spc(w.p));
   slab(x,WX,WY,WW,WH,10,wb,14); fluid(x,WX,WY,WW,WH,10,wb,sp.kind+"|"+w.n);
