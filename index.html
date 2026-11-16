@@ -597,6 +597,8 @@ const SEAT_FOR={"kazana-raudea-north":"JF"}, FIT={...PINNED,...SEAT_FOR};
 // suburbs, Régionale where local identity is strongest, and Jasfelts in hard-pressed small towns and working-class
 // suburbs. Seats already called keep their party wherever the table allows. Where the plan says so, the planned
 // party takes the leader's share and the leader takes the planned party's, so margins stay natural.
+// the organiser has called every House seat (16 November): each is called for its leader, which follows SEAT_PLAN
+const HOUSE_ALL_CALLED=true;
 // seats already called before the plan that keep their party under it: they stay called
 const PLAN_CALLED=new Set(["ventura-las-colinas","ventura-san-vicente-south","ventura-coralisle-west","pleucadeuc-valcartier-sud","pleucadeuc-fievreau-nord","pleucadeuc-penhoat","pleucadeuc-point-arthur","pittston-esquerico-reyes-and-conklin","montiablo-la-ensenada","mezata-san-pedro","mezata-mercado-south","mezata-el-puerto","kazana-marae-bay-central","chasmia-verasul-and-hollin-fells","chasmia-hautmont","ambrosia-ambrosian-downs","ambrosia-garrison","ambarino-bedford-falls","ambarino-university-square","ambarino-hartley-and-bois-joli"]);
 const SEAT_PLAN={
@@ -701,7 +703,7 @@ function buildLive(){
     // swung by the region) puts the leader 25+ points clear, and whose votes so far agree, is called straight away
     const early=reporting&&RL.pct>=EARLY_FROM&&proj.win===win&&proj.margin>=EARLY_PROJ&&margin>=EARLY_NOW;
     const pinned=reporting&&(PINNED[id]===win||(PLAN_CALLED.has(id)&&SEAT_PLAN[id]===win));
-    const called=reporting&&(final||o.f>=0.999||shown||pinned||early||(RL.pct>=CALL_FROM&&o.f>=0.5&&margin*100>5+40*(1-o.f)));
+    const called=reporting&&(HOUSE_ALL_CALLED||final||o.f>=0.999||shown||pinned||early||(RL.pct>=CALL_FROM&&o.f>=0.5&&margin*100>5+40*(1-o.f)));
     res[id]={r:{cands:c,inc:o.inc,turnout:null},c,tot,win,prev:o.prev,flip:!!win&&win!==o.prev,margin,pct:o.f,called,reporting,expected:o.expected,proj}}
   capCalls(Object.keys(res).map(id=>{const o=res[id], k=(typeof callTimes==="object"&&callTimes[id]&&callTimes[id].w===o.win)||PINNED[id]===o.win||(PLAN_CALLED.has(id)&&SEAT_PLAN[id]===o.win)?1:0;
     return {o,keep:k,safety:LIVE.reg[byId[id].region].final||o.pct>=0.999?1e9:Math.max(o.margin*100-(5+40*(1-o.pct)),o.proj.margin*100-20)}}),S.length);
