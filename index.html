@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Caprica Elects</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700;800&family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700;800&family=Fjalla+One&family=Archivo+Black&family=Barlow+Semi+Condensed:wght@600;700&display=swap" rel="stylesheet">
 <style>
   :root{--ink:#121212;--muted:#666;--rule:#e2e2e2;--bg:#fff}
   *{box-sizing:border-box}
@@ -1095,6 +1095,9 @@ function drawHeadshot(x,name,img,X,Y,D,col){
   else{x.fillStyle=shade(col,0.55); x.beginPath(); x.arc(cx,Y+D*0.4,D*0.2,0,7); x.fill(); x.beginPath(); x.ellipse(cx,Y+D*1.02,D*0.36,D*0.33,0,0,7); x.fill()} // empty slot
   x.restore(); x.beginPath(); x.arc(cx,cy,r-3,0,7); x.strokeStyle=col; x.lineWidth=6; x.stroke();
 }
+function drawBrand(x,M,logo){ // the logo and the year on the dark strip across the top of the square graphics
+  if(logo){ x.drawImage(logo,M,8,112,56); x.fillStyle="#fff"; x.font=FONT(800,22); x.fillText("2076",M+128,44); return }
+  x.fillStyle="#e3173e"; x.beginPath(); x.arc(M+8,36,8,0,7); x.fill(); x.fillStyle="#fff"; x.font=FONT(800,22); x.fillText("CAPRICA ELECTS 2076",M+28,44) }
 function fitFont(x,text,weight,px,maxW,min){let p=px; x.font=FONT(weight,p); while(p>min&&x.measureText(text).width>maxW){p-=2; x.font=FONT(weight,p)} return p}
 async function callCanvas(id,withPhoto){
   try{await Promise.all(["500","600","700","800"].map(w=>document.fonts.load(FONT(w,20))))}catch(e){}
@@ -1104,8 +1107,7 @@ async function callCanvas(id,withPhoto){
   x.fillStyle="#fff"; x.fillRect(0,0,W,H); x.textBaseline="alphabetic";
   // top strip
   x.fillStyle="#121212"; x.fillRect(0,0,W,72);
-  x.fillStyle="#e3173e"; x.beginPath(); x.arc(M+8,36,8,0,7); x.fill();
-  x.fillStyle="#fff"; x.font=FONT(800,22); x.fillText("CAPRICA ELECTS 2076",M+28,44);
+  drawBrand(x,M,await loadLogo());
   const t=(callTimes[id]||{}).t||Date.now(); x.textAlign="right"; x.font=FONT(600,22); x.fillText(`RACE CALL · ${hhmm(t)}`,W-M,44); x.textAlign="left";
   // the call
   x.fillStyle=col; x.fillRect(0,72,W,190);
@@ -1314,8 +1316,7 @@ async function senCanvas(r,withPhoto){
   const cv=document.createElement("canvas"); cv.width=W; cv.height=H; const x=cv.getContext("2d");
   x.fillStyle="#fff"; x.fillRect(0,0,W,H); x.textBaseline="alphabetic";
   x.fillStyle="#121212"; x.fillRect(0,0,W,72);
-  x.fillStyle="#e3173e"; x.beginPath(); x.arc(M+8,36,8,0,7); x.fill();
-  x.fillStyle="#fff"; x.font=FONT(800,22); x.fillText("CAPRICA ELECTS 2076",M+28,44);
+  drawBrand(x,M,await loadLogo());
   const tm=(senTimes[r]||{}).t||Date.now(); x.textAlign="right"; x.font=FONT(600,22); x.fillText(`SENATE CALL · ${hhmm(tm)}`,W-M,44); x.textAlign="left";
   x.fillStyle=col; x.fillRect(0,72,W,190);
   x.fillStyle=fg; x.font=FONT(700,24); x.fillText("PROJECTED WINNER · SENATE",M,120);
@@ -1365,15 +1366,24 @@ async function openPresCall(withPhoto){
   return showGraphic("president","president",withPhoto) }
 
 // ---- broadcast-style call graphic (1920×1080): raised, glossy panels for the winner and the runner-up
-const BFONT=(w,px)=>`${w} ${px}px "Barlow Condensed","Arial Narrow","Libre Franklin",Arial,sans-serif`;
+// type: Fjalla One for names and titles, Archivo Black for the numbers, Barlow Semi Condensed for the small labels.
+// All static (single-weight) faces: WebKit can draw a variable web font at its thinnest weight on a canvas
+const BFAM={d:'"Fjalla One","Arial Narrow",Arial,sans-serif',n:'"Archivo Black","Arial Black",Arial,sans-serif',l:'"Barlow Semi Condensed","Arial Narrow",Arial,sans-serif'};
+const BFONT=(w,px,f)=>`${f==="l"?w:400} ${px}px ${BFAM[f||"d"]}`;
 const BC_KIND={senate:["SENATE","#1d5fb4"],house:["HOUSE","#17714a"],president:["PRESIDENT","#a3172f"]};
 const hexRGB=h=>{const n=parseInt(h.slice(1),16);return [n>>16,n>>8&255,n&255]};
+const rgba=(h,a)=>{const c=hexRGB(h);return `rgba(${c[0]},${c[1]},${c[2]},${a})`};
 const tone=(h,t)=>"#"+hexRGB(h).map(v=>Math.round(t<0?v*(1+t):v+(255-v)*t).toString(16).padStart(2,"0")).join(""); // t<0 darker, t>0 lighter
 const lum=h=>{const c=hexRGB(h);return (0.299*c[0]+0.587*c[1]+0.114*c[2])/255};
 const deep=h=>{let c=h,k=0; while(lum(c)>0.4&&k<9){c=tone(c,-0.1);k++} return c}; // dark enough for white type
+let logoP=null; const loadLogo=()=>logoP=logoP||new Promise(res=>{const im=new Image(); im.onload=()=>res(im); im.onerror=()=>res(null); im.src="img/caprica-elects-logo.png"});
 function rrect(x,X,Y,W,H,r){x.beginPath();x.moveTo(X+r,Y);x.arcTo(X+W,Y,X+W,Y+H,r);x.arcTo(X+W,Y+H,X,Y+H,r);x.arcTo(X,Y+H,X,Y,r);x.arcTo(X,Y,X+W,Y,r);x.closePath()}
 function starP(x,cx,cy,R){x.beginPath();for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,r=i%2?R*0.45:R;x.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a))}x.closePath()}
-function fitB(x,text,w,px,maxW,min){let p=px;x.font=BFONT(w,p);while(p>min&&x.measureText(text).width>maxW){p-=2;x.font=BFONT(w,p)}return p}
+function fitB(x,text,w,px,maxW,min,f){let p=px;x.font=BFONT(w,p,f);while(p>min&&x.measureText(text).width>maxW){p-=2;x.font=BFONT(w,p,f)}return p}
+function track(x,s,X,Y,sp,align){ // letter-spaced text, drawn a letter at a time (not every Safari has canvas letterSpacing)
+  const ch=[...s], ws=ch.map(c=>x.measureText(c).width), tw=ws.reduce((a,b)=>a+b,0)+sp*(ch.length-1); if(Y==null) return tw;
+  let cx=align==="center"?X-tw/2:align==="right"?X-tw:X; const al=x.textAlign; x.textAlign="left"; ch.forEach((c,i)=>{x.fillText(c,cx,Y); cx+=ws[i]+sp}); x.textAlign=al; return tw }
+function fitT(x,s,w,px,maxW,min,f,sp){let p=px;x.font=BFONT(w,p,f);while(p>min&&track(x,s,0,null,sp)>maxW){p-=1;x.font=BFONT(w,p,f)}return p} // fitB for letter-spaced text
 function splitName(n){const t=n.trim().split(/\s+/); let k=t.length-1; if(k>0&&/^(jr\.?|sr\.?|i{1,3}|iv)$/i.test(t[k])) k--; return [t.slice(0,k).join(" "),t.slice(k).join(" ")]}
 function shadowText(x,s,X,Y,fill,d){x.save();x.shadowColor="rgba(0,0,0,.42)";x.shadowOffsetY=d||4;x.shadowBlur=(d||4)*2.5;x.fillStyle=fill;x.fillText(s,X,Y);x.restore()}
 function slab(x,X,Y,W,H,r,face,depth){ // a raised block: a soft drop shadow, then its darker sides, so the face sits above the page
@@ -1381,15 +1391,26 @@ function slab(x,X,Y,W,H,r,face,depth){ // a raised block: a soft drop shadow, th
   for(let d=depth;d>0;d--){ rrect(x,X+d*0.5,Y+d,W,H,r); x.fillStyle=tone(face,-0.62+0.3*(depth-d)/depth); x.fill() } }
 function gloss(x,X,Y,W,H,r,a){ x.save(); rrect(x,X,Y,W,H,r); x.clip();
   let g=x.createLinearGradient(0,Y,0,Y+H*0.5); g.addColorStop(0,`rgba(255,255,255,${a})`); g.addColorStop(1,"rgba(255,255,255,0)"); x.fillStyle=g; x.fillRect(X,Y,W,H*0.5);
-  g=x.createLinearGradient(X,Y,X+W,Y+H*1.4); g.addColorStop(0.28,"rgba(255,255,255,0)"); g.addColorStop(0.36,`rgba(255,255,255,${a*0.5})`); g.addColorStop(0.44,"rgba(255,255,255,0)"); x.fillStyle=g; x.fillRect(X,Y,W,H);
-  g=x.createLinearGradient(0,Y+H*0.65,0,Y+H); g.addColorStop(0,"rgba(0,0,0,0)"); g.addColorStop(1,"rgba(0,0,0,.25)"); x.fillStyle=g; x.fillRect(X,Y+H*0.65,W,H*0.35);
+  g=x.createLinearGradient(0,Y+H*0.65,0,Y+H); g.addColorStop(0,"rgba(0,0,0,0)"); g.addColorStop(1,"rgba(0,0,0,.22)"); x.fillStyle=g; x.fillRect(X,Y+H*0.65,W,H*0.35);
   x.restore();
   x.save(); rrect(x,X+1.5,Y+1.5,W-3,H-3,r); x.lineWidth=3; g=x.createLinearGradient(0,Y,0,Y+H);
   g.addColorStop(0,"rgba(255,255,255,.6)"); g.addColorStop(0.4,"rgba(255,255,255,.08)"); g.addColorStop(1,"rgba(0,0,0,.35)"); x.strokeStyle=g; x.stroke(); x.restore() }
 function face(x,X,Y,W,H,r,base){ const g=x.createLinearGradient(X,Y,X+W*0.7,Y+H); g.addColorStop(0,tone(base,0.2)); g.addColorStop(0.5,base); g.addColorStop(1,tone(base,-0.38));
-  rrect(x,X,Y,W,H,r); x.fillStyle=g; x.fill();
-  x.save(); rrect(x,X,Y,W,H,r); x.clip(); x.strokeStyle="rgba(255,255,255,.045)"; x.lineWidth=12; // fine diagonal texture
-  for(let d=-H;d<W;d+=34){x.beginPath();x.moveTo(X+d,Y+H);x.lineTo(X+d+H,Y);x.stroke()} x.restore() }
+  rrect(x,X,Y,W,H,r); x.fillStyle=g; x.fill() }
+function fluid(x,X,Y,W,H,r,base,key){ // a soft, flowing, slightly retro backdrop in the party's colour: pools of light and shade, broad ribbons, a sheaf of fine lines and a halftone corner
+  const R=srand("fluid|"+key), wave=(y0,a,f,ph)=>t=>y0+Math.sin(t*Math.PI*f+ph)*a+Math.sin(t*Math.PI*f*2.3+ph*1.7)*a*0.25;
+  x.save(); rrect(x,X,Y,W,H,r); x.clip();
+  let g=x.createLinearGradient(X,Y,X+W*0.7,Y+H); g.addColorStop(0,tone(base,0.16)); g.addColorStop(0.55,base); g.addColorStop(1,tone(base,-0.42)); x.fillStyle=g; x.fillRect(X,Y,W,H);
+  for(let i=0;i<5;i++){ const cx=X+W*R(), cy=Y+H*R(), rad=(0.3+0.35*R())*Math.max(W,H), c=i%2?tone(base,0.4):tone(base,-0.55);
+    g=x.createRadialGradient(cx,cy,0,cx,cy,rad); g.addColorStop(0,rgba(c,0.5)); g.addColorStop(1,rgba(c,0)); x.fillStyle=g; x.fillRect(X,Y,W,H) }
+  for(let i=0;i<3;i++){ const fy=wave(Y+H*(0.15+0.7*R()),H*(0.1+0.14*R()),1.1+R()*0.8,R()*6), th=H*(0.07+0.1*R()), N=60;
+    x.beginPath(); for(let k=0;k<=N;k++){const t=k/N; x.lineTo(X-20+t*(W+40),fy(t))} for(let k=N;k>=0;k--){const t=k/N; x.lineTo(X-20+t*(W+40),fy(t)+th*(0.3+0.7*Math.sin(t*Math.PI)))} x.closePath();
+    g=x.createLinearGradient(X,0,X+W,0); g.addColorStop(0,"rgba(255,255,255,0)"); g.addColorStop(0.5,`rgba(255,255,255,${(0.13+0.08*R()).toFixed(3)})`); g.addColorStop(1,"rgba(255,255,255,.02)"); x.fillStyle=g; x.fill() }
+  { const fy=wave(Y+H*(0.35+0.35*R()),H*0.15,1.3,R()*6); x.lineWidth=2.2;
+    for(let j=0;j<9;j++){ x.beginPath(); for(let k=0;k<=72;k++){const t=k/72; x.lineTo(X-20+t*(W+40),fy(t)+j*10+t*j*7)} x.strokeStyle=`rgba(255,255,255,${(0.17-j*0.015).toFixed(3)})`; x.stroke() } }
+  x.fillStyle="rgba(0,0,0,.16)";
+  for(let yy=Y+8;yy<Y+H;yy+=15) for(let xx=X+8;xx<X+W;xx+=15){ const d=Math.hypot((xx-X-W)/W,(yy-Y-H)/H), rr=3.4*(1-d*1.6); if(rr>0.35){x.beginPath();x.arc(xx,yy,rr,0,7);x.fill()} }
+  x.restore() }
 function bcPhoto(x,img,key,X,Y,D,base){
   x.save(); rrect(x,X,Y,D,D,10); x.clip();
   const g=x.createRadialGradient(X+D/2,Y+D*0.38,D*0.05,X+D/2,Y+D/2,D*0.75); g.addColorStop(0,tone(base,0.35)); g.addColorStop(1,tone(base,-0.35)); x.fillStyle=g; x.fillRect(X,Y,D,D);
@@ -1408,23 +1429,22 @@ function checkBadge(x,cx,cy,R){
   g=x.createLinearGradient(0,cy-R*0.4,0,cy+R*0.4); g.addColorStop(0,"#fff4b8"); g.addColorStop(1,"#e0a800"); x.strokeStyle=g;
   x.beginPath(); x.moveTo(cx-R*0.38,cy+R*0.02); x.lineTo(cx-R*0.1,cy+R*0.3); x.lineTo(cx+R*0.42,cy-R*0.32); x.stroke(); x.restore() }
 function bigPct(x,v,X,Y,px,maxW,fill){ // "57.4" with a raised "%"
-  const s=fmtPct(v); let p=px; for(;p>60;p-=4){x.font=BFONT(800,p); const w=x.measureText(s).width; x.font=BFONT(700,Math.round(p*0.42)); if(w+x.measureText("%").width+6<=maxW) break}
-  x.font=BFONT(800,p); const w=x.measureText(s).width; shadowText(x,s,X,Y,fill,5);
-  x.font=BFONT(700,Math.round(p*0.42)); shadowText(x,"%",X+w+6,Y-p*0.33,fill,3); return p }
+  const s=fmtPct(v); let p=px; for(;p>60;p-=4){x.font=BFONT(800,p,"n"); const w=x.measureText(s).width; x.font=BFONT(700,Math.round(p*0.4),"n"); if(w+x.measureText("%").width+8<=maxW) break}
+  x.font=BFONT(800,p,"n"); const w=x.measureText(s).width; shadowText(x,s,X,Y,fill,5);
+  x.font=BFONT(700,Math.round(p*0.4),"n"); shadowText(x,"%",X+w+8,Y-p*0.34,fill,3); return p }
 function bcSpec(kind,key){
   if(kind==="president"){ const f=presFin();
-    return {kind,title:"Caprica",tag:"RANKED CHOICE",pct:1,round:"FINAL ROUND",lead:PRES.margin,sentence:presSentence(),
+    return {kind,title:"Caprica",tag:"RANKED CHOICE",pct:1,round:"FINAL ROUND",lead:PRES.margin,
       c:f.map(t=>({n:t.n,p:t.p,v:t.v,line:`${sps(t.p).toUpperCase()} · WITH ${t.mate.toUpperCase()}`,head:headKey(t.n)}))} }
   if(kind==="senate"){ const X0=SEN[key];
-    return {kind,title:key,tag:X0.pct>=0.999?"FINAL RESULT":"RACE CALL",pct:X0.pct,round:X0.outright?"RESULT":"FINAL ROUND",lead:X0.margin,sentence:senSentence(key),
+    return {kind,title:key,tag:X0.pct>=0.999?"FINAL RESULT":"RACE CALL",pct:X0.pct,round:X0.outright?"RESULT":"FINAL ROUND",lead:X0.margin,
       c:X0.fin.slice(0,2).map(f=>({n:f.c.n,p:f.p,v:f.v,line:partyLine(f.c).toUpperCase(),head:headKey(f.c.n)}))} }
   const o=OUT[key], s=byId[key], c=o.c.filter(v=>v.votes>0);
   return {kind:"house",title:s.name,tag:`${s.region.toUpperCase()} · SEAT ${s.num}`,pct:Math.min(1,o.tot/(o.expected||o.tot)),round:"",lead:o.margin,badge:o.flip?"GAIN":"",
-    sentence:`${s.name}, ${s.region}: ${callHeadline(o)}${o.flip?" from "+pshort(o.prev):""}. ${c[0].name} wins by ${fmtPct(o.margin)} points${c[1]?" over "+c[1].name:""}.`,
     c:c.slice(0,2).map(v=>({n:v.name,p:v.party,v:v.votes/o.tot,votes:v.votes,line:sps(v.party).toUpperCase(),head:HEADSHOTS[v.name]?v.name:headKey(v.name),inc:o.r.inc===v.name}))} }
 async function bcCanvas(sp,withPhoto){
-  try{await Promise.all(["600","700","800"].map(w=>document.fonts.load(BFONT(w,40))))}catch(e){}
-  const [w,l]=sp.c, heads=withPhoto?await Promise.all(sp.c.map(c=>c.head?loadHead(c.head):null)):[];
+  try{await Promise.all([["400","d"],["400","n"],["600","l"],["700","l"]].map(([w,f])=>document.fonts.load(BFONT(w,40,f),"0%ABC")))}catch(e){}
+  const [w,l]=sp.c, heads=withPhoto?await Promise.all(sp.c.map(c=>c.head?loadHead(c.head):null)):[], logo=await loadLogo();
   const W=1920, H=1080, [KL,KC]=BC_KIND[sp.kind];
   const cv=document.createElement("canvas"); cv.width=W; cv.height=H; const x=cv.getContext("2d"); x.textBaseline="alphabetic";
   // backdrop: brushed silver with light shards and a soft vignette
@@ -1434,79 +1454,72 @@ async function bcCanvas(sp,withPhoto){
   [[[[300,1080],[1100,0],[1150,0],[350,1080]],.05],[[[1500,1080],[1920,500],[1920,600],[1580,1080]],.06]].forEach(([pts,a])=>{x.beginPath();pts.forEach(p=>x.lineTo(p[0],p[1]));x.closePath();x.fillStyle=`rgba(20,40,70,${a})`;x.fill()});
   g=x.createRadialGradient(W/2,H*0.45,H*0.35,W/2,H*0.5,W*0.72); g.addColorStop(0,"rgba(10,25,50,0)"); g.addColorStop(1,"rgba(10,25,50,.28)"); x.fillStyle=g; x.fillRect(0,0,W,H);
   // edge credits, running up the sides
-  x.save(); x.fillStyle="rgba(20,40,75,.26)"; x.font=BFONT(700,22);
-  [[46,"CAPRICA ELECTS 2076  ·  DECISION DESK  ·  "],[W-38,"CAPRICA ELECTS 2076  ·  "+KL+"  ·  "]].forEach(([cx,s])=>{x.save();x.translate(cx,H-40);x.rotate(-Math.PI/2);x.fillText((s).repeat(4),0,0);x.restore()}); x.restore();
-  // header: the race badge, the title bar and the count box
+  x.save(); x.fillStyle="rgba(20,40,75,.26)"; x.font=BFONT(700,20,"l");
+  [[44,"CAPRICA ELECTS 2076   ·   DECISION DESK   ·   "],[W-34,"CAPRICA ELECTS 2076   ·   "+KL+"   ·   "]].forEach(([cx,s])=>{x.save();x.translate(cx,H-40);x.rotate(-Math.PI/2);track(x,s.repeat(4),0,0,2);x.restore()}); x.restore();
+  // header: the race badge, the title bar, the count box and the logo
   const BX=96,BY=44,BW=330,BH=116;
   x.save(); x.shadowColor="rgba(10,22,45,.3)"; x.shadowBlur=26; x.shadowOffsetY=12; rrect(x,BX,BY,BW,BH,8); g=x.createLinearGradient(0,BY,0,BY+BH); g.addColorStop(0,"#ffffff"); g.addColorStop(1,"#dfe5ec"); x.fillStyle=g; x.fill(); x.restore();
   rrect(x,BX+2.5,BY+2.5,BW-5,BH-5,7); x.lineWidth=5; x.strokeStyle=KC; x.stroke();
-  x.fillStyle=KC; [BY+19,BY+BH-19].forEach(yy=>{starP(x,BX+BW/2,yy,9);x.fill();x.fillRect(BX+34,yy-1.5,BW/2-56,3);x.fillRect(BX+BW/2+22,yy-1.5,BW/2-56,3)});
-  x.textAlign="center"; fitB(x,KL,800,84,BW-44,40); x.fillText(KL,BX+BW/2,BY+BH/2+29); x.textAlign="left";
-  const TX=BX+BW+18, TY=BY+8, TH=100, RXb=1520, TW=RXb-24-TX;
+  x.fillStyle=KC; [BY+16,BY+BH-16].forEach(yy=>{starP(x,BX+BW/2,yy,9);x.fill();x.fillRect(BX+34,yy-1.5,BW/2-56,3);x.fillRect(BX+BW/2+22,yy-1.5,BW/2-56,3)});
+  fitT(x,KL,400,62,BW-70,34,"d",2); track(x,KL,BX+BW/2,BY+BH/2+23,2,"center");
+  const TX=BX+BW+18, TY=BY+8, TH=100, LGW=200, LGX=W-96-LGW, VW=250, VX=LGX-16-VW, TW=VX-16-TX;
   slab(x,TX,TY,TW,TH,6,KC,10); face(x,TX,TY,TW,TH,6,KC); gloss(x,TX,TY,TW,TH,6,0.32);
-  x.font=BFONT(700,26); const tagW=x.measureText(sp.tag).width, tt=sp.title.toUpperCase();
-  fitB(x,tt,800,92,TW-60-tagW-22,44); const ttW=x.measureText(tt).width; shadowText(x,tt,TX+30,TY+TH/2+33,"#fff",4);
-  x.font=BFONT(700,26); x.fillStyle="rgba(255,255,255,.88)"; x.fillText(sp.tag,TX+30+ttW+20,TY+TH/2-6);
-  const RW=W-96-RXb;
-  x.save(); x.shadowColor="rgba(10,22,45,.3)"; x.shadowBlur=26; x.shadowOffsetY=12; rrect(x,RXb,TY,RW,TH,6); g=x.createLinearGradient(0,TY,0,TY+TH); g.addColorStop(0,"#ffffff"); g.addColorStop(1,"#dde3ea"); x.fillStyle=g; x.fill(); x.restore();
-  x.fillStyle="#0e1f3d"; x.fillRect(RXb,TY+TH-8,RW,8);
-  x.fillStyle="#50607a"; x.font=BFONT(700,22); x.fillText("VOTE COUNTED",RXb+22,TY+30);
-  const pin=sp.pct>=0.999?"100%":Math.round(sp.pct*100)+"%"; x.fillStyle="#0e1f3d"; x.font=BFONT(800,56); x.fillText(pin,RXb+22,TY+82); const pw=x.measureText(pin).width;
-  x.font=BFONT(700,28); x.fillText("IN",RXb+30+pw,TY+82);
-  x.textAlign="right"; x.font=BFONT(800,24); x.fillStyle="#0e1f3d"; x.fillText("CAPRICA",RXb+RW-18,TY+48); x.fillText("ELECTS",RXb+RW-18,TY+74); x.textAlign="left";
-  x.fillStyle="#e3173e"; x.beginPath(); x.arc(RXb+RW-18-x.measureText("CAPRICA").width-14,TY+40,7,0,7); x.fill();
+  x.font=BFONT(700,22,"l"); const tagW=track(x,sp.tag,0,null,2), tt=sp.title.toUpperCase();
+  fitB(x,tt,700,78,TW-60-tagW-22,40); const ttW=x.measureText(tt).width; shadowText(x,tt,TX+28,TY+TH/2+29,"#fff",4);
+  x.font=BFONT(700,22,"l"); x.fillStyle="rgba(255,255,255,.88)"; track(x,sp.tag,TX+28+ttW+20,TY+TH/2-12,2);
+  x.save(); x.shadowColor="rgba(10,22,45,.3)"; x.shadowBlur=26; x.shadowOffsetY=12; rrect(x,VX,TY,VW,TH,6); g=x.createLinearGradient(0,TY,0,TY+TH); g.addColorStop(0,"#ffffff"); g.addColorStop(1,"#dde3ea"); x.fillStyle=g; x.fill(); x.restore();
+  x.fillStyle="#0e1f3d"; x.fillRect(VX,TY+TH-8,VW,8);
+  x.fillStyle="#50607a"; x.font=BFONT(700,20,"l"); track(x,"VOTE COUNTED",VX+22,TY+30,2);
+  const pin=sp.pct>=0.999?"100%":Math.round(sp.pct*100)+"%"; x.fillStyle="#0e1f3d"; x.font=BFONT(800,50,"n"); x.fillText(pin,VX+20,TY+80); const pw=x.measureText(pin).width;
+  x.font=BFONT(700,26,"l"); x.fillText("IN",VX+30+pw,TY+80);
+  x.save(); x.shadowColor="rgba(10,22,45,.35)"; x.shadowBlur=26; x.shadowOffsetY=12; rrect(x,LGX,TY,LGW,TH,6); x.fillStyle="#007c7a"; x.fill(); x.restore();
+  if(logo){ x.save(); rrect(x,LGX,TY,LGW,TH,6); x.clip(); x.drawImage(logo,LGX,TY,LGW,LGW/2); x.restore() }
+  else { x.fillStyle="#fff"; x.font=BFONT(700,30); x.fillText("CAPRICA ELECTS",LGX+16,TY+62) }
+  gloss(x,LGX,TY,LGW,TH,6,0.14);
   // the winner's panel, under a gold "projected winner" band
-  const WW=960, WX=l?150:(W-WW)/2, WY=200, WH=752, wb=deep(spc(w.p));
-  slab(x,WX,WY,WW,WH,10,wb,14); face(x,WX,WY,WW,WH,10,wb);
-  const PY=WY+90, D=420, PX=WX+36;
-  if(withPhoto){ g=x.createRadialGradient(PX+D/2,PY+D/2,20,PX+D/2,PY+D/2,D*0.9); g.addColorStop(0,"rgba(255,255,255,.25)"); g.addColorStop(1,"rgba(255,255,255,0)");
+  const WW=960, WX=l?150:(W-WW)/2, WY=206, WH=790, wb=deep(spc(w.p));
+  slab(x,WX,WY,WW,WH,10,wb,14); fluid(x,WX,WY,WW,WH,10,wb,sp.kind+"|"+w.n);
+  const PY=WY+94, D=440, PX=WX+36;
+  if(withPhoto){ g=x.createRadialGradient(PX+D/2,PY+D/2,20,PX+D/2,PY+D/2,D*0.9); g.addColorStop(0,"rgba(255,255,255,.22)"); g.addColorStop(1,"rgba(255,255,255,0)");
     x.save(); rrect(x,WX,WY,WW,WH,10); x.clip(); x.fillStyle=g; x.fillRect(WX,WY,WW,WH); x.restore() }
-  gloss(x,WX,WY,WW,WH,10,0.26);
+  gloss(x,WX,WY,WW,WH,10,0.24);
   x.save(); rrect(x,WX,WY,WW,WH,10); x.clip(); g=x.createLinearGradient(0,WY,0,WY+60); g.addColorStop(0,"#ffe98a"); g.addColorStop(0.5,"#f5c518"); g.addColorStop(1,"#d39e00");
   x.fillStyle=g; x.fillRect(WX,WY,WW,60); x.fillStyle="rgba(0,0,0,.28)"; x.fillRect(WX,WY+60,WW,3); x.fillStyle="rgba(255,255,255,.5)"; x.fillRect(WX,WY+2,WW,2); x.restore();
-  x.textAlign="center"; x.font=BFONT(800,42); x.fillStyle="#1b1b1b"; x.fillText("PROJECTED WINNER",WX+WW/2,WY+45); x.textAlign="left";
+  x.font=BFONT(700,38); x.fillStyle="#1b1b1b"; track(x,"PROJECTED WINNER",WX+WW/2,WY+45,4,"center");
   rrect(x,WX+3.5,WY+3.5,WW-7,WH-7,8); x.lineWidth=7; g=x.createLinearGradient(0,WY,0,WY+WH); g.addColorStop(0,"#fff0a0"); g.addColorStop(0.35,"#e8b500"); g.addColorStop(1,"#9c7300"); x.strokeStyle=g; x.stroke();
   let bx, by;
   if(withPhoto){ bcPhoto(x,heads[0],w.head,PX,PY,D,wb); bx=PX+D; by=PY+D-62 }
   const NX=withPhoto?PX+D+58:WX+50, NW=WX+WW-44-NX;
-  const pp=bigPct(x,w.v,NX,PY+(withPhoto?190:230),withPhoto?210:270,NW,"#fff");
+  bigPct(x,w.v,NX,PY+(withPhoto?186:226),withPhoto?190:250,NW,"#fff");
   let sy=PY+(withPhoto?232:280); x.fillStyle="rgba(255,255,255,.55)"; x.fillRect(NX,sy,Math.min(NW,420),3); sy+=46;
-  x.fillStyle="rgba(255,255,255,.82)"; x.font=BFONT(700,30);
-  const sub=w.votes!=null?`${w.votes.toLocaleString("en-US")} VOTES`:sp.round; if(sub){x.fillText(sub,NX,sy); sy+=58}
-  x.font=BFONT(800,52); shadowText(x,`+${fmtPct(sp.lead)} PTS`,NX,sy,"#fff",3); const lw=x.measureText(`+${fmtPct(sp.lead)} PTS`).width;
-  x.font=BFONT(700,26); x.fillStyle="rgba(255,255,255,.8)"; x.fillText("LEAD",NX+lw+12,sy);
+  x.fillStyle="rgba(255,255,255,.85)"; x.font=BFONT(700,28,"l");
+  const sub=w.votes!=null?`${w.votes.toLocaleString("en-US")} VOTES`:sp.round; if(sub){track(x,sub,NX,sy,1.5); sy+=60}
+  const ld=`+${fmtPct(sp.lead)}`; x.font=BFONT(800,50,"n"); shadowText(x,ld,NX,sy,"#fff",3); const lw=x.measureText(ld).width;
+  x.font=BFONT(700,26,"l"); x.fillStyle="rgba(255,255,255,.85)"; track(x,"PTS LEAD",NX+lw+14,sy,1.5);
   if(!withPhoto){ bx=WX+WW-120; by=PY+110 }
   checkBadge(x,bx,by,60);
-  if(sp.badge){ x.font=BFONT(800,34); const bw=x.measureText("+"+sp.badge).width+28, gx=WX+WW-26-bw, gy=WY+10; // a gain, on the gold band
+  if(sp.badge){ x.font=BFONT(700,30); const bw=track(x,"+"+sp.badge,0,null,2)+28, gx=WX+WW-26-bw, gy=WY+10; // a gain, on the gold band
     x.save(); x.shadowColor="rgba(0,0,0,.35)"; x.shadowBlur=8; x.shadowOffsetY=3; rrect(x,gx,gy,bw,42,6); g=x.createLinearGradient(0,gy,0,gy+42); g.addColorStop(0,"#26406b"); g.addColorStop(1,"#0b1730"); x.fillStyle=g; x.fill(); x.restore();
-    x.fillStyle="#f5c518"; x.fillText("+"+sp.badge,gx+14,gy+34) }
-  const [wf,wl]=splitName(w.n), ny=WY+WH-166;
-  if(wf){ fitB(x,wf.toUpperCase(),600,46,(withPhoto?bx-62:WX+WW-80)-PX,28); shadowText(x,wf.toUpperCase(),PX,ny,"rgba(255,255,255,.92)",3) }
-  fitB(x,wl.toUpperCase(),800,104,WW-80,52); shadowText(x,wl.toUpperCase(),PX,ny+(wf?92:60),"#fff",5);
-  fitB(x,w.line,600,32,WW-80,20); x.fillStyle="rgba(255,255,255,.9)"; x.fillText(w.line,PX,ny+(wf?142:110));
+    x.fillStyle="#f5c518"; track(x,"+"+sp.badge,gx+14,gy+33,2) }
+  const [wf,wl]=splitName(w.n), ny=WY+WH-176;
+  if(wf){ fitB(x,wf.toUpperCase(),600,46,(withPhoto?bx-62:WX+WW-80)-PX,26,"l"); shadowText(x,wf.toUpperCase(),PX,ny,"rgba(255,255,255,.92)",3) }
+  fitB(x,wl.toUpperCase(),700,100,WW-80,48); shadowText(x,wl.toUpperCase(),PX,ny+(wf?100:64),"#fff",5);
+  fitT(x,w.line,700,28,WW-90,18,"l",1.5); x.fillStyle="rgba(255,255,255,.9)"; track(x,w.line,PX,ny+(wf?148:112),1.5);
   // the runner-up, set back a little
   if(l){ const LX=WX+WW+40, LY=WY+86, LW=W-96-LX, LH=WH-112, lb=tone(deep(spc(l.p)),-0.12);
-    slab(x,LX,LY,LW,LH,10,lb,10); face(x,LX,LY,LW,LH,10,lb); gloss(x,LX,LY,LW,LH,10,0.18);
+    slab(x,LX,LY,LW,LH,10,lb,10); fluid(x,LX,LY,LW,LH,10,lb,sp.kind+"|"+l.n); gloss(x,LX,LY,LW,LH,10,0.16);
     rrect(x,LX+1,LY+1,LW-2,LH-2,9); x.lineWidth=2; x.strokeStyle="rgba(255,255,255,.25)"; x.stroke();
     const LD=250, LPX=LX+LW-36-LD, LPY=LY+40, LNW=withPhoto?LPX-30-(LX+36):LW-72;
     if(withPhoto){ bcPhoto(x,heads[1],l.head,LPX,LPY,LD,lb);
-      if(l.inc){ x.font=BFONT(800,24); const iw=x.measureText("INCUMBENT").width+20; x.fillStyle="rgba(10,20,40,.85)"; x.fillRect(LPX+LD-iw-8,LPY+LD-42,iw,32); x.fillStyle="#fff"; x.fillText("INCUMBENT",LPX+LD-iw+2,LPY+LD-18) } }
-    bigPct(x,l.v,LX+36,LY+170,withPhoto?150:190,LNW,"#fff");
+      if(l.inc){ x.font=BFONT(700,20,"l"); const iw=track(x,"INCUMBENT",0,null,1.5)+20; x.fillStyle="rgba(10,20,40,.85)"; x.fillRect(LPX+LD-iw-8,LPY+LD-42,iw,32); x.fillStyle="#fff"; track(x,"INCUMBENT",LPX+LD-iw+2,LPY+LD-19,1.5) } }
+    bigPct(x,l.v,LX+36,LY+166,withPhoto?132:170,LNW,"#fff");
     x.fillStyle="rgba(255,255,255,.5)"; x.fillRect(LX+36,LY+208,Math.min(LNW,300),3);
-    let ly=LY+254; if(l.votes!=null){ x.font=BFONT(700,30); x.fillStyle="rgba(255,255,255,.82)"; x.fillText(`${l.votes.toLocaleString("en-US")} VOTES`,LX+36,ly); ly+=50 }
-    const ll=l.line; fitB(x,ll,600,28,LNW,16); x.fillStyle="rgba(255,255,255,.88)"; x.fillText(ll,LX+36,ly);
-    const [lf,lln]=splitName(l.n), lny=LY+LH-120;
-    if(lf){ fitB(x,lf.toUpperCase(),600,40,LW-72,24); shadowText(x,lf.toUpperCase(),LX+36,lny,"rgba(255,255,255,.88)",3) }
-    fitB(x,lln.toUpperCase(),800,84,LW-72,40); shadowText(x,lln.toUpperCase(),LX+36,lny+(lf?78:50),"#fff",4) }
-  // lower-third ticker
-  const KY=986, KH=58; slab(x,96,KY,W-192,KH,6,"#13284a",6);
-  g=x.createLinearGradient(0,KY,0,KY+KH); g.addColorStop(0,"#24426f"); g.addColorStop(1,"#0c1b36"); rrect(x,96,KY,W-192,KH,6); x.fillStyle=g; x.fill();
-  x.save(); rrect(x,96,KY,W-192,KH,6); x.clip(); g=x.createLinearGradient(0,KY,0,KY+KH); g.addColorStop(0,"#ff4a68"); g.addColorStop(1,"#b80f2e"); x.fillStyle=g; x.fillRect(96,KY,300,KH); x.restore();
-  gloss(x,96,KY,W-192,KH,6,0.2);
-  x.fillStyle="#fff"; x.font=BFONT(800,32); x.fillText("CAPRICA ELECTS",120,KY+41);
-  x.font=BFONT(600,30); let tk=sp.sentence; const tkW=W-192-300-48; while(x.measureText(tk).width>tkW&&tk.length>10) tk=tk.replace(/\s*\S+$/,"")+"…"; while(tk.endsWith("……")) tk=tk.slice(0,-1);
-  x.fillStyle="#fff"; x.fillText(tk,96+300+24,KY+40);
-  if(SIM){ x.font=BFONT(700,22); x.fillStyle="rgba(180,20,40,.9)"; x.textAlign="right"; x.fillText("SIMULATED COUNT · PREVIEW",W-100,WY-14); x.textAlign="left" }
+    let ly=LY+254; if(l.votes!=null){ x.font=BFONT(700,26,"l"); x.fillStyle="rgba(255,255,255,.85)"; track(x,`${l.votes.toLocaleString("en-US")} VOTES`,LX+36,ly,1.5); ly+=48 }
+    fitT(x,l.line,700,24,LNW,15,"l",1.2); x.fillStyle="rgba(255,255,255,.88)"; track(x,l.line,LX+36,ly,1.2);
+    const [lf,lln]=splitName(l.n), lny=LY+LH-122;
+    if(lf){ fitB(x,lf.toUpperCase(),600,40,LW-72,22,"l"); shadowText(x,lf.toUpperCase(),LX+36,lny,"rgba(255,255,255,.88)",3) }
+    fitB(x,lln.toUpperCase(),700,80,LW-72,38); shadowText(x,lln.toUpperCase(),LX+36,lny+(lf?84:52),"#fff",4) }
+  if(SIM){ x.font=BFONT(700,22,"l"); x.fillStyle="rgba(180,20,40,.9)"; x.textAlign="right"; x.fillText("SIMULATED COUNT · PREVIEW",W-100,H-30); x.textAlign="left" }
   return cv }
 
 // ---- fit the Results stage to the window
