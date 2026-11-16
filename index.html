@@ -168,7 +168,8 @@
   @keyframes tin{from{transform:translateY(12px);opacity:0}to{transform:none;opacity:1}}
   /* Senate view */
   body.sen #elec{display:none}
-  body.sen .rp-ctl{display:none}
+  #ssort,body.sen #rfilter,body.sen #rsort,body.sen #rcnt{display:none}
+  body.sen #ssort{display:inline-block}
   .srace .sfin{display:flex;align-items:baseline;gap:6px;font-size:12.5px;margin-top:5px}
   .srace .sfin .chip{width:9px;height:9px;border-radius:2px;flex:none;align-self:center}
   .srace .sfin .sp{color:#777;font-size:11.5px}
@@ -229,6 +230,7 @@
             <option value="close">Closest first</option>
             <option value="party">By winner</option>
           </select>
+          <select id="ssort" aria-label="Sort Senate races"><option value="region">By region</option><option value="close">Closest first</option><option value="wide">Biggest margin first</option></select>
           <span class="cnt" id="rcnt"></span>
         </div>
       </div>
@@ -708,7 +710,7 @@ async function fetchLive(){
 }
 
 
-let mode="region", rFilter="all", rSort="region", rParty=null, qText="";
+let mode="region", rFilter="all", rSort="region", sSort="region", rParty=null, qText="";
 const norm=t=>t.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
 function seatQ(s){return norm(s.name).includes(qText)||norm(s.region).includes(qText)}
 function candQ(s){const o=OUT[s.id]; return qText&&o?o.c.filter(x=>norm(x.name).includes(qText)):[]}
@@ -967,6 +969,7 @@ rlist.addEventListener("click",e=>{const cbtn=e.target.closest("[data-call]"); i
   const b=p.getBoundingClientRect(); cur=null; showTip(s,{clientX:b.left+b.width/2,clientY:b.top+b.height/2}); highlight(s)});
 document.querySelectorAll("#rfilter button").forEach(b=>b.onclick=()=>{document.querySelectorAll("#rfilter button").forEach(x=>x.classList.remove("on"));b.classList.add("on");rFilter=b.dataset.f;recolor();renderRaces()});
 document.getElementById("rsort").onchange=e=>{rSort=e.target.value;renderRaces();rlist.scrollTop=0};
+document.getElementById("ssort").onchange=e=>{sSort=e.target.value;renderRaces();rlist.scrollTop=0}; // the Senate list: by region, or by final-round margin either way
 function revealRace(s){
   if(!inView(s)||!matchesQ(s)) return;
   const row=rlist.querySelector(`.race[data-id="${s.id}"]`); if(!row) return;
@@ -1064,6 +1067,7 @@ const HEADSHOTS={
   "Walter Black":{src:"img/headshots/walter-black.jpg",crop:[230,0,360]},
   "Adam Scholz":{src:"img/headshots/adam-scholz.jpg",crop:[0,0,600]},
   "Jasmin Bergvall":{src:"img/headshots/jasmin-bergvall.png",crop:[130,20,420]},
+  "Anton Hofer":{src:"img/headshots/anton-hofer.png",crop:[40,8,210]},
   // Manifest MPs (600×600 portraits)
   "Amelia McLean":{src:"img/headshots/amelia-mclean.jpg",crop:[25,5,550]},
   "Avery Sladen":{src:"img/headshots/avery-sladen.jpg",crop:[25,5,550]},
@@ -1258,7 +1262,8 @@ function renderSenate(){
   const half=Math.ceil(order.length/2);
   pt.innerHTML=`<div class="livehd" style="grid-column:1/-1"><span>Senate seats won <b>+</b> leading</span><span>${calledN} of 17 called</span></div><div>${order.slice(0,half).map(row).join("")}</div><div>${order.slice(half).map(row).join("")}</div>`;
   const pres=!qText||"president".includes(qText)||PRES.tickets.some(t=>norm(t.n+" "+t.mate).includes(qText));
-  rlist.innerHTML=(pres?presRow():"")+Object.keys(DATA.regions).sort().filter(r=>!qText||norm(r).includes(qText)||SEN[r].cands.some(c=>norm(c.n).includes(qText))).map(senateRow).join("")||`<div class="empty">No Senate races match.</div>`;
+  rlist.innerHTML=(pres?presRow():"")+Object.keys(DATA.regions).sort().sort((a,b)=>{ if(sSort==="region") return 0; const A=SEN[a],B=SEN[b]; if(!A.win!==!B.win) return A.win?-1:1; return sSort==="close"?A.margin-B.margin:B.margin-A.margin })
+    .filter(r=>!qText||norm(r).includes(qText)||SEN[r].cands.some(c=>norm(c.n).includes(qText))).map(senateRow).join("")||`<div class="empty">No Senate races match.</div>`;
 }
 // ---- the presidency (one national race, ranked-choice): shown above the Senate races
 const presFin=()=>PRES.tickets.map((t,i)=>({...t,v:i?(1-PRES.margin)/2:(1+PRES.margin)/2}));
