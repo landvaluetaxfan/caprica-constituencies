@@ -640,8 +640,8 @@ const SEN_FINAL={"Ambarino":["DEM",0.1477],"Ambrosia":["A",0.1559],"Cambria":["A
   "Costa Blanca":["CON",0.0940],"Kalahooska":["AR",0.5695],"Kazana":{A:0.5336,AA:0.3663,JF:0.1001},"Mezata":["CON",0.3084],"Moeras":{JF:0.5069,DEM:0.3677,CON:0.1253},"Montiablo":["A",0.2746],
   "Myrati":{CON:0.6197,JF:0.1944,IND:0.1859},"Oplana":["AA",0.1216],"Pittston":["CON",0.1237],"Pleucadeuc":["A",0.7161],"Reno":["A",0.2644],"Ventura":["CON",0.4130]};
 // the presidency: decided by ranked-choice voting; the final round is between these two tickets
-// first round (vote totals): Flash led on first preferences but short of half; the write-in votes were then transferred
-const PRES_R1={DEM:18862792,CON:17399299,other:4394543}, PRES_R1T=PRES_R1.CON+PRES_R1.DEM+PRES_R1.other;
+// first round (vote totals): Alametsä led on first preferences but short of half; Flash overtook him on the write-in transfers
+const PRES_R1={CON:18862792,DEM:17399299,other:4394543}, PRES_R1T=PRES_R1.CON+PRES_R1.DEM+PRES_R1.other;
 const PRES={margin:0.0062,rcv:true,firstVotes:PRES_R1,first:{CON:PRES_R1.CON/PRES_R1T,DEM:PRES_R1.DEM/PRES_R1T},firstOther:PRES_R1.other/PRES_R1T,otherName:"Write-in",
   tickets:[{p:"DEM",n:"Adriana Flash",mate:"Kosta Piastri",line:"Democrats"},
            {p:"CON",n:"Reijo Alametsä",mate:"Tony Blair",line:"Caprican Democratic Movement · Renaissance"}]}; // the winning ticket first
@@ -1335,7 +1335,7 @@ const presFin=()=>PRES.tickets.map((t,i)=>({...t,v:i?(1-PRES.margin)/2:(1+PRES.m
 function presSentence(){ const [w,l]=presFin();
   const f=PRES.first, behind=f&&f[w.p]<f[l.p];
   return `${w.n} and ${w.mate} win the presidency for ${pnL(w.p)}, ${fmtPct(PRES.margin)} points ahead of ${l.n} and ${l.mate} (${sps(l.p)}) in the ranked-choice final round`+
-    (behind?`, after trailing ${fmtPct(f[l.p])}% to ${fmtPct(f[w.p])}% on first preferences and winning most of the transfers.`:f?`, after leading ${fmtPct(f[w.p])}% to ${fmtPct(f[l.p])}% on first preferences, short of a majority, with ${fmtPct(PRES.firstOther)}% of the vote cast for write-in candidates.`:".") }
+    (behind?`, after trailing ${fmtPct(f[w.p])}% to ${fmtPct(f[l.p])}% on first preferences and winning most of the transfers.`:f?`, after leading ${fmtPct(f[w.p])}% to ${fmtPct(f[l.p])}% on first preferences, short of a majority, with ${fmtPct(PRES.firstOther)}% of the vote cast for write-in candidates.`:".") }
 function presRow(){ const fin=presFin(), col=spc(fin[0].p);
   return `<div class="race srace pres"><div class="rh"><span class="rn">President</span><span class="tag gain" style="--c:${col};--fg:${ink(col)}">${sps(fin[0].p)} wins</span></div>`+
     fin.map((t,i)=>`<div class="sfin"><span class="chip" style="background:${spc(t.p)}"></span><b>${t.n}</b><span class="sp">with ${t.mate} · ${t.line}</span><span class="sv">${fmtPct(t.v)}%</span></div><div class="sbar"><i style="width:${t.v*100}%;background:${i?shade(spc(t.p),0.45):spc(t.p)}"></i></div>`).join("")+
