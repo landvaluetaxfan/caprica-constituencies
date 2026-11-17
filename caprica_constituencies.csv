@@ -105,10 +105,10 @@ Ambrosia,1,Auburne,ambrosia-auburne,261000,-0.9%,151,Auburne
 Ambrosia,2,Ambrosian Downs,ambrosia-ambrosian-downs,261000,-0.9%,22308,Auburne
 Ambrosia,3,Strawberry and Meridian,ambrosia-strawberry-and-meridian,262000,-0.5%,21042,Strawberry; Meridian
 Ambrosia,4,Garrison,ambrosia-garrison,269000,+2.2%,1201,Garrison
-Reno,1,Coleston,reno-coleston,361000,+1.6%,1412,Syon
+Reno,1,Coleston-Homerville,reno-coleston,361000,+1.6%,1412,Syon
 Reno,2,Kingsbridge,reno-kingsbridge,349000,-1.7%,84,Syon
 Reno,3,Syon Central,reno-syon-central,354000,-0.3%,66,Syon
-Reno,4,Chancery Hill,reno-marietta,368000,+3.6%,110,Syon
+Reno,4,Port Syon,reno-marietta,368000,+3.6%,110,Syon
 Reno,5,Capital Park,reno-capital-park,357000,+0.5%,3908,Capital Park; Redmont
 Reno,6,Beaurivage,reno-orlean,341000,-4.0%,712,Syon
 Reno,7,Syon South,reno-syon-south,370000,+4.2%,96,Syon
@@ -169,10 +169,10 @@ Pittston,4,"Esquerico, Reyes and Conklin",pittston-esquerico-reyes-and-conklin,3
 Pittston,5,Losana North,pittston-losana-north,314000,+0.0%,87,Losana
 Pittston,6,Losana South,pittston-losana-south,314000,+0.0%,82,Losana; Río Claro
 Pittston,7,Río Claro,pittston-rio-claro,314000,+0.0%,30,Río Claro
-Cambria,1,Oluksee,cambria-oluksee,332000,-0.5%,17047,Oluksee
+Cambria,1,Ouluksee,cambria-oluksee,332000,-0.5%,17047,Ouluksee
 Cambria,2,La Croix,cambria-la-croix,333000,-0.2%,8418,Gryphon; La Croix
 Cambria,3,Gryphon,cambria-gryphon,326000,-2.3%,848,Gryphon
-Cambria,4,Sionaq Springs,cambria-sionaq-springs,324000,-2.9%,12147,Sionaq Springs; Alto; Ampollá
+Cambria,4,Sionaq Springs and Ampollá,cambria-sionaq-springs,324000,-2.9%,12147,Sionaq Springs; Alto; Ampollá
 Cambria,5,Battle Mountain and Fayre,cambria-battle-mountain-and-fayre,330000,-1.1%,11179,Battle Mountain; Fayre; Ampollá
 Cambria,6,Alto West,cambria-alto-west,352000,+5.5%,660,Alto
 Cambria,7,Alto East,cambria-alto-east,339000,+1.6%,339,Alto

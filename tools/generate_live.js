@@ -68,7 +68,7 @@ const SWITCHED = [
   ["Sejin Bluespan", "JF", "ambarino-ambarino-west"],
   // Rejuvenation MP for La Croix in 2072, now Autumn Accords; moves to Sionaq Springs, which the Accords win
   ["Miu Yamada", "AA", "cambria-sionaq-springs"],
-  // Democrat MP for Oluksee in 2072, now the Democrats' candidate in Dalaran, Moeras
+  // Democrat MP for Ouluksee in 2072, now the Democrats' candidate in Dalaran, Moeras
   ["Minette Nine'oh Niamh", "DEM", "moeras-dalaran"],
 ];
 SWITCHED.forEach(([name, party, to]) => {
