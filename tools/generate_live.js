@@ -70,6 +70,8 @@ const SWITCHED = [
   ["Miu Yamada", "AA", "cambria-sionaq-springs"],
   // Democrat MP for Oluksee in 2072, now the Democrats' candidate in Dalaran, Moeras
   ["Minette Nine'oh Niamh", "DEM", "moeras-dalaran"],
+  // Democrat MP for Valley of the Sun in 2072, now the Democrats' candidate in Los Campos (Adriana Flash's old seat), which she wins
+  ["Madeline Blair Flash", "DEM", "costa-blanca-los-campos"],
 ];
 SWITCHED.forEach(([name, party, to]) => {
   const from = Object.keys(out).find(k => Object.values(out[k]).includes(name)); if (!from || !out[to]) throw `no seat for ${name}`;
@@ -79,6 +81,11 @@ SWITCHED.forEach(([name, party, to]) => {
   if (NAMED_LIVE.some(n => n[0] === bumped)) { const reg = DATA.seats.find(x => x.id === from).region; let n; do { n = namer(reg, 0.5); } while (exampleNames.has(n)); A[party] = n; }
   console.error(`${name} stands for ${party} in ${to}; in ${from} ${A[old]} takes the ${old} slot and ${bumped} the ${party} slot`);
 });
+// people not standing for the House in 2076: their slot gets a fresh generated name
+const NOT_STANDING = ["Adriana Flash"]; // elected President
+NOT_STANDING.forEach(name => Object.keys(out).forEach(id => Object.keys(out[id]).forEach(p => { if (out[id][p] !== name) return;
+  const reg = DATA.seats.find(x => x.id === id).region; let n; do { n = namer(reg, 0.5); } while (exampleNames.has(n));
+  out[id][p] = n; console.error(`${name} not standing; ${n} takes the ${p} slot in ${id}`); })));
 // same-party candidates who swap seats: [party, seat id, seat id]
 const SWAP_SEATS = [
   ["A", "pleucadeuc-point-arthur", "pleucadeuc-montagnehautes-terres"],
