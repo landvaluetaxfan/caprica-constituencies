@@ -16,11 +16,11 @@ Chasmia,7,Lisieux East,chasmia-lisieux-east,352000,-0.9%,215,Lisieux
 Chasmia,8,Littlewoods and the Southern Dales,chasmia-littlewoods-and-the-southern-dales,343000,-3.4%,16288,Littlewoods; Verasul
 Chasmia,9,Hautmont,chasmia-hautmont,355000,-0.1%,2692,Lisieux
 Carnapol,1,Montfleury,carnapol-montfleury,373000,-2.5%,883,Dubois
-Carnapol,2,Dubois-Ouest,carnapol-dubois-ouest,387000,+1.1%,501,Dubois
+Carnapol,2,Les Castors,carnapol-dubois-ouest,387000,+1.1%,501,Dubois
 Carnapol,3,Vieux-Dubois,carnapol-vieux-dubois,405000,+5.8%,120,Dubois
 Carnapol,4,Pointe-aux-Saules,carnapol-pointe-aux-saules,369000,-3.6%,431,Dubois
 Carnapol,5,Saint-Rémi,carnapol-saint-remi,378000,-1.2%,142,Dubois
-Carnapol,6,Dubois-Sud,carnapol-dubois-sud,386000,+0.9%,484,Dubois
+Carnapol,6,Brécy-Saint-Martin,carnapol-dubois-sud,386000,+0.9%,484,Dubois
 Carnapol,7,Le Plateau,carnapol-le-plateau,387000,+1.1%,104,Dubois
 Carnapol,8,Rivière-aux-Cèdres,carnapol-riviere-aux-cedres,376000,-1.7%,358,Dubois
 Moeras,1,"Georgetown, St. Lucia and Port Penelope",moeras-georgetown-st-lucia-and-port-penelope,237000,+0.6%,1894,Georgetown; St. Lucia; Port Penelope
@@ -108,42 +108,42 @@ Ambrosia,4,Garrison,ambrosia-garrison,269000,+2.2%,1201,Garrison
 Reno,1,Coleston,reno-coleston,361000,+1.6%,1412,Syon
 Reno,2,Kingsbridge,reno-kingsbridge,349000,-1.7%,84,Syon
 Reno,3,Syon Central,reno-syon-central,354000,-0.3%,66,Syon
-Reno,4,Marietta,reno-marietta,368000,+3.6%,110,Syon
+Reno,4,Chancery Hill,reno-marietta,368000,+3.6%,110,Syon
 Reno,5,Capital Park,reno-capital-park,357000,+0.5%,3908,Capital Park; Redmont
-Reno,6,Orléan,reno-orlean,341000,-4.0%,712,Syon
+Reno,6,Beaurivage,reno-orlean,341000,-4.0%,712,Syon
 Reno,7,Syon South,reno-syon-south,370000,+4.2%,96,Syon
-Reno,8,Holmdel,reno-holmdel,352000,-0.9%,310,Redmont; Capital Park
+Reno,8,Fort Wardell,reno-holmdel,352000,-0.9%,310,Redmont; Capital Park
 Reno,9,Redmont,reno-redmont,353000,-0.6%,252,Redmont
 Reno,10,Reno—Kipling,reno-renokipling,347000,-2.3%,2589,Reno; Redmont
-Montiablo,1,Hollingworth,montiablo-hollingworth,427000,+3.1%,149,Montiablo
-Montiablo,2,Montiablo North,montiablo-montiablo-north,414000,-0.1%,103,Montiablo
-Montiablo,3,Alameda,montiablo-alameda,433000,+4.5%,58,Montiablo
-Montiablo,4,Norcastle,montiablo-norcastle,403000,-2.7%,106,Montiablo
+Montiablo,1,Montiablo North,montiablo-hollingworth,427000,+3.1%,149,Montiablo
+Montiablo,2,Denton,montiablo-montiablo-north,414000,-0.1%,103,Montiablo
+Montiablo,3,Bellevue,montiablo-alameda,433000,+4.5%,58,Montiablo
+Montiablo,4,Saint Lucas,montiablo-norcastle,403000,-2.7%,106,Montiablo
 Montiablo,5,San Fernando,montiablo-san-fernando,396000,-4.4%,84,Montiablo
-Montiablo,6,Pinewood,montiablo-pinewood,427000,+3.1%,82,Montiablo
-Montiablo,7,Los Olivos,montiablo-los-olivos,396000,-4.4%,76,Montiablo
-Montiablo,8,Westbourne,montiablo-westbourne,424000,+2.3%,52,Montiablo
-Montiablo,9,Cathedral,montiablo-cathedral,405000,-2.2%,49,Montiablo
-Montiablo,10,Bellwood,montiablo-bellwood,394000,-4.9%,54,Montiablo
-Montiablo,11,Las Palmas,montiablo-las-palmas,412000,-0.5%,75,Montiablo
-Montiablo,12,Montiablo Central,montiablo-montiablo-central,429000,+3.6%,43,Montiablo
-Montiablo,13,Ciudad Vieja,montiablo-ciudad-vieja,413000,-0.3%,44,Montiablo
-Montiablo,14,Grand Parade,montiablo-grand-parade,443000,+6.9%,50,Montiablo
-Montiablo,15,Market Quarter,montiablo-market-quarter,432000,+4.3%,45,Montiablo
-Montiablo,16,Riverside,montiablo-riverside,414000,-0.1%,86,Montiablo
+Montiablo,6,Holmdel,montiablo-pinewood,427000,+3.1%,82,Montiablo
+Montiablo,7,Lanark,montiablo-los-olivos,396000,-4.4%,76,Montiablo
+Montiablo,8,Douglaston,montiablo-westbourne,424000,+2.3%,52,Montiablo
+Montiablo,9,Elmsford,montiablo-cathedral,405000,-2.2%,49,Montiablo
+Montiablo,10,Caledon,montiablo-bellwood,394000,-4.9%,54,Montiablo
+Montiablo,11,Munsey,montiablo-las-palmas,412000,-0.5%,75,Montiablo
+Montiablo,12,Auburndale,montiablo-montiablo-central,429000,+3.6%,43,Montiablo
+Montiablo,13,Montiablo Central,montiablo-ciudad-vieja,413000,-0.3%,44,Montiablo
+Montiablo,14,Duferin,montiablo-grand-parade,443000,+6.9%,50,Montiablo
+Montiablo,15,Lambton,montiablo-market-quarter,432000,+4.3%,45,Montiablo
+Montiablo,16,Canarsie,montiablo-riverside,414000,-0.1%,86,Montiablo
 Montiablo,17,Saint Jude,montiablo-saint-jude,415000,+0.2%,70,Montiablo
-Montiablo,18,Harbourside,montiablo-harbourside,414000,-0.1%,61,Montiablo
-Montiablo,19,Bayview,montiablo-bayview,422000,+1.9%,192,Montiablo
-Montiablo,20,Southwood,montiablo-southwood,386000,-6.8%,203,Montiablo
-Montiablo,21,La Ensenada,montiablo-la-ensenada,407000,-1.8%,200,Montiablo
-Montiablo,22,Port Munsey,montiablo-port-munsey,408000,-1.5%,290,Montiablo
+Montiablo,18,Orlean,montiablo-harbourside,414000,-0.1%,61,Montiablo
+Montiablo,19,Marietta,montiablo-bayview,422000,+1.9%,192,Montiablo
+Montiablo,20,Festil Basin,montiablo-southwood,386000,-6.8%,203,Montiablo
+Montiablo,21,Montiablo South,montiablo-la-ensenada,407000,-1.8%,200,Montiablo
+Montiablo,22,Grayndler and Bayside,montiablo-port-munsey,408000,-1.5%,290,Montiablo
 Oplana,1,Ashgrove,oplana-ashgrove,366000,-0.4%,671,Langston
 Oplana,2,Langston Central,oplana-langston-central,361000,-1.8%,98,Langston
-Oplana,3,Munsey,oplana-munsey,358000,-2.6%,308,Langston
+Oplana,3,Bellflower,oplana-munsey,358000,-2.6%,308,Langston
 Oplana,4,Langston East,oplana-langston-east,387000,+5.3%,193,Langston
 Oplana,5,Cabo,oplana-cabo,359000,-2.3%,895,Cabo; Langston
 Oplana,6,Kirkwood,oplana-kirkwood,360000,-2.0%,530,Langston
-Oplana,7,Grayndler,oplana-grayndler,366000,-0.4%,1993,Santa Valentina; Langston
+Oplana,7,Cornucopia,oplana-grayndler,366000,-0.4%,1993,Santa Valentina; Langston
 Oplana,8,Santa Valentina West,oplana-santa-valentina-west,381000,+3.7%,153,Santa Valentina
 Oplana,9,Punta Valentina,oplana-punta-valentina,369000,+0.4%,449,Santa Valentina
 Costa Blanca,1,Miramar,costa-blanca-miramar,321000,+0.2%,288,Domicilio Blanca
