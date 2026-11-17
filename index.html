@@ -184,6 +184,16 @@
   .ty-bar{display:flex;height:14px;border-radius:2px;overflow:hidden;min-width:60px}
   @media (max-width:640px){.ty-tab td.n:last-child{display:none}}
   .ty-bar i{display:block;height:100%}
+  #phq{width:100%;box-sizing:border-box;font:14px "Libre Franklin",sans-serif;padding:8px 10px;border:1px solid #ccc;border-radius:3px;margin:10px 0}
+  .ph-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px;max-height:340px;overflow:auto;padding:2px}
+  .ph-grid button{border:2px solid transparent;background:none;padding:4px;border-radius:4px;cursor:pointer;font:600 11.5px/1.25 "Libre Franklin",sans-serif;color:#333;text-align:center;min-width:0}
+  .ph-grid button:hover{background:#f4f4f4}.ph-grid button.on{border-color:#121212}
+  .ph-grid canvas{width:100%;aspect-ratio:1;display:block;border-radius:50%;margin-bottom:4px}
+  .ph-grid small{display:block;font-weight:400;color:#777;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ph-sel{display:flex;gap:16px;align-items:flex-start;margin-top:14px;border-top:1px solid #eee;padding-top:14px;flex-wrap:wrap}
+  .ph-sel canvas{width:140px;height:140px;flex:none;background:repeating-conic-gradient(#eee 0 25%,#fff 0 50%) 0 0/16px 16px}
+  .ph-sel .md-f{flex:1;min-width:200px}
+  #phwho{font-size:13px}#phwho b{font-size:15px;display:block}
   .md-f{display:grid;gap:10px;margin:12px 0 4px;font-size:13px}
   .md-f label{display:grid;gap:4px;font-weight:700}
   .md-f label.ck{display:flex;gap:8px;align-items:flex-start;font-weight:400}
@@ -267,7 +277,8 @@
     <div class="seg" id="elec" aria-label="Election"><button data-e="live" class="on"><span class="livedot"></span>2076 · Live</button><button data-e="ex">2072 election</button></div>
     <input type="search" id="q" placeholder="Find a seat, candidate or MP…" title="Search constituencies, regions and candidate names. Press Enter to jump to the first match." autocomplete="off">
     <span id="count" style="font-size:12.5px;color:#666"></span>
-    <button id="dlmap" class="cc-btn" style="width:auto;margin:0 0 0 auto;padding:6px 10px">Download map</button>
+    <button id="dlphoto" class="cc-btn" style="width:auto;margin:0 0 0 auto;padding:6px 10px">Candidate photos</button>
+    <button id="dlmap" class="cc-btn" style="width:auto;margin:0;padding:6px 10px">Download map</button>
   </div>
   <div class="legend" id="legend"></div>
   <div class="stage" id="stage">
@@ -300,6 +311,13 @@
 <div id="coalmodal" role="dialog" aria-label="Coalition builder"><div class="cmx-box"><div class="co-h"><h3>Coalition builder</h3><span>203 seats · 102 for a majority</span></div><div class="co-chips" id="cochips"></div><div class="co-bar" id="cobar"></div><div class="co-st" id="cost"></div><div class="co-lh">Possible majorities · the smallest that reach 102</div><div id="colist"></div><div class="co-lh" id="colh2">Larger majorities</div><div id="colist2"></div><div class="cmx-act"><button id="coclear">Clear</button><button id="coclose" class="pri">Close</button></div></div></div>
 <div id="flowmodal" class="xmodal" role="dialog" aria-label="Seat flow"><div class="cmx-box"><div class="co-h"><h3>Where the seats went</h3><span>2072 winner → 2076 winner · 203 seats</span></div><div id="flbody"></div><div class="cmx-act"><button class="pri" data-close>Close</button></div></div></div>
 <div id="tgmodal" class="xmodal" role="dialog" aria-label="Targets and marginal seats"><div class="cmx-box"><div class="co-h"><h3>Targets and marginal seats</h3><span id="tgsub"></span></div><div class="co-chips" id="tgchips"></div><div id="tgbody"></div><div class="cmx-act"><button class="pri" data-close>Close</button></div></div></div>
+<div id="phmodal" class="xmodal" role="dialog" aria-label="Candidate photos"><div class="cmx-box"><div class="co-h"><h3>Candidate photos</h3><span id="phcount"></span></div>
+<input id="phq" type="search" placeholder="Search by name, party or seat" autocomplete="off">
+<div class="ph-grid" id="phgrid"></div>
+<div class="ph-sel" id="phsel" hidden><canvas id="phprev" width="240" height="240"></canvas><div class="md-f" style="margin:0"><div id="phwho"></div>
+<label>Style<select id="phstyle"><option value="sq">Square, as cropped on the site</option><option value="ci">Circle with party ring</option><option value="or">Original photo, uncropped</option></select></label>
+<label>Size<select id="phsize"><option value="512">512 px</option><option value="1024" selected>1024 px</option><option value="2048">2048 px</option></select></label></div></div>
+<div class="cmx-act"><button data-close>Close</button><button class="pri" id="phgo" disabled>Download</button></div></div></div>
 <div id="mapdlmodal" class="xmodal" role="dialog" aria-label="Download map"><div class="cmx-box" style="max-width:min(480px,100%)"><div class="co-h"><h3>Download map</h3><span>uses the colours on screen now</span></div>
 <div class="md-f"><label>Area<select id="mdarea"></select></label><label>Format<select id="mdfmt"><option value="svg">SVG (vector, editable)</option><option value="png">PNG (image, 2×)</option></select></label>
 <label class="ck"><input type="checkbox" id="mdhead" checked> Title and key</label><label class="ck"><input type="checkbox" id="mdlab" checked> Labels (region names on the country map, seat names elsewhere)</label></div>
@@ -1391,6 +1409,43 @@ document.getElementById("tgbody").onclick=e=>{const r=e.target.closest("[data-id
   if(!inView(s)){rFilter="all";rParty=null;document.querySelectorAll("#rfilter button").forEach(x=>x.classList.toggle("on",x.dataset.f==="all"));recolor();renderRaces()}
   revealRace(s); const p=(pathsById[s.id]||[])[0]; if(!p) return; p.scrollIntoView({block:"center",behavior:"smooth"});
   setTimeout(()=>{const b=p.getBoundingClientRect(); cur=null; showTip(s,{clientX:b.left+b.width/2,clientY:b.top+b.height/2})},450)};
+
+// ---- candidate photos: pick anyone with a headshot and save just the photo (square crop, party circle or the original file)
+(()=>{
+  const m=document.getElementById("phmodal"), grid=document.getElementById("phgrid"), q=document.getElementById("phq"), go=document.getElementById("phgo");
+  let cur=null, info=[];
+  function about(n){ // party and seat: the 2076 count first, then 2072
+    const t=PRES.tickets.findIndex(t=>t.n===n||t.mate===n); if(t>=0){ const k=PRES.tickets[t]; return {p:k.p,seat:k.n===n?(t?"Presidential candidate":"President-elect"):(t?"Vice-presidential candidate":"Vice-President-elect"),won:false} }
+    for(const id in OUT){ const c=(OUT[id].c||[]).find(c=>c.name===n); if(c) return {p:c.party,seat:byId[id].name+", "+byId[id].region,won:OUT[id].win===c.party&&OUT[id].c[0].name===n} }
+    for(const id in RESULTS){ const c=RESULTS[id].cands.find(c=>c.name===n); if(c) return {p:MAP_TO_LIVE[c.party]||c.party,seat:byId[id].name+", "+byId[id].region+" (2072)",won:false} }
+    for(const id in CANDS_LIVE) for(const p in CANDS_LIVE[id]) if(CANDS_LIVE[id][p]===n) return {p,seat:byId[id].name+", "+byId[id].region,won:false};
+    return {p:"IND",seat:"",won:false} }
+  const col=p=>pcol(p)||"#888";
+  function draw(cv,n,img,style,D){ const x=cv.getContext("2d"), a=info.find(i=>i.n===n)||{p:"IND"};
+    if(style==="or"){ const k=Math.min(1,D/Math.max(img.width,img.height)); cv.width=Math.round(img.width*k); cv.height=Math.round(img.height*k); x.drawImage(img,0,0,cv.width,cv.height); return }
+    cv.width=cv.height=D; x.clearRect(0,0,D,D);
+    if(style==="ci") drawHeadshot(x,n,img,0,0,D,col(a.p));
+    else { const c=HEADSHOTS[n].crop||[0,0,Math.min(img.width,img.height)]; x.drawImage(img,c[0],c[1],c[2],c[2],0,0,D,D) } }
+  function list(){ const t=q.value.trim().toLowerCase();
+    const shown=info.filter(i=>!t||(i.n+" "+pshort(i.p)+" "+i.seat).toLowerCase().includes(t));
+    document.getElementById("phcount").textContent=shown.length+" of "+info.length+" with photos";
+    grid.innerHTML=shown.map(i=>`<button data-n="${i.n.replace(/"/g,"&quot;")}" class="${i.n===cur?"on":""}"><canvas width="160" height="160" style="background:${shade(col(i.p),0.82)}"></canvas>${i.n}<small>${pshort(i.p)}${i.won?" · MP":""}</small></button>`).join("")||'<div class="co-st">No one matches.</div>';
+    grid.querySelectorAll("button").forEach(b=>loadHead(b.dataset.n).then(img=>{ if(img) draw(b.querySelector("canvas"),b.dataset.n,img,"sq",160) })) }
+  function preview(){ if(!cur) return; loadHead(cur).then(img=>{ if(!img) return; const st=document.getElementById("phstyle").value, cv=document.getElementById("phprev");
+    draw(cv,cur,img,st,480); const tall=st==="or"&&cv.height>cv.width; cv.style.width=tall?"auto":"140px"; cv.style.height=st==="or"&&!tall?"auto":"140px" }) }
+  function pick(n){ cur=n; const a=info.find(i=>i.n===n); document.getElementById("phsel").hidden=false; go.disabled=false;
+    document.getElementById("phwho").innerHTML=`<b>${n}</b>${LEADER_TITLE[n]?LEADER_TITLE[n]+" · ":""}${pshort(a.p)}${a.seat?" · "+a.seat:""}${a.won?" · elected 2076":""}`;
+    grid.querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.n===n)); preview() }
+  document.getElementById("dlphoto").onclick=()=>{ info=Object.keys(HEADSHOTS).map(n=>({n,...about(n)})).sort((a,b)=>a.n.localeCompare(b.n)); list(); m.classList.add("on"); q.focus() };
+  q.oninput=list;
+  grid.onclick=e=>{ const b=e.target.closest("[data-n]"); if(b) pick(b.dataset.n) };
+  document.getElementById("phstyle").onchange=preview;
+  go.onclick=()=>{ if(!cur) return; const st=document.getElementById("phstyle").value, D=+document.getElementById("phsize").value,
+      file=cur.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+    const save=(blob,fn)=>{ const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=fn; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),4000) };
+    if(st==="or"){ const src=HEADSHOTS[cur].src; fetch(src).then(r=>r.blob()).then(b=>save(b,file+src.slice(src.lastIndexOf(".")))); return }
+    loadHead(cur).then(img=>{ const cv=document.createElement("canvas"); draw(cv,cur,img,st,D); cv.toBlob(b=>save(b,file+(st==="ci"?"-circle":"")+".png"),"image/png") }) };
+})();
 
 // ---- map download: the whole country, one region or one metro inset, as SVG or PNG, in the colours on screen
 (()=>{
