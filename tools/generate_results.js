@@ -87,7 +87,7 @@ const SAFE_SEAT = LEADERS; // leaders sit in their party's safest seat in the re
 const W = (party, region, names, extra = {}) => names.map(name => ({ name, region, party, ...extra }));
 const NAMED = [
   // --- from the player-NPC sheet
-  ...W("REJ", "Ambarino", ["Kerry Bouvier"]), ...W("DEM", "Ambarino", ["Jason Herrera", "Rainier Leclerc"]), ...W("DM", "Ambarino", ["Maria Carter", "Oliver Williams"]), ...W("RE", "Ambarino", ["Sejin Bluespan"]),
+  ...W("REJ", "Ambarino", ["Kerry Bouvier"]), ...W("DEM", "Ambarino", ["Jason Herrera", "Altair Piastri"]), ...W("DM", "Ambarino", ["Maria Carter", "Oliver Williams"]), ...W("RE", "Ambarino", ["Sejin Bluespan"]),
   ...W("DEM", "Ambrosia", ["Alina Charliennes"]), ...W("DM", "Ambrosia", ["Elizabeth Harris"]), ...W("PP", "Ambrosia", ["Michael Lim"]),
   ...W("REJ", "Cambria", ["Miu Yamada"]), ...W("DEM", "Cambria", ["Minette Nine'oh Niamh"]), ...W("DM", "Cambria", ["Amelia McLean"]), ...W("NPP", "Cambria", ["George Macron"]), ...W("RE", "Cambria", ["Eduardo DiValera"]),
   ...W("DM", "Carnapol", ["Cordelia Lynn Edinburgh", "Robyn Pantic-Slater", "Avery Sladen"]), ...W("NPP", "Carnapol", ["Draqi Arkas"]), ...W("AC", "Carnapol", ["Joe Azhadron Jr."]),

@@ -50,7 +50,6 @@ const NAMED_LIVE = [
   ["Óscar Soto", "Montiablo", "CON", "Alameda"], // Caprican Democratic Movement, standing for Convergence (already the generated name there)
   ["Juan Pastor", "Mezata", "CON", "Los Arcos"], // Caprican Democratic Movement, standing for Convergence
   ["Yolande Delauney", "Pleucadeuc", "CON", "Glazcarneau"], // Caprican Democratic Movement, standing for Convergence
-  ["Minette", "Moeras", "DEM", "Dalaran"], // the Democrats' candidate in Dalaran
   ["Christian Lindner", "Montiablo", "DEM", "Las Palmas"], // also the Democrats' Senate candidate in Montiablo
 ];
 NAMED_LIVE.forEach(([name, region, party, seatName]) => {
@@ -69,13 +68,22 @@ const SWITCHED = [
   ["Sejin Bluespan", "JF", "ambarino-ambarino-west"],
   // Rejuvenation MP for La Croix in 2072, now Autumn Accords; moves to Sionaq Springs, which the Accords win
   ["Miu Yamada", "AA", "cambria-sionaq-springs"],
+  // Democrat MP for Oluksee in 2072, now the Democrats' candidate in Dalaran, Moeras
+  ["Minette Nine'oh Niamh", "DEM", "moeras-dalaran"],
 ];
 SWITCHED.forEach(([name, party, to]) => {
   const from = Object.keys(out).find(k => Object.values(out[k]).includes(name)); if (!from || !out[to]) throw `no seat for ${name}`;
   const A = out[from], B = out[to], old = Object.keys(A).find(p => A[p] === name), bumped = B[party];
   A[old] = A[party]; A[party] = bumped; B[party] = name;
+  // a bumped name that belongs to a named candidate elsewhere gets a fresh generated name instead
+  if (NAMED_LIVE.some(n => n[0] === bumped)) { const reg = DATA.seats.find(x => x.id === from).region; let n; do { n = namer(reg, 0.5); } while (exampleNames.has(n)); A[party] = n; }
   console.error(`${name} stands for ${party} in ${to}; in ${from} ${A[old]} takes the ${old} slot and ${bumped} the ${party} slot`);
 });
+// same-party candidates who swap seats: [party, seat id, seat id]
+const SWAP_SEATS = [
+  ["A", "pleucadeuc-point-arthur", "pleucadeuc-montagnehautes-terres"],
+];
+SWAP_SEATS.forEach(([p, a, b]) => { [out[a][p], out[b][p]] = [out[b][p], out[a][p]]; console.error(`${p}: ${out[a][p]} now in ${a}, ${out[b][p]} in ${b}`); });
 const lines = html.split(/\r?\n/);
 const k = lines.findIndex(l => l.startsWith("const CANDS_LIVE = "));
 const text = "const CANDS_LIVE = " + JSON.stringify(out) + ";";
