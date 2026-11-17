@@ -1,9 +1,9 @@
 region,seat_no,name,id,est_population,deviation_from_region_quota,area_svg_units2,main_places
-Myrati,1,Cas Arwydd West,myrati-cas-arwydd-west,277000,+3.2%,81,Port Aaron
+Myrati,1,Cas Arwydd Dwyrain,myrati-cas-arwydd-west,277000,+3.2%,81,Port Aaron
 Myrati,2,Cas Arwydd,myrati-cas-arwydd,279000,+4.0%,77,Port Aaron
 Myrati,3,Abermeiron,myrati-abermeiron,263000,-2.0%,809,Abermeiron; Port Aaron; Port Heaton
 Myrati,4,Aberllew,myrati-aberllew,270000,+0.6%,301,Port Aaron; Abermeiron; Aberllew
-Myrati,5,Bae Glas,myrati-bae-glas,255000,-5.0%,386,Blue Bay; Aberllew
+Myrati,5,Ynys Dwyrain,myrati-bae-glas,255000,-5.0%,386,Blue Bay; Aberllew
 Myrati,6,Cas Hardd,myrati-cas-hardd,263000,-2.0%,523,Blue Bay; Port Heaton
 Myrati,7,Morfach,myrati-morfach,271000,+1.0%,571,Morfach; Llanhew
 Chasmia,1,Chasberg,chasmia-chasberg,350000,-1.5%,335,Chasberg
