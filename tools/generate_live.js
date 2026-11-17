@@ -90,6 +90,7 @@ const SWAP_SEATS = [
   // named and photographed candidates take the seats their party wins, swapping with a generated winner in the same region
   ["DM", "chasmia-littlewoods-and-the-southern-dales", "chasmia-chasberg"], // Donna Christensen
   ["DM", "kalahooska-saltmarsh", "kalahooska-greenhaven-central"], // Klara Ludvigsson
+  ["DM", "carnapol-dubois-ouest", "carnapol-saint-remi"], // Cordelia Lynn Edinburgh takes Avery Sladen's seat
   ["JF", "ambarino-ambarino-west", "ambarino-montclair"], // Sejin Bluespan
   ["CON", "pleucadeuc-glazcarneau", "pleucadeuc-notanville-sud"], // Yolande Delauney
   ["CON", "oplana-munsey", "oplana-kirkwood"], // Silvia Palacios
