@@ -87,6 +87,13 @@ NOT_STANDING.forEach(name => Object.keys(out).forEach(id => Object.keys(out[id])
 // same-party candidates who swap seats: [party, seat id, seat id]
 const SWAP_SEATS = [
   ["A", "pleucadeuc-point-arthur", "pleucadeuc-montagnehautes-terres"],
+  // named and photographed candidates take the seats their party wins, swapping with a generated winner in the same region
+  ["DM", "chasmia-littlewoods-and-the-southern-dales", "chasmia-chasberg"], // Donna Christensen
+  ["DM", "kalahooska-saltmarsh", "kalahooska-greenhaven-central"], // Klara Ludvigsson
+  ["JF", "ambarino-ambarino-west", "ambarino-montclair"], // Sejin Bluespan
+  ["CON", "pleucadeuc-glazcarneau", "pleucadeuc-notanville-sud"], // Yolande Delauney
+  ["CON", "oplana-munsey", "oplana-kirkwood"], // Silvia Palacios
+  ["CON", "mezata-new-roschau", "mezata-rancho-rojos"], // Leonardo A. Domínguez
 ];
 SWAP_SEATS.forEach(([p, a, b]) => { [out[a][p], out[b][p]] = [out[b][p], out[a][p]]; console.error(`${p}: ${out[a][p]} now in ${a}, ${out[b][p]} in ${b}`); });
 const lines = html.split(/\r?\n/);
