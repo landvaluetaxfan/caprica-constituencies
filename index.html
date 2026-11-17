@@ -1241,8 +1241,8 @@ async function openCall(id,withPhoto){
   return showGraphic("house",id,withPhoto) }
 // one modal for every call graphic: House, Senate or President, in the classic square or the 16:9 broadcast style
 async function showGraphic(kind,key,withPhoto){
-  const fixed=kind==="president"||kind==="presrounds"||kind==="hdiag"||kind==="sdiag", style=fixed?"broadcast":callStyle;
-  const cv=style==="broadcast"?await bcCanvas(bcSpec(kind,key),withPhoto):kind==="senate"?await senCanvas(key,withPhoto):await callCanvas(key,withPhoto);
+  const diag=kind==="hdiag"||kind==="sdiag", fixed=kind==="president"||kind==="presrounds", style=fixed?"broadcast":callStyle;
+  const cv=diag&&style!=="broadcast"?await diagClassic(chamberSpec(kind)):style==="broadcast"?await bcCanvas(bcSpec(kind,key),withPhoto):kind==="senate"?await senCanvas(key,withPhoto):await callCanvas(key,withPhoto);
   const m=document.getElementById("callmodal"), img=document.getElementById("cmximg");
   img.src=cv.toDataURL("image/png");
   img.alt=kind==="hdiag"?"House of Caprica: seats by party":kind==="sdiag"?"Senate of Caprica: seats by party":kind==="presrounds"?"Presidential result, round by round":kind==="president"?`Presidential call: ${sps(PRES.tickets[0].p)} wins`:kind==="senate"?`Senate call: ${sps(SEN[key].win)} wins ${key}`:`Race call: ${callHeadline(OUT[key])} in ${byId[key].name}`;
@@ -1634,6 +1634,31 @@ async function diagramBody(x,sp){ const D=sp.diagram, W=1920, PX=96, PY=210, PW=
   const top=order[0], maj=D.counts[top]>=D.maj;
   x.font=BFONT(700,24,"l"); x.fillStyle="#f5c518";
   track(x,maj?`${(PARTIES_LIVE[top]||{}).short.toUpperCase()} WIN A MAJORITY`:`NO MAJORITY · ${(PARTIES_LIVE[top]||{}).short.toUpperCase()} LARGEST ON ${D.counts[top]}`,LX,PY+PH-46,1.5) }
+async function diagClassic(sp){ // the square, white "classic" chamber graphic
+  try{await Promise.all(["500","600","700","800"].map(w=>document.fonts.load(FONT(w,20))))}catch(e){}
+  const D=sp.diagram, W=1080, H=1080, M=60, cv=document.createElement("canvas"); cv.width=W; cv.height=H; const x=cv.getContext("2d");
+  x.fillStyle="#fff"; x.fillRect(0,0,W,H); x.textBaseline="alphabetic";
+  x.fillStyle="#121212"; x.fillRect(0,0,W,72); drawBrand(x,M,await loadLogo());
+  x.fillStyle="#fff"; x.textAlign="right"; x.font=FONT(600,22); x.fillText(`${D.sen?"SENATE":"HOUSE"} · FINAL RESULT`,W-M,44); x.textAlign="left";
+  x.fillStyle="#121212"; x.font=FONT(800,60); x.fillText(D.sen?"The new Senate":"The new House",M,160);
+  x.fillStyle="#555"; x.font=FONT(600,26); x.fillText(`${D.total} seats · ${D.maj} for a majority`,M,204);
+  const cx=W/2, cy=D.sen?650:670, R=D.sen?330:390, rows=D.sen?2:9, r0=D.sen?R*0.62:R*0.36;
+  const dr=hemicycle(x,D.counts,D.total,cx,cy,R,rows,r0), mt=cy-R-dr-8;
+  x.save(); x.setLineDash([8,6]); x.strokeStyle="#121212"; x.lineWidth=2; x.beginPath(); x.moveTo(cx,mt-26); x.lineTo(cx,mt); x.stroke(); x.restore();
+  x.textAlign="center"; x.fillStyle="#555"; x.font=FONT(700,18); x.fillText(`${D.maj} FOR A MAJORITY`,cx,mt-34);
+  x.fillStyle="#121212"; x.font=FONT(800,80); x.fillText(String(D.total),cx,cy-14); x.fillStyle="#777"; x.font=FONT(700,20); x.fillText("SEATS",cx,cy+16); x.textAlign="left";
+  const order=Object.keys(D.counts).sort((a,b)=>D.counts[b]-D.counts[a]), colW=(W-2*M-40)/2, rh=52, ky=cy+66;
+  x.fillStyle="#e2e2e2"; x.fillRect(M,ky-20,W-2*M,2);
+  order.forEach((p,i)=>{ const cX=M+(i%2)*(colW+40), y=ky+22+Math.floor(i/2)*rh, n=D.counts[p];
+    x.fillStyle=spc(p); x.fillRect(cX,y-22,14,28); x.fillStyle="#121212"; x.font=FONT(700,26); x.fillText((PARTIES_LIVE[p]||{}).short,cX+26,y);
+    x.textAlign="right"; x.font=FONT(800,30); x.fillText(String(n),cX+colW-(D.prev?64:0),y);
+    if(D.prev){ const d=n-(D.prev[p]||0); x.font=FONT(700,20); x.fillStyle=d>0?"#1a8a46":d<0?"#c81e3c":"#999"; x.fillText(d>0?"+"+d:d<0?"−"+(-d):"–",cX+colW,y) }
+    x.textAlign="left" });
+  const top=order[0], maj=D.counts[top]>=D.maj;
+  x.fillStyle="#e2e2e2"; x.fillRect(M,H-74,W-2*M,2); x.fillStyle="#777"; x.font=FONT(500,19);
+  x.fillText(maj?`${(PARTIES_LIVE[top]||{}).short} win a majority`:`No majority · ${(PARTIES_LIVE[top]||{}).short} largest on ${D.counts[top]}`+(D.prev?" · change on 2072":""),M,H-34);
+  x.textAlign="right"; x.fillText("Source: Caprica count sheet",W-M,H-34); x.textAlign="left";
+  return cv }
 async function bcCanvas(sp,withPhoto){
   try{await Promise.all([["400","d"],["400","n"],["600","l"],["700","l"]].map(([w,f])=>document.fonts.load(BFONT(w,40,f),"0%ABC")))}catch(e){}
   const [w,l]=sp.c, heads=withPhoto?await Promise.all(sp.c.map(c=>c.head?loadHead(c.head):null)):[], logo=await loadLogo();
