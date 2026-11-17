@@ -644,7 +644,7 @@ const SEN_FINAL={"Ambarino":["DEM",0.1477],"Ambrosia":["A",0.1559],"Cambria":["A
 const PRES_R1={CON:18862792,DEM:17399299,other:4394543}, PRES_R1T=PRES_R1.CON+PRES_R1.DEM+PRES_R1.other;
 const PRES={margin:0.0062,rcv:true,firstVotes:PRES_R1,first:{CON:PRES_R1.CON/PRES_R1T,DEM:PRES_R1.DEM/PRES_R1T},firstOther:PRES_R1.other/PRES_R1T,otherName:"Write-in",
   tickets:[{p:"DEM",n:"Adriana Flash",mate:"Kosta Piastri",line:"Democrats"},
-           {p:"CON",n:"Reijo Alametsä",mate:"Tony Blair",line:"Caprican Democratic Movement · Renaissance"}]}; // the winning ticket first
+           {p:"CON",n:"Reijo Alametsä",mate:"Walter Black",line:"Caprican Democratic Movement · People’s Party"}]}; // the winning ticket first
 // final round (vote totals): the write-in ballots split about 61% Flash, 23% Alametsä, 16% ranking neither (exhausted)
 PRES.finalVotes={DEM:20101413,CON:19852103}; PRES.exhausted=703118;
 {const v=PRES.finalVotes, [a,b]=PRES.tickets.map(x=>v[x.p]); PRES.margin=(a-b)/(a+b)}
@@ -1105,6 +1105,7 @@ const HEADSHOTS={
   "Benjamin Netanyahu":{src:"img/headshots/benjamin-netanyahu.jpg",crop:[220,0,300]},
   "Tato Lily":{src:"img/headshots/tato-lily.png",crop:[86,0,340]},
   "Walter Black":{src:"img/headshots/walter-black.jpg",crop:[230,0,360]},
+  "Kosta Piastri":{src:"img/headshots/kosta-piastri.png",crop:[150,40,420]},
   "Adam Scholz":{src:"img/headshots/adam-scholz.jpg",crop:[0,0,600]},
   "Jasmin Bergvall":{src:"img/headshots/jasmin-bergvall.png",crop:[130,20,420]},
   "Anton Hofer":{src:"img/headshots/anton-hofer.png",crop:[40,8,210]},
@@ -1516,18 +1517,21 @@ function bcSpec(kind,key){
   if(kind==="presrounds") return {...bcSpec("president"),kind:"president",tag:"RANKED CHOICE · ROUND BY ROUND",rounds:true};
   if(kind==="president"){ const f=presFin();
     return {kind,title:"Caprica",tag:"RANKED CHOICE",pct:1,round:"FINAL ROUND",lead:PRES.margin,
-      c:f.map(t=>({n:t.n,p:t.p,v:t.v,sub:PRES.first?`FIRST ROUND ${fmtPct(PRES.first[t.p])}%`:null,line:`${sps(t.p).toUpperCase()} · WITH ${t.mate.toUpperCase()}`,head:headKey(t.n)}))} }
+      c:f.map(t=>({n:t.n,p:t.p,v:t.v,mate:t.mate,sub:PRES.first?`FIRST ROUND ${fmtPct(PRES.first[t.p])}%`:null,line:`${sps(t.p).toUpperCase()} · WITH ${t.mate.toUpperCase()}`,head:headKey(t.n)}))} }
   if(kind==="senate"){ const X0=SEN[key];
     return {kind,title:key,tag:X0.pct>=0.999?"FINAL RESULT":"RACE CALL",pct:X0.pct,round:X0.outright?"RESULT":"FINAL ROUND",lead:X0.margin,
       c:X0.fin.slice(0,3).map(f=>({n:f.c.n,p:f.p,v:f.v,line:partyLine(f.c).toUpperCase(),head:headKey(f.c.n)}))} }
   const o=OUT[key], s=byId[key], c=o.c.filter(v=>v.votes>0);
   return {kind:"house",title:s.name,tag:`${s.region.toUpperCase()} · SEAT ${s.num}`,pct:Math.min(1,o.tot/(o.expected||o.tot)),round:"",lead:o.margin,badge:o.flip?"GAIN":"",
     c:c.slice(0,2).map(v=>({n:v.name,p:v.party,v:v.votes/o.tot,votes:v.votes,line:(v.party==="IND"?"Independent":sps(v.party)).toUpperCase(),head:HEADSHOTS[v.name]?v.name:headKey(v.name),inc:o.r.inc===v.name}))} }
+function mateInset(x,img,name,X,Y,D,base){ // the running mate, a small portrait on the corner of the candidate's
+  const S=Math.round(D*0.38), ix=X+10, iy=Y+D-S-10; x.save(); x.shadowColor="rgba(0,0,0,.45)"; x.shadowBlur=14; x.shadowOffsetY=5; rrect(x,ix,iy,S,S,8); x.fillStyle=base; x.fill(); x.restore();
+  bcPhoto(x,img,headKey(name),ix,iy,S,base) }
 function sidePanel(x,l,img,LX,LY,LW,LH,withPhoto,kind,dim){ const lb=tone(deep(spc(l.p)),dim), tall=LH>450;
     slab(x,LX,LY,LW,LH,10,lb,10); fluid(x,LX,LY,LW,LH,10,lb,kind+"|"+l.n); gloss(x,LX,LY,LW,LH,10,0.16);
     rrect(x,LX+1,LY+1,LW-2,LH-2,9); x.lineWidth=2; x.strokeStyle="rgba(255,255,255,.25)"; x.stroke();
     const LD=tall?250:Math.min(LH-56,200), LPX=LX+LW-(tall?36:28)-LD, LPY=LY+(tall?40:28), LNW=withPhoto?LPX-30-(LX+36):LW-72;
-    if(withPhoto){ bcPhoto(x,img,l.head,LPX,LPY,LD,lb);
+    if(withPhoto){ bcPhoto(x,img,l.head,LPX,LPY,LD,lb); if(l.mate) mateInset(x,l.mateImg,l.mate,LPX,LPY,LD,lb);
       if(l.inc){ x.font=BFONT(700,20,"l"); const iw=track(x,"INCUMBENT",0,null,1.5)+20; x.fillStyle="rgba(10,20,40,.85)"; x.fillRect(LPX+LD-iw-8,LPY+LD-42,iw,32); x.fillStyle="#fff"; track(x,"INCUMBENT",LPX+LD-iw+2,LPY+LD-19,1.5) } }
     if(!tall){ // a compact panel, for the runner-up and third place stacked
       bigPct(x,l.v,LX+32,LY+104,withPhoto?92:112,LNW,"#fff"); let ly=LY+146;
@@ -1545,11 +1549,11 @@ function sidePanel(x,l,img,LX,LY,LW,LH,withPhoto,kind,dim){ const lb=tone(deep(s
     fitB(x,lln.toUpperCase(),700,80,LW-72,38); shadowText(x,lln.toUpperCase(),LX+36,lny+(lf?84:52),"#fff",4) }
 // ---- the presidency round by round (1920×1080): first preferences, the transfers, and the final round
 function presRounds(){ const t=PRES.tickets, f=presFin(), F=PRES.first;
-  const r1=[...t.map(c=>({n:c.n,p:c.p,v:F[c.p],votes:PRES.firstVotes&&PRES.firstVotes[c.p],line:`${sps(c.p).toUpperCase()} · WITH ${c.mate.toUpperCase()}`})),{n:PRES.otherName||"Other candidates",p:"IND",v:PRES.firstOther,votes:PRES.firstVotes&&PRES.firstVotes.other,line:"ELIMINATED AFTER ROUND 1",other:true}].sort((a,b)=>b.v-a.v);
-  const r2=f.map(c=>({n:c.n,p:c.p,v:c.v,votes:PRES.finalVotes&&PRES.finalVotes[c.p],gain:c.v-F[c.p],line:`${sps(c.p).toUpperCase()} · WITH ${c.mate.toUpperCase()}`})).sort((a,b)=>b.v-a.v);
+  const r1=[...t.map(c=>({n:c.n,p:c.p,mate:c.mate,v:F[c.p],votes:PRES.firstVotes&&PRES.firstVotes[c.p],line:`${sps(c.p).toUpperCase()} · WITH ${c.mate.toUpperCase()}`})),{n:PRES.otherName||"Other candidates",p:"IND",v:PRES.firstOther,votes:PRES.firstVotes&&PRES.firstVotes.other,line:"ELIMINATED AFTER ROUND 1",other:true}].sort((a,b)=>b.v-a.v);
+  const r2=f.map(c=>({n:c.n,p:c.p,mate:c.mate,v:c.v,votes:PRES.finalVotes&&PRES.finalVotes[c.p],gain:c.v-F[c.p],line:`${sps(c.p).toUpperCase()} · WITH ${c.mate.toUpperCase()}`})).sort((a,b)=>b.v-a.v);
   return {r1,r2} }
 async function roundsBody(x,withPhoto){ const {r1,r2}=presRounds(), W=1920;
-  const heads={}; if(withPhoto) for(const c of [...r1,...r2]) if(!c.other&&!(c.n in heads)){const k=headKey(c.n); heads[c.n]=k?await loadHead(k):null}
+  const heads={}; if(withPhoto) for(const c of [...r1,...r2]) for(const n of [c.n,c.mate]) if(n&&!c.other&&!(n in heads)){const k=headKey(n); heads[n]=k?await loadHead(k):null}
   const PW=780, PY=210, PH=770, P1=96, P2=W-96-PW, base="#1c3058";
   const panel=(X,title,sub,rows,final)=>{
     slab(x,X,PY,PW,PH,10,base,12); fluid(x,X,PY,PW,PH,10,base,"rounds|"+title); gloss(x,X,PY,PW,PH,10,0.18);
@@ -1560,7 +1564,7 @@ async function roundsBody(x,withPhoto){ const {r1,r2}=presRounds(), W=1920;
     x.font=BFONT(700,24,"l"); x.fillStyle="rgba(20,20,20,.75)"; track(x,sub,X+30+tw+22,PY+48,2);
     const top=PY+(final?120:100), rh=final?(PH-150)/2:(PH-115)/3, D=withPhoto?(final?170:140):0, BXL=X+30+(D?D+26:0), BWF=X+PW-30-BXL, scale=0.62;
     rows.forEach((c,i)=>{ const ry=top+i*rh, col=c.other?"#8e8e8e":spc(c.p), dk=deep(col);
-      if(D){ bcPhoto(x,heads[c.n]||null,headKey(c.n),X+30,ry+12,D,dk); if(final&&!i) checkBadge(x,X+30+D-34,ry+12+D-34,36) }
+      if(D){ bcPhoto(x,heads[c.n]||null,headKey(c.n),X+30,ry+12,D,dk); if(c.mate) mateInset(x,heads[c.mate]||null,c.mate,X+30,ry+12,D,dk); if(final&&!i) checkBadge(x,X+30+D-34,ry+12+D-34,36) }
       const [fn,ln]=c.other?(PRES.otherName?["",PRES.otherName.toUpperCase()]:["OTHER","CANDIDATES"]):splitName(c.n);
       fitB(x,fn.toUpperCase(),600,30,BWF-200,18,"l"); shadowText(x,fn.toUpperCase(),BXL,ry+42,"rgba(255,255,255,.88)",3);
       fitB(x,ln.toUpperCase(),400,final?64:54,BWF-210,30); shadowText(x,ln.toUpperCase(),BXL,ry+(final?102:92),"#fff",4);
@@ -1591,6 +1595,7 @@ async function roundsBody(x,withPhoto){ const {r1,r2}=presRounds(), W=1920;
 async function bcCanvas(sp,withPhoto){
   try{await Promise.all([["400","d"],["400","n"],["600","l"],["700","l"]].map(([w,f])=>document.fonts.load(BFONT(w,40,f),"0%ABC")))}catch(e){}
   const [w,l]=sp.c, heads=withPhoto?await Promise.all(sp.c.map(c=>c.head?loadHead(c.head):null)):[], logo=await loadLogo();
+  if(withPhoto) await Promise.all(sp.c.map(async c=>{ const k=c.mate&&headKey(c.mate); c.mateImg=k?await loadHead(k):null }));
   const W=1920, H=1080, [KL,KC]=BC_KIND[sp.kind];
   const cv=document.createElement("canvas"); cv.width=W; cv.height=H; const x=cv.getContext("2d"); x.textBaseline="alphabetic";
   // backdrop: brushed silver with light shards and a soft vignette
@@ -1635,7 +1640,7 @@ async function bcCanvas(sp,withPhoto){
   x.font=BFONT(700,38); x.fillStyle="#1b1b1b"; track(x,"PROJECTED WINNER",WX+WW/2,WY+45,4,"center");
   rrect(x,WX+3.5,WY+3.5,WW-7,WH-7,8); x.lineWidth=7; g=x.createLinearGradient(0,WY,0,WY+WH); g.addColorStop(0,"#fff0a0"); g.addColorStop(0.35,"#e8b500"); g.addColorStop(1,"#9c7300"); x.strokeStyle=g; x.stroke();
   let bx, by;
-  if(withPhoto){ bcPhoto(x,heads[0],w.head,PX,PY,D,wb); bx=PX+D; by=PY+D-62 }
+  if(withPhoto){ bcPhoto(x,heads[0],w.head,PX,PY,D,wb); if(w.mate) mateInset(x,w.mateImg,w.mate,PX,PY,D,wb); bx=PX+D; by=PY+D-62 }
   const NX=withPhoto?PX+D+58:WX+50, NW=WX+WW-44-NX;
   bigPct(x,w.v,NX,PY+(withPhoto?186:226),withPhoto?190:250,NW,"#fff");
   let sy=PY+(withPhoto?232:280); x.fillStyle="rgba(255,255,255,.55)"; x.fillRect(NX,sy,Math.min(NW,420),3); sy+=46;
