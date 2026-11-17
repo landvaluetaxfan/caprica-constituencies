@@ -67,6 +67,8 @@ const SWITCHED = [
   ["George Miliband", "JF", "kazana-marae-bay-east"],
   // Renaissance MP for Ambarino West in 2072, now Jasfelts (from the Scarfelts; also its Senate candidate in Ambarino), standing again there
   ["Sejin Bluespan", "JF", "ambarino-ambarino-west"],
+  // Rejuvenation MP for La Croix in 2072, now Autumn Accords; moves to Sionaq Springs, which the Accords win
+  ["Miu Yamada", "AA", "cambria-sionaq-springs"],
 ];
 SWITCHED.forEach(([name, party, to]) => {
   const from = Object.keys(out).find(k => Object.values(out[k]).includes(name)); if (!from || !out[to]) throw `no seat for ${name}`;
