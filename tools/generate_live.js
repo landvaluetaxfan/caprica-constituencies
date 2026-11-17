@@ -50,6 +50,8 @@ const NAMED_LIVE = [
   ["Óscar Soto", "Montiablo", "CON", "Alameda"], // Caprican Democratic Movement, standing for Convergence (already the generated name there)
   ["Juan Pastor", "Mezata", "CON", "Los Arcos"], // Caprican Democratic Movement, standing for Convergence
   ["Yolande Delauney", "Pleucadeuc", "CON", "Glazcarneau"], // Caprican Democratic Movement, standing for Convergence
+  ["Minette", "Moeras", "DEM", "Dalaran"], // the Democrats' candidate in Dalaran
+  ["Christian Lindner", "Montiablo", "DEM", "Las Palmas"], // also the Democrats' Senate candidate in Montiablo
 ];
 NAMED_LIVE.forEach(([name, region, party, seatName]) => {
   const seats = DATA.seats.filter(s => s.region === region && (!seatName || s.name === seatName));
