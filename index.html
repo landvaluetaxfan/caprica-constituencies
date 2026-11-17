@@ -645,6 +645,9 @@ const PRES_R1={CON:18862792,DEM:17399299,other:4394543}, PRES_R1T=PRES_R1.CON+PR
 const PRES={margin:0.0062,rcv:true,firstVotes:PRES_R1,first:{CON:PRES_R1.CON/PRES_R1T,DEM:PRES_R1.DEM/PRES_R1T},firstOther:PRES_R1.other/PRES_R1T,otherName:"Write-in",
   tickets:[{p:"DEM",n:"Adriana Flash",mate:"Kosta Piastri",line:"Democrats"},
            {p:"CON",n:"Reijo Alametsä",mate:"Tony Blair",line:"Caprican Democratic Movement · Renaissance"}]}; // the winning ticket first
+// final round (vote totals): the write-in ballots split about 61% Flash, 23% Alametsä, 16% ranking neither (exhausted)
+PRES.finalVotes={DEM:20101413,CON:19852103}; PRES.exhausted=703118;
+{const v=PRES.finalVotes, [a,b]=PRES.tickets.map(x=>v[x.p]); PRES.margin=(a-b)/(a+b)}
 // preview a later stage of the count: ?sim=0.7 lifts every counting region to at least 70% counted (nothing is saved)
 const SIM=Math.min(1,Math.max(0,+(new URLSearchParams(location.search).get("sim"))||0));
 function applySim(L){ if(HOUSE_ALL_CALLED) for(const r in L.reg){const g=L.reg[r]; g.pct=1; g.final=g.final||g.seats||{}} // the count is over: every region fully counted
@@ -1339,7 +1342,7 @@ function presSentence(){ const [w,l]=presFin();
 function presRow(){ const fin=presFin(), col=spc(fin[0].p);
   return `<div class="race srace pres"><div class="rh"><span class="rn">President</span><span class="tag gain" style="--c:${col};--fg:${ink(col)}">${sps(fin[0].p)} wins</span></div>`+
     fin.map((t,i)=>`<div class="sfin"><span class="chip" style="background:${spc(t.p)}"></span><b>${t.n}</b><span class="sp">with ${t.mate} · ${t.line}</span><span class="sv">${fmtPct(t.v)}%</span></div><div class="sbar"><i style="width:${t.v*100}%;background:${i?shade(spc(t.p),0.45):spc(t.p)}"></i></div>`).join("")+
-    (PRES.first?`<div class="soth">First round: ${fin.map(t=>`${t.n} ${fmtPct(PRES.first[t.p])}%`).join(", ")}, write-in ${fmtPct(PRES.firstOther)}%</div>`:"")+
+    (PRES.first?`<div class="soth">First round: ${fin.map(t=>`${t.n} ${fmtPct(PRES.first[t.p])}%`).join(", ")}, write-in ${fmtPct(PRES.firstOther)}%.${PRES.finalVotes?` Final round: ${fin.map(t=>`${t.n} ${PRES.finalVotes[t.p].toLocaleString("en-US")}`).join(", ")} votes; ${PRES.exhausted.toLocaleString("en-US")} write-in ballots ranked neither.`:""}</div>`:"")+
     `<div class="rs"><span>Ranked-choice final round · +${fmtPct(PRES.margin)} pts</span><span class="cnted">Final</span></div>`+
     `<div style="display:flex;gap:6px;margin:8px 0 0"><button class="cc-btn" data-pcall="1" style="flex:1;width:auto;margin:0">Call graphic ↗</button>`+(PRES.first?`<button class="cc-btn" data-prounds="1" style="flex:1;width:auto;margin:0">Rounds graphic ↗</button>`:"")+`</div></div>` }
 
@@ -1543,7 +1546,7 @@ function sidePanel(x,l,img,LX,LY,LW,LH,withPhoto,kind,dim){ const lb=tone(deep(s
 // ---- the presidency round by round (1920×1080): first preferences, the transfers, and the final round
 function presRounds(){ const t=PRES.tickets, f=presFin(), F=PRES.first;
   const r1=[...t.map(c=>({n:c.n,p:c.p,v:F[c.p],votes:PRES.firstVotes&&PRES.firstVotes[c.p],line:`${sps(c.p).toUpperCase()} · WITH ${c.mate.toUpperCase()}`})),{n:PRES.otherName||"Other candidates",p:"IND",v:PRES.firstOther,votes:PRES.firstVotes&&PRES.firstVotes.other,line:"ELIMINATED AFTER ROUND 1",other:true}].sort((a,b)=>b.v-a.v);
-  const r2=f.map(c=>({n:c.n,p:c.p,v:c.v,gain:c.v-F[c.p],line:`${sps(c.p).toUpperCase()} · WITH ${c.mate.toUpperCase()}`})).sort((a,b)=>b.v-a.v);
+  const r2=f.map(c=>({n:c.n,p:c.p,v:c.v,votes:PRES.finalVotes&&PRES.finalVotes[c.p],gain:c.v-F[c.p],line:`${sps(c.p).toUpperCase()} · WITH ${c.mate.toUpperCase()}`})).sort((a,b)=>b.v-a.v);
   return {r1,r2} }
 async function roundsBody(x,withPhoto){ const {r1,r2}=presRounds(), W=1920;
   const heads={}; if(withPhoto) for(const c of [...r1,...r2]) if(!c.other&&!(c.n in heads)){const k=headKey(c.n); heads[c.n]=k?await loadHead(k):null}
@@ -1569,7 +1572,7 @@ async function roundsBody(x,withPhoto){ const {r1,r2}=presRounds(), W=1920;
       let g=x.createLinearGradient(0,by,0,by+bh); g.addColorStop(0,tone(col,0.3)); g.addColorStop(0.5,col); g.addColorStop(1,tone(col,-0.35));
       rrect(x,BXL,by,bw,bh,6); x.fillStyle=g; x.fill(); gloss(x,BXL,by,bw,bh,6,0.35);
       if(final){ const mx=BXL+BWF*0.5/scale; x.save(); x.setLineDash([8,6]); x.strokeStyle="rgba(255,255,255,.8)"; x.lineWidth=3; x.beginPath(); x.moveTo(mx,by-10); x.lineTo(mx,by+bh+10); x.stroke(); x.restore();
-        if(!i){ x.font=BFONT(700,18,"l"); x.fillStyle="rgba(255,255,255,.85)"; x.textAlign="right"; x.fillText("50% TO WIN",mx-8,by-12); x.textAlign="left" } }
+        if(!i){ x.font=BFONT(700,18,"l"); x.fillStyle="rgba(255,255,255,.85)"; x.fillText("50% TO WIN",mx+8,by+bh+26) } }
       if(final&&c.gain>0){ const gx=BXL+BWF*(c.v-c.gain)/scale; x.save(); rrect(x,BXL,by,bw,bh,6); x.clip(); x.fillStyle="rgba(255,255,255,.2)"; x.fillRect(gx,by,bw,bh);
         x.strokeStyle="rgba(255,255,255,.75)"; x.lineWidth=2; x.beginPath(); x.moveTo(gx,by); x.lineTo(gx,by+bh); x.stroke(); x.restore();
         x.font=BFONT(700,20,"l"); x.fillStyle="#fff"; track(x,`+${fmtPct(c.gain)} FROM TRANSFERS`,BXL,by+bh+28,1.2) } }) };
@@ -1583,6 +1586,7 @@ async function roundsBody(x,withPhoto){ const {r1,r2}=presRounds(), W=1920;
   x.textAlign="center"; x.font=BFONT(700,20,"l"); x.fillStyle="#1c3058"; track(x,"TRANSFERS",AX+AW/2,AY-22,2,"center");
   r2.forEach((c,i)=>{ x.fillStyle=spc(c.p); x.font=BFONT(400,26,"n"); x.fillText("+"+fmtPct(c.gain),AX+AW/2,AY+AH+40+i*58);
     x.font=BFONT(700,16,"l"); x.fillStyle="#1c3058"; track(x,splitName(c.n)[1].toUpperCase(),AX+AW/2,AY+AH+60+i*58,1,"center") });
+  if(PRES.exhausted){ x.fillStyle="#5a6578"; x.font=BFONT(400,22,"n"); x.fillText(PRES.exhausted.toLocaleString("en-US"),AX+AW/2,AY+AH+40+r2.length*58); x.font=BFONT(700,16,"l"); track(x,"EXHAUSTED",AX+AW/2,AY+AH+60+r2.length*58,1,"center") }
   x.textAlign="left" }
 async function bcCanvas(sp,withPhoto){
   try{await Promise.all([["400","d"],["400","n"],["600","l"],["700","l"]].map(([w,f])=>document.fonts.load(BFONT(w,40,f),"0%ABC")))}catch(e){}
