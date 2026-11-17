@@ -1108,6 +1108,7 @@ const HEADSHOTS={
   "Tato Lily":{src:"img/headshots/tato-lily.png",crop:[86,0,340]},
   "Walter Black":{src:"img/headshots/walter-black.jpg",crop:[230,0,360]},
   "Kosta Piastri":{src:"img/headshots/kosta-piastri.png",crop:[150,40,420]},
+  "Jean-Jacques LeRoy-Du Lac":{src:"img/headshots/jean-jacques-leroy-du-lac.png",crop:[0,30,307]},
   "Adam Scholz":{src:"img/headshots/adam-scholz.jpg",crop:[0,0,600]},
   "Jasmin Bergvall":{src:"img/headshots/jasmin-bergvall.png",crop:[130,20,420]},
   "Anton Hofer":{src:"img/headshots/anton-hofer.png",crop:[40,8,210]},
@@ -1468,7 +1469,7 @@ function track(x,s,X,Y,sp,align){ // letter-spaced text, drawn a letter at a tim
   const ch=[...s], ws=ch.map(c=>x.measureText(c).width), tw=ws.reduce((a,b)=>a+b,0)+sp*(ch.length-1); if(Y==null) return tw;
   let cx=align==="center"?X-tw/2:align==="right"?X-tw:X; const al=x.textAlign; x.textAlign="left"; ch.forEach((c,i)=>{x.fillText(c,cx,Y); cx+=ws[i]+sp}); x.textAlign=al; return tw }
 function fitT(x,s,w,px,maxW,min,f,sp){let p=px;x.font=BFONT(w,p,f);while(p>min&&track(x,s,0,null,sp)>maxW){p-=1;x.font=BFONT(w,p,f)}return p} // fitB for letter-spaced text
-function splitName(n){const t=n.trim().split(/\s+/); let k=t.length-1; if(k>0&&/^(jr\.?|sr\.?|i{1,3}|iv)$/i.test(t[k])) k--; return [t.slice(0,k).join(" "),t.slice(k).join(" ")]}
+function splitName(n){const t=n.trim().split(/\s+/); let k=t.length-1; if(k>0&&/^(jr\.?|sr\.?|i{1,3}|iv)$/i.test(t[k])) k--; while(k>0&&/(^|-)(du|de|del|der|la|le|van|von|da|di|dos|das)$/i.test(t[k-1])) k--; return [t.slice(0,k).join(" "),t.slice(k).join(" ")]} // "LeRoy-Du Lac", "van Ryneveld" stay in the surname
 function shadowText(x,s,X,Y,fill,d){x.save();x.shadowColor="rgba(0,0,0,.42)";x.shadowOffsetY=d||4;x.shadowBlur=(d||4)*2.5;x.fillStyle=fill;x.fillText(s,X,Y);x.restore()}
 function slab(x,X,Y,W,H,r,face,depth){ // a raised block: a soft drop shadow, then its darker sides, so the face sits above the page
   x.save(); x.shadowColor="rgba(10,22,45,.4)"; x.shadowBlur=50; x.shadowOffsetY=28; rrect(x,X+depth*0.5,Y+depth,W,H,r); x.fillStyle=tone(face,-0.6); x.fill(); x.restore();
