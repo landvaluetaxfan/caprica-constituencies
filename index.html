@@ -926,6 +926,7 @@ function seatSummaryLive(){
     `<div>${order.slice(0,half).map(row).join("")}</div><div>${order.slice(half).map(row).join("")}</div>`+
     (pv?`<div style="grid-column:1/-1;margin-top:6px"><div class="pgh">Popular vote</div><div class="pvrow" style="margin-top:6px">${pvOrder.map(p=>`<i style="width:${pv[p]*100}%;background:${pcol(p)}" title="${pshort(p)} ${(pv[p]*100).toFixed(1)}%"></i>`).join("")}</div>`+
       `<div class="pvl">${pvOrder.map(p=>`<span><span class="sw" style="background:${pcol(p)};display:inline-block;width:8px;height:8px;border-radius:1px;margin-right:4px"></span>${pshort(p)} <b>${(pv[p]*100).toFixed(1)}%</b></span>`).join("")}</div></div>`:"");
+  if(ELEC==="live") pt.insertAdjacentHTML("beforeend",'<button class="cc-btn" data-diag="hdiag" style="grid-column:1/-1;width:100%;margin:8px 0 0">House diagram ↗</button>');
   sb.querySelectorAll("i[data-p]").forEach(i=>i.onclick=()=>toggleParty(i.dataset.p));
   pt.querySelectorAll(".prow").forEach(i=>i.onclick=()=>toggleParty(i.dataset.p));
 }
@@ -996,6 +997,7 @@ function renderRaces(){
 const rlist=document.getElementById("rlist");
 rlist.addEventListener("mouseover",e=>{const r=e.target.closest(".race"); if(!r) return; if(r.classList.contains("pres")) return highlight(null); if(r.dataset.r) highlightRegion(r.dataset.r); else highlight(byId[r.dataset.id])});
 rlist.addEventListener("mouseleave",()=>highlight(null));
+document.getElementById("ptab").addEventListener("click",e=>{const b=e.target.closest("[data-diag]"); if(b){e.stopPropagation(); showGraphic(b.dataset.diag,"chamber",false)}},true);
 rlist.addEventListener("click",e=>{const cbtn=e.target.closest("[data-call]"); if(cbtn){e.stopPropagation(); openCall(cbtn.dataset.call); return}
   const sbtn=e.target.closest("[data-scall]"); if(sbtn){e.stopPropagation(); openSenCall(sbtn.dataset.scall); return}
   if(e.target.closest("[data-pcall]")){e.stopPropagation(); openPresCall(); return}
@@ -1239,14 +1241,14 @@ async function openCall(id,withPhoto){
   return showGraphic("house",id,withPhoto) }
 // one modal for every call graphic: House, Senate or President, in the classic square or the 16:9 broadcast style
 async function showGraphic(kind,key,withPhoto){
-  const style=kind==="president"||kind==="presrounds"?"broadcast":callStyle;
+  const fixed=kind==="president"||kind==="presrounds"||kind==="hdiag"||kind==="sdiag", style=fixed?"broadcast":callStyle;
   const cv=style==="broadcast"?await bcCanvas(bcSpec(kind,key),withPhoto):kind==="senate"?await senCanvas(key,withPhoto):await callCanvas(key,withPhoto);
   const m=document.getElementById("callmodal"), img=document.getElementById("cmximg");
   img.src=cv.toDataURL("image/png");
-  img.alt=kind==="presrounds"?"Presidential result, round by round":kind==="president"?`Presidential call: ${sps(PRES.tickets[0].p)} wins`:kind==="senate"?`Senate call: ${sps(SEN[key].win)} wins ${key}`:`Race call: ${callHeadline(OUT[key])} in ${byId[key].name}`;
+  img.alt=kind==="hdiag"?"House of Caprica: seats by party":kind==="sdiag"?"Senate of Caprica: seats by party":kind==="presrounds"?"Presidential result, round by round":kind==="president"?`Presidential call: ${sps(PRES.tickets[0].p)} wins`:kind==="senate"?`Senate call: ${sps(SEN[key].win)} wins ${key}`:`Race call: ${callHeadline(OUT[key])} in ${byId[key].name}`;
   callShown=key; callPhoto=withPhoto; callKind=kind; callStyleShown=style;
   document.querySelectorAll("#cmxlay button").forEach(b=>b.classList.toggle("on",(b.dataset.p==="1")===withPhoto));
-  document.querySelectorAll("#cmxsty button").forEach(b=>b.classList.toggle("on",b.dataset.s===style)); document.getElementById("cmxsty").style.display=kind==="president"||kind==="presrounds"?"none":""; // the presidency only has the broadcast style
+  document.querySelectorAll("#cmxsty button").forEach(b=>b.classList.toggle("on",b.dataset.s===style)); document.getElementById("cmxsty").style.display=fixed?"none":""; document.getElementById("cmxlay").style.display=kind==="hdiag"||kind==="sdiag"?"none":""; // diagrams have no photos // the presidency only has the broadcast style
   m.classList.toggle("wide",style==="broadcast"); m.classList.add("on"); hideTip();
 }
 document.querySelectorAll("#cmxlay button").forEach(b=>b.onclick=()=>showGraphic(callKind,callShown,b.dataset.p==="1"));
@@ -1254,7 +1256,7 @@ document.querySelectorAll("#cmxsty button").forEach(b=>b.onclick=()=>{ callStyle
 document.getElementById("cmxclose").onclick=()=>document.getElementById("callmodal").classList.remove("on");
 document.getElementById("callmodal").onclick=e=>{if(e.target.id==="callmodal") e.currentTarget.classList.remove("on")};
 document.addEventListener("keydown",e=>{if(e.key==="Escape") document.getElementById("callmodal").classList.remove("on")});
-document.getElementById("cmxdl").onclick=()=>{const a=document.createElement("a"); a.href=document.getElementById("cmximg").src; a.download=`${callKind==="presrounds"?"president-rounds":callKind==="president"?"president-call":callKind==="senate"?"senate-call-"+norm(callShown).replace(/[^a-z]+/g,"-"):"call-"+callShown}${callStyleShown==="broadcast"?"-broadcast":""}${callPhoto?"-photo":""}.png`; document.body.appendChild(a); a.click(); a.remove()};
+document.getElementById("cmxdl").onclick=()=>{const a=document.createElement("a"); a.href=document.getElementById("cmximg").src; a.download=`${callKind==="hdiag"?"house-diagram":callKind==="sdiag"?"senate-diagram":callKind==="presrounds"?"president-rounds":callKind==="president"?"president-call":callKind==="senate"?"senate-call-"+norm(callShown).replace(/[^a-z]+/g,"-"):"call-"+callShown}${callStyleShown==="broadcast"?"-broadcast":""}${callPhoto?"-photo":""}.png`; document.body.appendChild(a); a.click(); a.remove()};
 function showCallToasts(ids){
   const box=document.getElementById("toasts"), show=ids.slice(-3);
   show.forEach(id=>{const o=OUT[id], s=byId[id], d=document.createElement("div"); d.className="toast"; d.style.setProperty("--c",pcol(o.win));
@@ -1330,6 +1332,7 @@ function renderSenate(){
   const row=p=>`<div class="prow" title="${PARTIES_LIVE[p].name}: ${won[p]} won, leading in ${lead[p]}"><span class="sw" style="background:${spc(p)}"></span><span class="pn">${sps(p)}</span><span class="ps">${won[p]}<span style="font-weight:500;color:#888"> +${lead[p]}</span></span><span class="chg"></span></div>`;
   const half=Math.ceil(order.length/2);
   pt.innerHTML=`<div class="livehd" style="grid-column:1/-1"><span>Senate seats won <b>+</b> leading</span><span>${calledN} of 17 called</span></div><div>${order.slice(0,half).map(row).join("")}</div><div>${order.slice(half).map(row).join("")}</div>`;
+  if(true) pt.insertAdjacentHTML("beforeend",'<button class="cc-btn" data-diag="sdiag" style="grid-column:1/-1;width:100%;margin:8px 0 0">Senate diagram ↗</button>');
   const pres=!qText||"president".includes(qText)||PRES.tickets.some(t=>norm(t.n+" "+t.mate).includes(qText));
   rlist.innerHTML=(pres?presRow():"")+Object.keys(DATA.regions).sort().sort((a,b)=>{ if(sSort==="region") return 0; const A=SEN[a],B=SEN[b]; if(!A.win!==!B.win) return A.win?-1:1; return sSort==="close"?A.margin-B.margin:B.margin-A.margin })
     .filter(r=>!qText||norm(r).includes(qText)||SEN[r].cands.some(c=>norm(c.n).includes(qText))).map(senateRow).join("")||`<div class="empty">No Senate races match.</div>`;
@@ -1514,6 +1517,7 @@ function bigPct(x,v,X,Y,px,maxW,fill){ // "57.4" with a raised "%"
   x.font=BFONT(800,p,"n"); const w=x.measureText(s).width; shadowText(x,s,X,Y,fill,5);
   x.font=BFONT(700,Math.round(p*0.4),"n"); shadowText(x,"%",X+w+8,Y-p*0.34,fill,3); return p }
 function bcSpec(kind,key){
+  if(kind==="hdiag"||kind==="sdiag") return chamberSpec(kind);
   if(kind==="presrounds") return {...bcSpec("president"),kind:"president",tag:"RANKED CHOICE · ROUND BY ROUND",rounds:true};
   if(kind==="president"){ const f=presFin();
     return {kind,title:"Caprica",tag:"RANKED CHOICE",pct:1,round:"FINAL ROUND",lead:PRES.margin,
@@ -1594,6 +1598,42 @@ async function roundsBody(x,withPhoto){ const {r1,r2}=presRounds(), W=1920;
     x.font=BFONT(700,16,"l"); x.fillStyle="#1c3058"; track(x,splitName(c.n)[1].toUpperCase(),AX+AW/2,AY+AH+60+i*58,1,"center") });
   if(PRES.exhausted){ x.fillStyle="#5a6578"; x.font=BFONT(400,22,"n"); x.fillText(PRES.exhausted.toLocaleString("en-US"),AX+AW/2,AY+AH+40+r2.length*58); x.font=BFONT(700,16,"l"); track(x,"EXHAUSTED",AX+AW/2,AY+AH+60+r2.length*58,1,"center") }
   x.textAlign="left" }
+// ---- chamber diagrams (1920×1080): every seat as a dot in a semicircle, parties from left to right
+const CHAMBER_ORDER=["AA","DEM","DM","AR","IND","JF","CON","A"];
+function chamberSpec(kind){ const sen=kind==="sdiag", c={};
+  (sen?Object.values(SEN):Object.values(OUT)).forEach(o=>{ if(o.win) c[o.win]=(c[o.win]||0)+1 });
+  const total=sen?17:203, prev={}; if(!sen) Object.values(OUT).forEach(o=>{ if(o.prev) prev[o.prev]=(prev[o.prev]||0)+1 });
+  return {kind:sen?"senate":"house",title:"Caprica",tag:sen?"SENATE · 17 SEATS":"HOUSE · 203 SEATS",pct:1,c:[],diagram:{counts:c,total,maj:Math.floor(total/2)+1,prev:sen?null:prev,sen}} }
+function hemicycle(x,counts,total,cx,cy,R,rows,r0){
+  const rad=[...Array(rows)].map((_,i)=>r0+(R-r0)*(rows>1?i/(rows-1):1)), sum=rad.reduce((a,b)=>a+b,0);
+  const n=rad.map(r=>Math.max(1,Math.round(total*r/sum))); n[rows-1]+=total-n.reduce((a,b)=>a+b,0);
+  const pos=[]; rad.forEach((r,i)=>{ for(let k=0;k<n[i];k++){ const a=n[i]>1?Math.PI-k*Math.PI/(n[i]-1):Math.PI/2; pos.push({a,r,x:cx+r*Math.cos(a),y:cy-r*Math.sin(a)}) } });
+  const gap=rows>1?(R-r0)/(rows-1):R*0.3, arc=Math.min(...rad.map((r,i)=>n[i]>1?Math.PI*r/(n[i]-1):9e9)), dr=Math.min(gap,arc)*(rows<=2?0.34:0.42);
+  pos.sort((p,q)=>q.a-p.a||p.r-q.r);
+  const seq=[]; CHAMBER_ORDER.filter(p=>counts[p]).forEach(p=>{for(let k=0;k<counts[p];k++) seq.push(p)}); while(seq.length<total) seq.push(null);
+  pos.forEach((s,i)=>{ const p=seq[i], col=p?spc(p):"#5a6578";
+    x.beginPath(); x.arc(s.x,s.y,dr,0,7); x.fillStyle=col; x.fill() }); // flat seats
+  return dr }
+async function diagramBody(x,sp){ const D=sp.diagram, W=1920, PX=96, PY=210, PW=W-192, PH=770, base="#1c3058";
+  slab(x,PX,PY,PW,PH,10,base,12); fluid(x,PX,PY,PW,PH,10,base,"chamber|"+sp.kind); gloss(x,PX,PY,PW,PH,10,0.16);
+  const cx=PX+560, cy=PY+PH-80, R=D.sen?400:470, rows=D.sen?2:9, r0=D.sen?R*0.68:R*0.36;
+  const dr=hemicycle(x,D.counts,D.total,cx,cy,R,rows,r0), mt=cy-R-dr-8;
+  x.save(); x.setLineDash([10,8]); x.strokeStyle="rgba(255,255,255,.7)"; x.lineWidth=3; x.beginPath(); x.moveTo(cx,mt-34); x.lineTo(cx,mt); x.stroke(); x.restore();
+  x.textAlign="center"; x.font=BFONT(700,20,"l"); x.fillStyle="rgba(255,255,255,.85)"; track(x,`${D.maj} FOR A MAJORITY`,cx,mt-44,1.5,"center");
+  x.font=BFONT(400,110,"n"); shadowText(x,String(D.total),cx,cy-20,"#fff",5); x.font=BFONT(700,24,"l"); x.fillStyle="rgba(255,255,255,.8)"; track(x,"SEATS",cx,cy+20,3,"center"); x.textAlign="left";
+  // the key: largest first
+  const order=Object.keys(D.counts).sort((a,b)=>D.counts[b]-D.counts[a]), LX=PX+1120, LW=PX+PW-40-LX; let ly=PY+70;
+  x.font=BFONT(400,40); x.fillStyle="#fff"; track(x,"SEATS",LX,ly,3); if(D.prev){ x.textAlign="right"; x.font=BFONT(700,20,"l"); x.fillStyle="rgba(255,255,255,.7)"; track(x,"CHANGE ON 2072",LX+LW,ly-4,1.5,"right"); x.textAlign="left" }
+  ly+=26; const rh=Math.min(66,(PH-250)/order.length);
+  order.forEach(p=>{ const n=D.counts[p], col=spc(p), y=ly+rh/2+4;
+    x.beginPath(); x.arc(LX+18,y,16,0,7); x.fillStyle=col; x.fill();
+    x.font=BFONT(400,34); shadowText(x,(PARTIES_LIVE[p]||{}).short.toUpperCase(),LX+52,y+12,"#fff",3);
+    x.textAlign="right"; x.font=BFONT(400,40,"n"); shadowText(x,String(n),LX+LW-(D.prev?150:0),y+14,"#fff",3);
+    if(D.prev){ const d=n-(D.prev[p]||0); x.font=BFONT(700,26,"l"); x.fillStyle=d>0?"#8fe3a8":d<0?"#ffa4a4":"rgba(255,255,255,.7)"; x.fillText(d>0?"+"+d:d<0?"−"+(-d):"–",LX+LW,y+10) }
+    x.textAlign="left"; x.fillStyle="rgba(255,255,255,.14)"; x.fillRect(LX,ly+rh,LW,2); ly+=rh });
+  const top=order[0], maj=D.counts[top]>=D.maj;
+  x.font=BFONT(700,24,"l"); x.fillStyle="#f5c518";
+  track(x,maj?`${(PARTIES_LIVE[top]||{}).short.toUpperCase()} WIN A MAJORITY`:`NO MAJORITY · ${(PARTIES_LIVE[top]||{}).short.toUpperCase()} LARGEST ON ${D.counts[top]}`,LX,PY+PH-46,1.5) }
 async function bcCanvas(sp,withPhoto){
   try{await Promise.all([["400","d"],["400","n"],["600","l"],["700","l"]].map(([w,f])=>document.fonts.load(BFONT(w,40,f),"0%ABC")))}catch(e){}
   const [w,l]=sp.c, heads=withPhoto?await Promise.all(sp.c.map(c=>c.head?loadHead(c.head):null)):[], logo=await loadLogo();
@@ -1630,6 +1670,7 @@ async function bcCanvas(sp,withPhoto){
   else { x.fillStyle="#fff"; x.font=BFONT(700,30); x.fillText("CAPRICA ELECTS",LGX+16,TY+62) }
   gloss(x,LGX,TY,LGW,TH,6,0.14);
   if(sp.rounds){ await roundsBody(x,withPhoto); return cv }
+  if(sp.diagram){ await diagramBody(x,sp); return cv }
   // the winner's panel, under a gold "projected winner" band
   const WW=960, WX=l?150:(W-WW)/2, WY=206, WH=790, wb=deep(spc(w.p));
   slab(x,WX,WY,WW,WH,10,wb,14); fluid(x,WX,WY,WW,WH,10,wb,sp.kind+"|"+w.n);
