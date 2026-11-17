@@ -70,8 +70,6 @@ const SWITCHED = [
   ["Miu Yamada", "AA", "cambria-sionaq-springs"],
   // Democrat MP for Oluksee in 2072, now the Democrats' candidate in Dalaran, Moeras
   ["Minette Nine'oh Niamh", "DEM", "moeras-dalaran"],
-  // Democrat MP for Valley of the Sun in 2072, now the Democrats' candidate in Los Campos (Adriana Flash's old seat), which she wins
-  ["Madeline Blair Flash", "DEM", "costa-blanca-los-campos"],
 ];
 SWITCHED.forEach(([name, party, to]) => {
   const from = Object.keys(out).find(k => Object.values(out[k]).includes(name)); if (!from || !out[to]) throw `no seat for ${name}`;
